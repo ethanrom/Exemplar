@@ -16,7 +16,7 @@ ARGS = ["--concept", "vehicle_stop", "--splits", "test", "--no-frollard", "--lim
 
 
 class FakePerceive:
-    """Stands in for perceive_window: stores the trace in B's cache like perceive_detailed does."""
+    """Stands in for perceive_window: stores the trace in the perception cache like perceive_detailed does."""
 
     def __init__(self, data_dir, kind="pos", fail_ids=()):
         self.data_dir, self.kind, self.fail_ids, self.calls = data_dir, kind, set(fail_ids), []

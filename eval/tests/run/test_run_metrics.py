@@ -85,10 +85,10 @@ def test_mean_std():
     assert metrics.mean_std([1.0, 3.0]) == (2.0, 1.0)
 
 
-def test_local_threshold_agrees_with_streams_e_when_it_is_merged():
+def test_local_threshold_agrees_with_the_calibrate_module():
     calibrate = pytest.importorskip("exemplar.calibrate")
     if not hasattr(calibrate, "conformal_threshold"):
-        pytest.skip("stream E not merged yet")
+        pytest.skip("exemplar.calibrate.conformal_threshold not available")
     import random
     rng = random.Random(1)
     for n in (5, 9, 10, 30, 99):

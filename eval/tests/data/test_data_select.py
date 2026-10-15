@@ -31,7 +31,7 @@ def test_choose_videos_is_deterministic_and_respects_limits():
         assert all(sum(y.date == d for y in mine) <= 2 for d in {y.date for y in mine})
 
 
-def test_committed_selection_meets_the_brief():
+def test_committed_selection_meets_the_selection_criteria():
     from eval.data.config import load_yaml
 
     vids = load_yaml("videos.yaml")["videos"]

@@ -1,4 +1,4 @@
-"""The Exemplar trial protocol against fake D / E: leakage assertions, determinism, checkpoints, metrics, escalation."""
+"""The Exemplar trial protocol against fake services: leakage assertions, determinism, checkpoints, metrics, escalation."""
 import pytest
 
 from eval.harness import experiment as ex
@@ -222,7 +222,7 @@ def _llm_services():
     inner = svc.run_cegis
 
     def run_cegis(examples, *, model=None, **kw):
-        model.usage.update(inputTokens=20000, outputTokens=2000, calls=3)           # what D's StrandsProposer reports
+        model.usage.update(inputTokens=20000, outputTokens=2000, calls=3)           # what StrandsProposer reports
         kw.pop("solve_timeout_s", None)
         return inner(examples, model=model, **kw)
 

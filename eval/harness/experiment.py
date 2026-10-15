@@ -1,6 +1,6 @@
-"""The Exemplar trial: teach from k examples, ask q active questions, calibrate, score the held-out test split (PLAN.md section 3).
+"""The Exemplar trial: teach from k examples, ask q active questions, calibrate, score the held-out test split.
 
-Everything stream D (synthesis) and E (active learning, calibration) provide is reached through `Services`, so the protocol
+Everything synthesis, active learning and calibration provide is reached through `Services`, so the protocol
 is testable with fakes and `eval.run` can wire in the real modules lazily.  The protocol, per (concept, k, seed):
 
 1. Examples: k positives and `n_neg` negatives drawn (seeded, nested in k) from the concept's TRAIN windows, label provenance `example`.
@@ -28,7 +28,7 @@ from .dataset import Window
 
 WEIGHT_CONFIRMED = 3.0          # contracts.labels.WEIGHT_CONFIRMED: the user looked at the clip and chose the label
 METHOD = "exemplar"
-STRONG_PERCEPTION_USD_ESTIMATE = 0.028     # Phase 0 spike 5, 16 frames; used only when no strong trace was executed
+STRONG_PERCEPTION_USD_ESTIMATE = 0.028     # measured on Bedrock, 16 frames; used only when no strong trace was executed
 EST_SYNTH_USD = 0.25                        # reservation per LLM synthesis run (a run is a few proposal calls on compact traces)
 FAILED_SCORE = -0.5                         # robustness of a perception_failed trace (-C)
 
@@ -37,7 +37,7 @@ class LeakError(AssertionError):
     """A calibration or test clip reached synthesis / active learning (or the splits overlap)."""
 
 
-# ------------------------------------------------------------------ services (D and E, injected)
+# ------------------------------------------------------------------ services (injected)
 @dataclass
 class Services:
     run_cegis: Callable[..., list]                   # D: agent.run_cegis(examples, nl_hint=, emit=, k=, max_rounds=, model=)
@@ -47,13 +47,13 @@ class Services:
     make_example: Callable[..., Any]                 # D: synth.Example(trace=, positive=, weight=, clip_id=)
     make_label: Callable[..., Any]                   # contracts.labels.Label(...)
     robustness: Callable[[Any, Trace], float]        # C: dsl.robustness(rule, trace)
-    new_proposer: Callable[[], Any] = lambda: None   # fresh proposer per trial (None: D's default LLM proposer)
+    new_proposer: Callable[[], Any] = lambda: None   # fresh proposer per trial (None: the default LLM proposer)
     proposer_name: str = "custom"
 
 
 def call_supported(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
-    """Call `fn` with the keyword arguments it accepts (the interface sheet is a floor: D and E may add parameters, and
-    their real signatures may lack optional ones)."""
+    """Call `fn` with the keyword arguments it accepts (the documented signature is a floor: the real implementations may add parameters, and
+    test fakes may lack optional ones)."""
     try:
         params = inspect.signature(fn).parameters
     except (TypeError, ValueError):
@@ -122,7 +122,7 @@ def _ok(trace: Optional[Trace]) -> bool:
 
 
 def _synth_usage(proposer: Any, events: Sequence[dict]) -> tuple[int, int]:
-    """Cumulative LLM tokens (in, out) the synthesis used: the proposer's own counter, else D's `done` event message."""
+    """Cumulative LLM tokens (in, out) the synthesis used: the proposer's own counter, else the `done` event message."""
     u = getattr(proposer, "usage", None)
     if isinstance(u, Mapping) and ("inputTokens" in u or "input_tokens" in u):
         return int(u.get("inputTokens", u.get("input_tokens", 0))), int(u.get("outputTokens", u.get("output_tokens", 0)))

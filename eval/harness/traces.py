@@ -1,6 +1,6 @@
 """Trace access for the harness: cache keys, offline loading of cached traces, and the fast-perception call.
 
-`perceive_detailed` (stream B) is the single place that talks to Bedrock.  The harness computes the same cache key
+`perceive_detailed` is the single place that talks to Bedrock.  The harness computes the same cache key
 (`exemplar.perception.cache.cache_key`) so that `python -m eval.run` can read traces without a client, without ffmpeg and
 without any chance of a paid call: a miss is reported, never silently filled.
 """

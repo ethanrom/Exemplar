@@ -1,4 +1,4 @@
-# Target concepts for the MEVA benchmark (PLAN.md section 3). Each maps to 1-2 MEVA activities (2020 names).
+# Target concepts for the MEVA benchmark. Each maps to 1-2 MEVA activities (2020 names).
 # `description` is the zero-shot baseline prompt and `hint` is the optional NL hint given to the teach/sketch step.
 # A window is positive for a concept iff it fully contains >= 1 instance of one of its activities; it is a negative
 # iff it overlaps no in-view instance of any of them (see windows.py). `confusers` are related activities: negatives that

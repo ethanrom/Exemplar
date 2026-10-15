@@ -1,4 +1,4 @@
-"""Few-shot Exemplar trials on MEVA (PLAN.md section 3).
+"""Few-shot Exemplar trials on MEVA.
 
     uv run --project engine python -m eval.run --concept vehicle_stop --k 3 --q 3 --seeds 5 [--alpha 0.1]
     uv run --project engine python -m eval.run --concept all --k 1 3 --q 0 3 5 --seeds 5 --proposer offline
@@ -31,7 +31,7 @@ EST_STRONG_USD = 0.06
 
 
 def make_services(proposer: str = "offline") -> Services:
-    """Wire the real streams C, D and E (imported lazily: D and E may not be merged yet)."""
+    """Wire the real DSL, synthesis, active-learning and calibration modules (imported lazily)."""
     try:
         from exemplar.active import build_committee, select_query
         from exemplar.calibrate import calibrate
@@ -43,13 +43,13 @@ def make_services(proposer: str = "offline") -> Services:
         except ImportError:
             from exemplar.agent.cegis import run_cegis
     except ImportError as e:
-        raise SystemExit(f"streams D (synth, agent) and E (active, calibrate) must be merged before the Exemplar rows can be "
-                         f"computed: {e}\nThe zero-shot baseline and precompute do not need them.")
+        raise SystemExit(f"The Exemplar rows need exemplar.synth, exemplar.agent, exemplar.active and exemplar.calibrate to be "
+                         f"importable: {e}\nThe zero-shot baseline and precompute do not need them.")
     if proposer == "offline":
         try:
             from exemplar.agent.templates import TemplateProposer
         except ImportError:
-            raise SystemExit("--proposer offline needs D's template proposer (exemplar.agent.templates.TemplateProposer)")
+            raise SystemExit("--proposer offline needs the template proposer (exemplar.agent.templates.TemplateProposer)")
         new = TemplateProposer
     elif proposer == "llm":
         try:
@@ -120,7 +120,7 @@ def main(argv: Optional[Sequence[str]] = None, *, services: Optional[Services] =
     ap.add_argument("--alpha", type=float, default=0.1)
     ap.add_argument("--n-neg", type=int, default=2, help="negative examples per trial (0-2)")
     ap.add_argument("--proposer", choices=["offline", "llm"], default="offline",
-                    help="offline: D's deterministic template proposer (free); llm: strong-model sketches via Strands (paid)")
+                    help="offline: the deterministic template proposer (free); llm: strong-model sketches via Strands (paid)")
     ap.add_argument("--no-hint", action="store_true", help="do not pass the concept's NL hint to synthesis")
     ap.add_argument("--solve-timeout", type=float, default=10.0)
     ap.add_argument("--committee-samples", type=int, default=200)
