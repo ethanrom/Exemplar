@@ -1,16 +1,22 @@
 // Automated WCAG 2.2 AA scan of every screen with axe-core (run against the mock engine).
 //
-//   NODE_PATH=d:/tmp/pw/node_modules AXE_PATH=d:/tmp/exemplar-axe/node_modules/axe-core/axe.min.js \
-//     node mock/a11y.mjs [http://localhost:3000]
+//   node mock/a11y.mjs [http://localhost:3000]
 //
-// axe-core is not a dependency of the app; install it anywhere outside the repo (npm i axe-core) and
-// point AXE_PATH at axe.min.js. Prints violations per page; exit code 1 when any are found.
+// playwright-core and axe-core are not dependencies of the app. By default they are looked up in the gitignored
+// mock/.cache/ folder:
+//   npm i --prefix mock/.cache/pw playwright-core
+//   npm i --prefix mock/.cache/axe axe-core
+// Override with NODE_PATH (a node_modules folder containing playwright-core) and AXE_PATH (path to axe.min.js).
+// Prints violations per page; exit code 1 when any are found.
 import { createRequire } from 'node:module'
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
-const require = createRequire((process.env.NODE_PATH || 'd:/tmp/pw/node_modules') + '/')
+const cache = path.join(path.dirname(fileURLToPath(import.meta.url)), '.cache')
+const require = createRequire(path.resolve(process.env.NODE_PATH || path.join(cache, 'pw', 'node_modules')) + path.sep)
 const { chromium } = require('playwright-core')
-const axeSource = readFileSync(process.env.AXE_PATH || 'd:/tmp/exemplar-axe/node_modules/axe-core/axe.min.js', 'utf8')
+const axeSource = readFileSync(process.env.AXE_PATH || path.join(cache, 'axe', 'node_modules', 'axe-core', 'axe.min.js'), 'utf8')
 const base = process.argv[2] || 'http://localhost:3000'
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true })

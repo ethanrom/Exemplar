@@ -1,8 +1,8 @@
 """A tiny SVG writer for the static evaluation charts (no plotting dependency).
 
-Design follows the dataviz skill: 2px lines, markers >= 8 px with a 2px surface ring, hairline solid grid, text in ink tokens (never
+Chart conventions: 2px lines, markers >= 8 px with a 2px surface ring, hairline solid grid, text in ink tokens (never
 in the series colour), a legend for two or more series, light and dark palettes selected through `prefers-color-scheme`, shapes
-as a second identity channel.  Slots 1-3 of the reference palette validate for all-pairs use in both modes.
+as a second identity channel.  The three series colours stay distinguishable from each other in both modes.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from typing import Optional
 
 FONT = 'system-ui, -apple-system, "Segoe UI", sans-serif'
 
-# series slots (light / dark) from the reference palette; shape = the non-colour identity channel
+# series slots (light / dark); shape = the non-colour identity channel
 SERIES = {
     "exemplar_a": {"var": "s1", "shape": "circle"},       # slot 1 blue   : Exemplar, more examples (k = max)
     "exemplar_b": {"var": "s2", "shape": "square"},       # slot 2 orange : Exemplar, fewer examples

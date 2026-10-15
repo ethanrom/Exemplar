@@ -1,18 +1,23 @@
 // Visual check of every screen against the mock engine (headless installed Chrome via playwright-core).
 //
 //   npm run dev:mock                      # in another terminal (or PORT=3110 MOCK_PORT=8797 npm run dev:mock)
-//   NODE_PATH=d:/tmp/pw/node_modules node mock/screenshots.mjs [http://localhost:3000] [outDir]
+//   node mock/screenshots.mjs [http://localhost:3000] [outDir]
 //
-// Writes PNGs to d:/tmp/exemplar-shots/F by default (outside the repo), prints console errors and
+// playwright-core is not a dependency of the app: install it with `npm i --prefix mock/.cache/pw playwright-core`
+// (the default lookup folder, gitignored) or point NODE_PATH at any node_modules folder that contains it.
+// Writes PNGs to outDir (argument, else SHOTS_DIR, else mock/.cache/shots), prints console errors and
 // checks that no screen scrolls horizontally on a 390 px wide phone.
 import { createRequire } from 'node:module'
 import { mkdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
-const require = createRequire((process.env.NODE_PATH || 'd:/tmp/pw/node_modules') + '/')
+const cache = path.join(path.dirname(fileURLToPath(import.meta.url)), '.cache')
+const require = createRequire(path.resolve(process.env.NODE_PATH || path.join(cache, 'pw', 'node_modules')) + path.sep)
 const { chromium } = require('playwright-core')
 
 const base = process.argv[2] || 'http://localhost:3000'
-const out = process.argv[3] || 'd:/tmp/exemplar-shots/F'
+const out = process.argv[3] || process.env.SHOTS_DIR || path.join(cache, 'shots')
 mkdirSync(out, { recursive: true })
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true })

@@ -14,7 +14,7 @@ Every number comes from a cost ledger written by the evaluation run, nothing is 
 
 The ledgers live in the gitignored `data/` directory. When they are not found the script falls back to the figures
 recorded below (copied from those ledgers on 2026-10-15), so the chart can be regenerated from a fresh clone.
-Chart conventions follow the dataviz reference palette (slots 1 and 2, validated with the palette validator in both modes):
+Chart conventions:
 2 px lines, markers >= 8 px with a 2 px surface ring, circle versus square as the non-colour identity channel,
 direct labels plus a legend, light and dark selected through `prefers-color-scheme`.
 """

@@ -1,8 +1,13 @@
 // Keyboard-only walk through the main interactions (WCAG 2.1.1 / 2.4.7 / 2.1.2), against the mock engine.
-//   NODE_PATH=d:/tmp/pw/node_modules node mock/keyboard.mjs [http://localhost:3000]
+//   node mock/keyboard.mjs [http://localhost:3000]
+// playwright-core is not a dependency of the app: install it with `npm i --prefix mock/.cache/pw playwright-core`
+// (the default lookup folder, gitignored) or point NODE_PATH at any node_modules folder that contains it.
 import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
-const require = createRequire((process.env.NODE_PATH || 'd:/tmp/pw/node_modules') + '/')
+const cache = path.join(path.dirname(fileURLToPath(import.meta.url)), '.cache')
+const require = createRequire(path.resolve(process.env.NODE_PATH || path.join(cache, 'pw', 'node_modules')) + path.sep)
 const { chromium } = require('playwright-core')
 const base = process.argv[2] || 'http://localhost:3000'
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
