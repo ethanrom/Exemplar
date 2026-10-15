@@ -1,5 +1,10 @@
 # Integration TODO (integrator-owned)
 
+## MEVA decision (user, after the X-diag report)
+- X-diag (`stream/X-diag`, unmerged; $3.85 spent): neither 1280 px, ontology-v2 motion predicates nor the strong model (n too small) restore signal cheaply. The fast model describes the salient scene and misses the small labelled events.
+- **User decision: stop MEVA accuracy work.** Evidence for the submission is the live Playground run, a cost-per-event-vs-number-of-rules chart (measured: fast perception $0.00179/event flat, zero-shot $0.0133 per rule per event), the guarantee simulation, and the differential-testing numbers.
+- The Eval screen becomes an "Evidence" screen with those sections; this is in F2's current pass. MEVA rows stay in `data/eval/results.json`.
+
 ## PAUSED 2026-10-15 ~13:30 UTC (user request: subagent rate limits), resume here
 - **Merged on main:** A, B, C, D, E, F, G-data, H, G-run. Engine suite is 840+ passed, eval suite 207 passed. The live Playground E2E passed (see below).
 - **Stopped mid-work, resume via the same worktrees:**
