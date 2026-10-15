@@ -19,6 +19,7 @@ import { VideoProcessor, ProcessorResult } from './types'
 export const FRAME_GRAB_ID = 'exemplar-frame-grab'
 
 const CAPTURE_INTERVAL_MS = 500 // 2 fps
+const CAPTURE_SLACK_MS = 50 // the host loop ticks every ~100 ms; without slack 500 ms rounds up to ~600 ms
 const JPEG_QUALITY = 0.85
 const MAX_IN_FLIGHT = 4 // drop frames rather than queue unboundedly when the engine is slow
 const IDLE_FINISH_MS = 5000 // no frame for this long => the stream stopped; close the session
@@ -79,7 +80,7 @@ export class FrameGrabProcessor implements VideoProcessor {
 
   async process(_frame: ImageData, _canvas: HTMLCanvasElement, video: HTMLVideoElement): Promise<ProcessorResult | null> {
     const now = performance.now()
-    if (now - this.lastCaptureAt < CAPTURE_INTERVAL_MS || this.capturing) return null
+    if (now - this.lastCaptureAt < CAPTURE_INTERVAL_MS - CAPTURE_SLACK_MS || this.capturing) return null
     if (video.readyState < 2 || video.paused || !video.videoWidth || !video.videoHeight) return null
     this.lastCaptureAt = now
     this.capturing = true

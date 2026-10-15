@@ -30,7 +30,7 @@ from .errors import (
     RingTransportError,
     error_from_response,
 )
-from .tokens import API_BASE, PlaygroundToken, TokenProvider
+from .tokens import API_BASE, AuthManager, AuthStatus, PlaygroundToken, TokenProvider
 
 log = logging.getLogger("exemplar.ring")
 
@@ -161,7 +161,6 @@ class RingClient:
         media_timeout_s: float = 180.0,
     ) -> None:
         if token is None:
-            from .tokens import AuthManager
             token = AuthManager.from_settings()
         elif isinstance(token, str):
             token = PlaygroundToken(token)
@@ -258,6 +257,14 @@ class RingClient:
         return await self._retrying(attempt)
 
     # ---- users / devices
+    async def verify_connection(self) -> AuthStatus:
+        """GET /v1/users/me to prove the token works; records the user's name on an AuthManager.
+        Raises RingAuthError for a bad/expired token. Use after `PUT /ring/auth`."""
+        me = await self.users_me()
+        if isinstance(self.token, AuthManager):
+            self.token.user_name = me.display_name
+        return self.token.status()
+
     async def users_me(self) -> RingUser:
         d = (await self._get_json("/v1/users/me")).get("data") or {}
         a = d.get("attributes") or {}

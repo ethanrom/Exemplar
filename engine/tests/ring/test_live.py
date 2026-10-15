@@ -27,6 +27,8 @@ async def ring():
 
 
 async def test_users_me_and_devices(ring):
+    st = await ring.verify_connection()
+    assert st.connected and st.mode == "playground"
     me = await ring.users_me()
     assert me.id.startswith("ava1.ring.account.")
     devices = await ring.list_devices()

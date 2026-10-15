@@ -72,6 +72,20 @@ async def test_users_me(fake_time):
 
 
 @respx.mock
+async def test_verify_connection_records_the_user_name_on_the_auth_manager(fake_time):
+    from exemplar.ring import AuthManager
+
+    respx.get(f"{API}/v1/users/me").mock(return_value=httpx.Response(200, json=load_fixture("users_me.json")))
+    auth = AuthManager()
+    auth.set_playground_token(TOKEN)
+    async with RingClient(auth, clock=fake_time.clock, sleep=fake_time.sleep) as c:
+        st = await c.verify_connection()
+    assert st.connected and st.user_name == "Playground User" and auth.status().to_api()["user_name"] == "Playground User"
+    auth.set_playground_token(TOKEN)                      # re-paste clears the stale name until verified again
+    assert auth.status().user_name is None
+
+
+@respx.mock
 async def test_list_devices_resolves_included_and_maps_to_api_device(fake_time):
     route = respx.get(f"{API}/v1/devices").mock(
         return_value=httpx.Response(200, json=load_fixture("devices_included.json")))

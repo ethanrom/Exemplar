@@ -46,11 +46,11 @@ def test_playground_token_times_and_expiry():
     p = PlaygroundToken(make_jwt(iat=int(NOW) - 600, exp=int(NOW) + 1200), clock=lambda: now[0])
     assert p.issued_at_ms == (int(NOW) - 600) * 1000
     assert p.expires_at_ms == (int(NOW) + 1200) * 1000
-    assert not p.is_expired()
+    assert not p.is_expired
     assert p.seconds_left() == pytest.approx(1200)
-    assert p.is_expired(skew_s=1300)
+    assert p.is_expiring(1300) and not p.is_expiring(1100)
     now[0] = NOW + 1200
-    assert p.is_expired()
+    assert p.is_expired
     st = p.status()
     assert st.mode == "playground" and st.connected is False
     assert st.to_api()["expires_at_ms"] == p.expires_at_ms
@@ -59,11 +59,11 @@ def test_playground_token_times_and_expiry():
 async def test_playground_token_get_token_and_missing():
     tok = make_jwt(iat=1, exp=2)
     p = PlaygroundToken(tok, clock=lambda: 10.0)
-    assert p.is_expired()
+    assert p.is_expired
     assert await p.get_token() == tok          # expired tokens are still returned; the API answers 401
     assert await p.on_unauthorized() is False
     empty = PlaygroundToken()
-    assert empty.is_expired() and not empty.status().connected
+    assert empty.is_expired and not empty.status().connected
     with pytest.raises(RingAuthError) as ei:
         await empty.get_token()
     assert ei.value.code == "NO_TOKEN"
@@ -262,6 +262,27 @@ async def test_on_unauthorized_forces_a_refresh_once():
     app = _app(store=store)
     assert await app.on_unauthorized() is True and route.call_count == 1
     assert await app.get_token() == "A2"
+
+
+@respx.mock
+async def test_concurrent_401s_trigger_a_single_refresh():
+    calls = []
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        await asyncio.sleep(0.01)
+        return httpx.Response(200, json=_tok_json("A2", "R2"))
+
+    respx.post("https://oauth.ring.com/oauth/token").mock(side_effect=handler)
+    store = InMemoryTokenStore(StoredAuth(mode="oauth", access_token="A1", refresh_token="R1",
+                                          expires_at_ms=int(NOW * 1000) + 3_600_000))
+    app = _app(store=store)
+    assert await asyncio.gather(*[app.on_unauthorized() for _ in range(4)]) == [True] * 4
+    assert len(calls) == 1 and await app.get_token() == "A2"      # the rotated-out R1 was used exactly once
+
+
+async def test_on_unauthorized_without_a_refresh_token_is_false():
+    assert await _app().on_unauthorized() is False
 
 
 @respx.mock

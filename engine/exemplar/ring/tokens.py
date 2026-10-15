@@ -21,7 +21,7 @@ import json
 import secrets
 import time
 from dataclasses import dataclass, field, replace
-from typing import Any, Awaitable, Callable, Protocol, runtime_checkable
+from typing import Any, Callable, Protocol, runtime_checkable
 from urllib.parse import urlencode
 
 import httpx
@@ -161,12 +161,17 @@ class PlaygroundToken:
     def expires_at_ms(self) -> int | None:
         return _claim_ms(self._claims, "exp")
 
-    def is_expired(self, skew_s: float = 0.0) -> bool:
-        """True when the token is gone or within `skew_s` of `exp`. Unknown `exp` counts as not expired."""
+    @property
+    def is_expired(self) -> bool:
+        """True when there is no token or `exp` has passed. Unknown `exp` counts as not expired."""
+        return self.is_expiring(0.0)
+
+    def is_expiring(self, within_s: float) -> bool:
+        """True when there is no token or it expires within `within_s` seconds."""
         if self._token is None:
             return True
         exp = self.expires_at_ms
-        return exp is not None and self._clock() * 1000 >= exp - skew_s * 1000
+        return exp is not None and self._clock() * 1000 >= exp - within_s * 1000
 
     def seconds_left(self) -> float | None:
         exp = self.expires_at_ms
@@ -182,7 +187,7 @@ class PlaygroundToken:
         return False  # nothing to refresh: the user must paste a new token
 
     def status(self) -> AuthStatus:
-        return AuthStatus(mode=self.mode, connected=self.has_token and not self.is_expired(),
+        return AuthStatus(mode=self.mode, connected=self.has_token and not self.is_expired,
                           expires_at_ms=self.expires_at_ms, issued_at_ms=self.issued_at_ms)
 
     def to_stored(self) -> StoredAuth:
@@ -349,13 +354,17 @@ class OAuthApp:
                                            issued_at_ms=s.issued_at_ms or 0, expires_at_ms=s.expires_at_ms or 0)
         return self._tokens
 
-    async def refresh(self, *, force: bool = True) -> OAuthTokens:
-        """refresh_token grant. Serialised: a rotated-out refresh token must never be replayed."""
+    async def refresh(self, *, force: bool = True, stale_access_token: str | None = None) -> OAuthTokens:
+        """refresh_token grant. Serialised: a rotated-out refresh token must never be replayed.
+
+        `stale_access_token` (used after a 401): skip the grant if someone else already replaced it."""
         async with self._lock:
             cur = self._load()
             if cur is None or not cur.refresh_token:
                 raise RingAuthError("No Ring refresh token available - link the account again",
                                     code="NO_REFRESH_TOKEN")
+            if stale_access_token is not None and cur.access_token != stale_access_token:
+                return cur
             if not force and not self._needs_refresh(cur):
                 return cur  # another task refreshed while we waited for the lock
             new = await self._token_request({"grant_type": "refresh_token", "refresh_token": cur.refresh_token})
@@ -376,12 +385,7 @@ class OAuthApp:
         cur = self._load()
         if cur is None or not cur.refresh_token:
             return False
-        stale = cur.access_token
-        async with self._lock:
-            now = self._tokens
-            if now is not None and now.access_token != stale:
-                return True  # someone already refreshed
-        await self.refresh(force=True)
+        await self.refresh(force=True, stale_access_token=cur.access_token)
         return True
 
     def status(self) -> AuthStatus:
@@ -467,7 +471,7 @@ class AuthManager:
                 self._provider = PlaygroundToken(saved.access_token, clock=self._clock)
                 self._note_issued()
                 # a newer token in the environment wins over a stale persisted one
-                if env_token and self._provider.is_expired():  # type: ignore[union-attr]
+                if env_token and self._provider.is_expired:  # type: ignore[union-attr]
                     self.set_playground_token(env_token, persist=False)
                 return
             except ValueError:
