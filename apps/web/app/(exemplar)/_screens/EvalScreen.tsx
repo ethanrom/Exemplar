@@ -6,10 +6,10 @@ import { fmtInt, fmtNum, fmtUsd } from '../_lib/format'
 import { useApi } from '../_lib/hooks'
 import type { EvalResults, EvalRow } from '../_lib/types'
 import { Icon } from '../_components/Icon'
-import { Alert, Empty, PageHeader, Spinner } from '../_components/ui'
+import { Alert, Empty, PageHeader, Skeleton, Stat, StatStrip } from '../_components/ui'
 
 // Dark-surface categorical slots 1-4 (dataviz reference palette), validated adjacent-pair on the card
-// surface #111c2f: CVD dE 8.4 (worst), normal-vision dE 19.8, contrast >= 3:1. Order is fixed: color
+// surface #111316: CVD dE 8.4 (worst), normal-vision dE 19.8, contrast >= 3:1. Order is fixed: color
 // follows the method, never its rank.
 const METHODS = [
   { key: 'exemplar', label: 'Exemplar (ours)', color: '#3987e5' },
@@ -27,12 +27,13 @@ const CONCEPT_NAME: Record<string, string> = {
 }
 const conceptName = (c: string) => CONCEPT_NAME[c] ?? c.replace(/_/g, ' ')
 
-const INK = '#F1F5F9'
-const INK2 = '#CBD5E1'
-const MUTED = '#A3B1C6'
-const GRID = '#2a3850'
-const AXIS = '#4a5a76'
-const SURFACE = '#111c2f'
+// Chart chrome, from the design tokens (ex-ink, ex-ink2, ex-ink3, the card surface ex-panel).
+const INK = '#ECEDEF'
+const INK2 = '#B2B6BD'
+const MUTED = '#8A8F98'
+const GRID = '#23272D'
+const AXIS = '#3A3F47'
+const SURFACE = '#111316'
 const ALL = '__all__'
 
 type Metric = 'f1' | 'false_alarm_rate' | 'usd_per_event' | 'p50_latency_ms' | 'tokens_per_event' | 'escalated_fraction'
@@ -58,11 +59,12 @@ function macro(rows: EvalRow[], concepts: string[], m: Metric): Stat | null {
 
 // ---------------------------------------------------------------------------------------------
 function Legend({ methods }: { methods: readonly { key: string; label: string; color: string }[] }) {
+  if (methods.length < 2) return null // one series: the title names it
   return (
     <ul className="flex flex-wrap items-center gap-x-5 gap-y-1" aria-label="Legend">
       {methods.map((m) => (
         <li key={m.key} className="flex items-center gap-2 text-sm text-ex-ink2">
-          <span aria-hidden="true" className="h-3 w-3 rounded-sm" style={{ background: m.color }} />
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-[3px]" style={{ background: m.color }} />
           {m.label}
         </li>
       ))}
@@ -83,21 +85,21 @@ function ChartCard({
 }) {
   const [asTable, setAsTable] = useState(false)
   return (
-    <figure className="card" aria-labelledby={`${id}-t`}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+    <figure className="rounded-xl border border-ex-line bg-ex-panel p-5 sm:p-6" aria-labelledby={`${id}-t`}>
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0 max-w-2xl">
           <figcaption>
-            <span id={`${id}-t`} className="card-title block">{title}</span>
+            <span id={`${id}-t`} className="block text-md font-semibold tracking-tight text-ex-ink">{title}</span>
             <span className="mt-0.5 block text-sm text-ex-ink2">{subtitle}</span>
           </figcaption>
         </div>
-        <button type="button" className="btn" aria-pressed={asTable} onClick={() => setAsTable(!asTable)}>
-          <Icon name="film" /> {asTable ? 'Show chart' : 'Show as table'}
+        <button type="button" className="btn btn-sm" aria-pressed={asTable} onClick={() => setAsTable(!asTable)}>
+          <Icon name={asTable ? 'gauge' : 'table'} className="h-3.5 w-3.5" /> {asTable ? 'Show chart' : 'Show as table'}
         </button>
       </div>
-      {legend && <div className="mt-3">{legend}</div>}
-      <div className="mt-3">{asTable ? <div className="relative overflow-x-auto">{table}</div> : children}</div>
-      {footer && <div className="mt-3 text-sm text-ex-ink2">{footer}</div>}
+      {legend && <div className="mt-4">{legend}</div>}
+      <div className="mt-4">{asTable ? <div className="relative overflow-x-auto">{table}</div> : children}</div>
+      {footer && <div className="mt-4 border-t border-ex-line pt-4 text-sm text-ex-ink2">{footer}</div>}
     </figure>
   )
 }
@@ -109,7 +111,7 @@ function TooltipBox({ tip }: { tip: Tip | null }) {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-ex-line bg-ex-raised px-2.5 py-1.5 text-xs shadow-lg"
+      className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-ex-line2 bg-ex-raised px-2.5 py-1.5 text-xs shadow-lg shadow-black/50"
       style={{ left: `${tip.x}%`, top: `${tip.y}%` }}
     >
       <p className="font-semibold text-ex-ink">{tip.title}</p>
@@ -133,7 +135,7 @@ function F1Chart({ rows, concepts, methods }: { rows: EvalRow[]; concepts: strin
   const [tip, setTip] = useState<Tip | null>(null)
   const groups = [...concepts, ALL]
   const W = 760, H = 330
-  const m = { l: 44, r: 12, t: 16, b: 46 }
+  const m = { l: 56, r: 12, t: 16, b: 46 }
   const pw = W - m.l - m.r, ph = H - m.t - m.b
   const y = (v: number) => m.t + ph - v * ph
   const gw = pw / groups.length
@@ -328,14 +330,14 @@ function Table({ head, body }: { head: string[]; body: (string | number)[][] }) 
   return (
     <table className="w-full min-w-[560px] border-separate border-spacing-0 text-sm">
       <thead>
-        <tr>{head.map((h, i) => <th key={h} scope="col" className={`border-b border-ex-line py-2 pr-3 text-xs font-medium text-ex-ink3 ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>)}</tr>
+        <tr>{head.map((h, i) => <th key={h} scope="col" className={`border-b border-ex-line2 py-2 pr-4 text-xs font-medium text-ex-ink3 ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>)}</tr>
       </thead>
       <tbody>
         {body.map((row, i) => (
           <tr key={i}>
             {row.map((c, j) => j === 0
-              ? <th key={j} scope="row" className="border-b border-ex-line py-2 pr-3 text-left font-normal text-ex-ink">{c}</th>
-              : <td key={j} className="border-b border-ex-line py-2 pr-3 text-right font-mono tabular-nums text-ex-ink2">{c}</td>)}
+              ? <th key={j} scope="row" className="border-b border-ex-line py-2.5 pr-4 text-left font-normal text-ex-ink">{c}</th>
+              : <td key={j} className="border-b border-ex-line py-2.5 pr-4 text-right font-mono text-xs tabular-nums text-ex-ink2">{c}</td>)}
           </tr>
         ))}
       </tbody>
@@ -347,14 +349,18 @@ function Table({ head, body }: { head: string[]; body: (string | number)[][] }) 
 export default function EvalScreen() {
   const { isMock } = useApp()
   const res = useApi<EvalResults>('/eval/results')
-  const [k, setK] = useState(3)
-  const [q, setQ] = useState(3)
+  const [kWant, setK] = useState(3)
+  const [qWant, setQ] = useState(3)
 
   const data = res.data
   const alpha = data?.alpha ?? 0.1
   const concepts = useMemo(() => Array.from(new Set((data?.rows ?? []).map((r) => r.concept))), [data])
   const ks = useMemo(() => Array.from(new Set((data?.rows ?? []).filter((r) => r.method === 'exemplar').map((r) => r.k))).sort(), [data])
   const qs = useMemo(() => Array.from(new Set((data?.rows ?? []).filter((r) => r.method === 'exemplar').map((r) => r.q))).sort(), [data])
+  const hasExemplar = ks.length > 0
+  // The chosen k / q may not exist in the data (for example before the first Exemplar run): fall back to what does.
+  const k = ks.includes(kWant) ? kWant : ks[0] ?? kWant
+  const q = qs.includes(qWant) ? qWant : qs[0] ?? qWant
   const rows = useMemo(
     () => (data?.rows ?? []).filter((r) => (r.method === 'exemplar' ? r.k === k && r.q === q : r.method === 'knn_embed' ? r.k === k : true)),
     [data, k, q],
@@ -373,52 +379,70 @@ export default function EvalScreen() {
         title="Eval"
         subtitle="Does teach-by-example beat prompting a vision model per event, and does the false-alarm guarantee hold? Benchmarked on MEVA outdoor surveillance footage (CC BY 4.0)."
       />
-      {isMock && <div className="mb-4"><Alert tone="info" title="Mock numbers">These results come from the mock engine so the charts can be reviewed. Real MEVA results appear when the engine serves them.</Alert></div>}
-      {res.loading && !data && <Spinner label="Loading results" />}
+      {isMock && <div className="mb-6"><Alert tone="info" title="Mock numbers">These results come from the mock engine so the charts can be reviewed. Real MEVA results appear when the engine serves them.</Alert></div>}
+      {res.loading && !data && (
+        <div role="status" aria-label="Loading results" className="grid gap-4"><Skeleton className="h-28 rounded-xl" /><Skeleton className="h-96 rounded-xl" /></div>
+      )}
       {res.error && <Alert tone="neg" title="No evaluation results yet">{res.error.message} Run <code className="font-mono">python -m eval.run</code> and reload.</Alert>}
-      {data && data.rows.length === 0 && <Empty title="The benchmark has not run yet">Run <code className="font-mono">python -m eval.run --concept vehicle_dwell --k 3 --q 3 --seeds 5</code>.</Empty>}
+      {data && data.rows.length === 0 && <Empty title="The benchmark has not run yet" icon="gauge">Run <code className="font-mono">python -m eval.run --concept vehicle_dwell --k 3 --q 3 --seeds 5</code>.</Empty>}
 
       {data && data.rows.length > 0 && (
         <>
-          <div className="card mb-4">
-            <div className="flex flex-wrap items-end gap-4">
-              <div>
-                <label htmlFor="ev-k" className="field-label">Examples shown (k)</label>
-                <select id="ev-k" className="field" value={k} onChange={(e) => setK(Number(e.target.value))}>
-                  {ks.map((v) => <option key={v} value={v}>{v} positive example{v === 1 ? '' : 's'}</option>)}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="ev-q" className="field-label">Active questions (q)</label>
-                <select id="ev-q" className="field" value={q} onChange={(e) => setQ(Number(e.target.value))}>
-                  {qs.map((v) => <option key={v} value={v}>{v} question{v === 1 ? '' : 's'}</option>)}
-                </select>
-              </div>
-              <p className="max-w-xl text-sm text-ex-ink2">
-                Every chart below uses these settings. Zero-shot and Nova see no examples. Error bars are one standard deviation over seeds.
-                Generated {new Date(data.generated_at).toLocaleString()}.
-              </p>
+          {!hasExemplar && (
+            <div className="mb-6">
+              <Alert tone="info" title="Exemplar’s runs are not in yet">
+                This is the zero-shot baseline only. Run <code className="font-mono text-xs">python -m eval.run</code> to add few-shot results next to it.
+              </Alert>
             </div>
-            <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-ex-line bg-ex-bg px-4 py-3">
-                <dt className="text-sm text-ex-ink2">F1 at a fixed false-alarm rate</dt>
-                <dd className="mt-1 text-4xl font-semibold text-ex-ink">{ex.f1 ? ex.f1.mean.toFixed(2) : '-'}</dd>
-                {zs.f1 && <dd className="text-sm text-ex-ink2">vs {zs.f1.mean.toFixed(2)} for zero-shot prompting</dd>}
-              </div>
-              <div className="rounded-lg border border-ex-line bg-ex-bg px-4 py-3">
-                <dt className="text-sm text-ex-ink2">Measured false-alarm rate (target α = {alpha})</dt>
-                <dd className="mt-1 text-4xl font-semibold text-ex-ink">{ex.fa ? ex.fa.mean.toFixed(3) : '-'}</dd>
-                {zs.fa && <dd className="text-sm text-ex-ink2">zero-shot: {zs.fa.mean.toFixed(3)}, uncalibrated</dd>}
-              </div>
-              <div className="rounded-lg border border-ex-line bg-ex-bg px-4 py-3">
-                <dt className="text-sm text-ex-ink2">Model cost per event</dt>
-                <dd className="mt-1 text-4xl font-semibold text-ex-ink">{fmtUsd(ex.usd?.mean)}</dd>
-                {zs.usd && ex.usd && ex.usd.mean > 0 && <dd className="text-sm text-ex-ink2">{(zs.usd.mean / ex.usd.mean).toFixed(1)}× less than zero-shot ({fmtUsd(zs.usd.mean)})</dd>}
-              </div>
-            </dl>
+          )}
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
+            {hasExemplar && (
+              <>
+                <div>
+                  <label htmlFor="ev-k" className="field-label">Examples shown (k)</label>
+                  <select id="ev-k" className="field w-48" value={k} onChange={(e) => setK(Number(e.target.value))}>
+                    {ks.map((v) => <option key={v} value={v}>{v} positive example{v === 1 ? '' : 's'}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="ev-q" className="field-label">Active questions (q)</label>
+                  <select id="ev-q" className="field w-48" value={q} onChange={(e) => setQ(Number(e.target.value))}>
+                    {qs.map((v) => <option key={v} value={v}>{v} question{v === 1 ? '' : 's'}</option>)}
+                  </select>
+                </div>
+              </>
+            )}
+            <p className="max-w-xl flex-1 pb-1 text-sm text-ex-ink3">
+              Every chart below uses these settings. Zero-shot and Nova see no examples. Error bars are one standard deviation over seeds.
+              Generated {new Date(data.generated_at).toLocaleString()}.
+            </p>
           </div>
 
-          <div className="grid gap-4">
+          <div className="mt-6">
+            <StatStrip cols="grid-cols-1 sm:grid-cols-3" label="Headline numbers">
+              <Stat
+                label="F1 at a fixed false-alarm rate"
+                size="lg"
+                value={ex.f1 ? ex.f1.mean.toFixed(2) : '–'}
+                hint={zs.f1 ? <>vs <span className="tabular-nums">{zs.f1.mean.toFixed(2)}</span> for zero-shot prompting</> : undefined}
+              />
+              <Stat
+                label={<>Measured false-alarm rate (target α = {alpha})</>}
+                size="lg"
+                value={ex.fa ? ex.fa.mean.toFixed(3) : '–'}
+                hint={zs.fa ? <>zero-shot: <span className="tabular-nums">{zs.fa.mean.toFixed(3)}</span>, uncalibrated</> : undefined}
+              />
+              <Stat
+                label="Model cost per event"
+                size="lg"
+                value={ex.usd ? fmtUsd(ex.usd.mean) : '–'}
+                hint={zs.usd && ex.usd && ex.usd.mean > 0 ? <><span className="tabular-nums">{(zs.usd.mean / ex.usd.mean).toFixed(1)}×</span> less than zero-shot ({fmtUsd(zs.usd.mean)})</> : zs.usd ? <>zero-shot: {fmtUsd(zs.usd.mean)}</> : undefined}
+              />
+            </StatStrip>
+          </div>
+
+          <div className="mt-8">
+          <div className="grid gap-6">
             <ChartCard
               id="f1"
               title="F1 at a fixed false-alarm rate"
@@ -464,9 +488,9 @@ export default function EvalScreen() {
                 ex.fa && (
                   <p>
                     {ex.fa.mean <= alpha ? (
-                      <span className="inline-flex items-center gap-1 text-green-300"><Icon name="check" className="h-4 w-4" /> Exemplar’s mean false-alarm rate ({ex.fa.mean.toFixed(3)}) is within α = {alpha}.</span>
+                      <span className="inline-flex items-center gap-1 text-ex-pos"><Icon name="check" className="h-4 w-4" /> Exemplar’s mean false-alarm rate ({ex.fa.mean.toFixed(3)}) is within α = {alpha}.</span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-amber-200"><Icon name="warning" className="h-4 w-4" /> Exemplar’s mean false-alarm rate ({ex.fa.mean.toFixed(3)}) is above α = {alpha}.</span>
+                      <span className="inline-flex items-center gap-1 text-ex-warn"><Icon name="warning" className="h-4 w-4" /> Exemplar’s mean false-alarm rate ({ex.fa.mean.toFixed(3)}) is above α = {alpha}.</span>
                     )}
                     {zs.fa && <> Prompting a model per event has no such bound: {zs.fa.mean.toFixed(3)}.</>}
                   </p>
@@ -498,6 +522,7 @@ export default function EvalScreen() {
             >
               <CostChart rows={rows} concepts={concepts} methods={methods as unknown as typeof METHODS[number][]} />
             </ChartCard>
+          </div>
           </div>
         </>
       )}

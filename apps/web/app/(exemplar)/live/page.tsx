@@ -1,11 +1,12 @@
 import { Suspense } from 'react'
+import { PageFallback } from '../_components/ui'
 import LiveScreen from '../_screens/LiveScreen'
 
 export const metadata = { title: 'Live' }
 
 export default function Page() {
   return (
-    <Suspense fallback={<p className="text-sm text-ex-ink2">Loading…</p>}>
+    <Suspense fallback={<PageFallback />}>
       <LiveScreen />
     </Suspense>
   )
