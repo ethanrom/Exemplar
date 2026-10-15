@@ -88,7 +88,7 @@ export function WitnessTimeline({
       )}
       {witness.english && !compact && <p className="mt-2 text-sm text-ex-ink2">{witness.english}</p>}
 
-      <div className="mt-3 overflow-x-auto">
+      <div className="relative mt-3 overflow-x-auto" tabIndex={0} role="region" aria-label="Witness timeline (scrolls sideways on narrow screens)">
         <table className="w-full min-w-[520px] table-fixed border-separate border-spacing-0 text-sm">
           <caption className="sr-only">
             Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each row is a subformula with the interval the monitor chose and its robustness ρ.

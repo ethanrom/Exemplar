@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { HomeExample } from './(exemplar)/_components/HomeExample'
 
 const STEPS = [
   { href: '/connect', n: 1, title: 'Connect', text: 'Paste a Ring Developer Playground token or link a Ring account. Devices and history appear.' },
@@ -12,7 +13,8 @@ const STEPS = [
 export default function Home() {
   return (
     <div>
-      <section className="rounded-2xl border border-ex-line bg-gradient-to-br from-ex-panel to-ex-bg px-6 py-10 sm:px-10">
+      <section className="grid items-center gap-8 rounded-2xl border border-ex-line bg-gradient-to-br from-ex-panel to-ex-bg px-6 py-10 sm:px-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div>
         <p className="text-sm font-medium text-ex-accent">Ring developer hackathon 2026</p>
         <h1 className="mt-2 max-w-3xl text-4xl font-semibold tracking-tight text-ex-ink sm:text-5xl">
           Teach your Ring camera new detectors by example.
@@ -25,6 +27,8 @@ export default function Home() {
           <Link href="/connect" className="btn-primary">Get started</Link>
           <Link href="/eval" className="btn">See the evaluation</Link>
         </div>
+        </div>
+        <HomeExample />
       </section>
 
       <section aria-labelledby="steps-h" className="mt-8">

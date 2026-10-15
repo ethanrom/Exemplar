@@ -96,7 +96,7 @@ function ChartCard({
         </button>
       </div>
       {legend && <div className="mt-3">{legend}</div>}
-      <div className="mt-3">{asTable ? <div className="overflow-x-auto">{table}</div> : children}</div>
+      <div className="mt-3">{asTable ? <div className="relative overflow-x-auto">{table}</div> : children}</div>
       {footer && <div className="mt-3 text-sm text-ex-ink2">{footer}</div>}
     </figure>
   )
@@ -227,8 +227,8 @@ function ValidityChart({ rows, concepts, methods, alpha }: { rows: EvalRow[]; co
             </g>
           ))}
           <text x={m.l + pw / 2} y={H - 4} textAnchor="middle" fontSize="11" fill={MUTED}>measured false-alarm rate on held-out negatives</text>
-          {/* target alpha: solid hairline in ink, labelled directly */}
-          <line x1={x(alpha)} x2={x(alpha)} y1={m.t - 8} y2={H - m.b} stroke={INK} strokeWidth="2" />
+          {/* target alpha: a labelled threshold line (dashed = limit, solid = grid) */}
+          <line x1={x(alpha)} x2={x(alpha)} y1={m.t - 8} y2={H - m.b} stroke={INK} strokeWidth="2" strokeDasharray="6 4" />
           <text x={x(alpha) + 6} y={m.t - 12} fontSize="12" fontWeight="600" fill={INK}>target α = {alpha.toFixed(2)}</text>
           {methods.map((me, i) => {
             const cy = m.t + i * rowH + rowH / 2
@@ -254,7 +254,12 @@ function ValidityChart({ rows, concepts, methods, alpha }: { rows: EvalRow[]; co
                 })}
                 {meanAll && (
                   <g>
-                    <line x1={x(meanAll.mean)} x2={x(meanAll.mean)} y1={cy - 13} y2={cy + 13} stroke={INK} strokeWidth="2" />
+                    <path
+                      d={`M${x(meanAll.mean)},${cy - 10} l8,10 l-8,10 l-8,-10 z`}
+                      fill={SURFACE}
+                      stroke={INK}
+                      strokeWidth="2"
+                    />
                     <text x={W - m.r + 10} y={cy - 1} fontSize="12" fontWeight="600" fill={INK}>mean {meanAll.mean.toFixed(3)}</text>
                     <text x={W - m.r + 10} y={cy + 13} fontSize="11" fill={MUTED}>{within}/{r.length} runs ≤ α</text>
                   </g>
@@ -394,7 +399,7 @@ export default function EvalScreen() {
                 Generated {new Date(data.generated_at).toLocaleString()}.
               </p>
             </div>
-            <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+            <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-ex-line bg-ex-bg px-4 py-3">
                 <dt className="text-sm text-ex-ink2">F1 at a fixed false-alarm rate</dt>
                 <dd className="mt-1 text-4xl font-semibold text-ex-ink">{ex.f1 ? ex.f1.mean.toFixed(2) : '-'}</dd>
@@ -439,7 +444,7 @@ export default function EvalScreen() {
             <ChartCard
               id="validity"
               title="Validity check: does the false-alarm rate stay under α?"
-              subtitle="Each dot is one concept (mean over seeds). The guarantee is about the average over calibration draws, so individual runs can land on either side."
+              subtitle="Each dot is one concept (mean over seeds); the diamond is the method's mean. The guarantee is about the average over calibration draws, so individual runs can land on either side."
               legend={<Legend methods={methods} />}
               table={
                 <Table

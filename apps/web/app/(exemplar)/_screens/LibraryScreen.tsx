@@ -161,7 +161,7 @@ function CalibrationPanel({
               <Icon name="minus" /> Mark all unanswered as not matching
             </button>
           </div>
-          <ol className="mt-3 grid gap-3 md:grid-cols-2">
+          <ol className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
             {clips.map((c, i) => {
               const a = answers[c.clip_id]
               return (
@@ -174,7 +174,7 @@ function CalibrationPanel({
                         type="button"
                         aria-pressed={a === 'pos'}
                         onClick={() => answer(c, 'pos')}
-                        className={`inline-flex min-h-[36px] items-center gap-1 rounded-md border px-3 text-sm font-medium ${a === 'pos' ? 'border-transparent bg-green-400 text-slate-950' : 'border-ex-line bg-ex-raised text-ex-ink hover:bg-[#243556]'}`}
+                        className={`inline-flex min-h-[36px] items-center gap-1 rounded-md border px-3 text-sm font-medium ${a === 'pos' ? 'border-transparent bg-green-400 text-slate-950' : 'border-ex-edge bg-ex-raised text-ex-ink hover:bg-[#243556]'}`}
                       >
                         <Icon name="check" /> Matches
                       </button>
@@ -182,7 +182,7 @@ function CalibrationPanel({
                         type="button"
                         aria-pressed={a === 'neg'}
                         onClick={() => answer(c, 'neg')}
-                        className={`inline-flex min-h-[36px] items-center gap-1 rounded-md border px-3 text-sm font-medium ${a === 'neg' ? 'border-transparent bg-red-400 text-slate-950' : 'border-ex-line bg-ex-raised text-ex-ink hover:bg-[#243556]'}`}
+                        className={`inline-flex min-h-[36px] items-center gap-1 rounded-md border px-3 text-sm font-medium ${a === 'neg' ? 'border-transparent bg-red-400 text-slate-950' : 'border-ex-edge bg-ex-raised text-ex-ink hover:bg-[#243556]'}`}
                       >
                         <Icon name="cross" /> Doesn’t match
                       </button>
@@ -291,12 +291,14 @@ function EventCard({
   const title = ev.summary || (ev.trace_status === 'none' ? 'Waiting for the model to read this clip' : ev.clip_id)
   return (
     <li className="flex flex-col overflow-hidden rounded-xl border border-ex-line bg-ex-panel">
-      <button type="button" onClick={onOpen} aria-label={`View details: ${title}`} className="group relative block aspect-video w-full overflow-hidden rounded-none">
-        <EventThumb event={ev} className="h-full w-full transition-opacity group-hover:opacity-90" />
+      <div className="relative">
+        <button type="button" onClick={onOpen} aria-label={`View details: ${title}${ev.has_snapshot ? '' : ' (No snapshot)'}`} className="group block aspect-video w-full overflow-hidden rounded-none">
+          <EventThumb event={ev} showLabel={false} className="h-full w-full transition-opacity group-hover:opacity-90" />
+        </button>
         {ev.duration_ms != null && (
-          <span className="absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1.5 py-0.5 font-mono text-[11px] text-white">{fmtDuration(ev.duration_ms)}</span>
+          <span aria-hidden="true" className="pointer-events-none absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1.5 py-0.5 font-mono text-[11px] text-white">{fmtDuration(ev.duration_ms)}</span>
         )}
-      </button>
+      </div>
       <div className="flex flex-1 flex-col gap-2 p-3">
         <p className="line-clamp-2 min-h-[2.5rem] text-sm text-ex-ink">{title}</p>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -304,7 +306,7 @@ function EventCard({
           <KindBadges event={ev} />
           <TraceStatusBadge event={ev} />
         </div>
-        <p className="text-xs text-ex-ink3" title={new Date(ev.start_ms).toLocaleString()}>{fmtRelative(ev.start_ms)}</p>
+        <p className="text-xs text-ex-ink3" title={new Date(ev.start_ms).toLocaleString()}>{fmtRelative(ev.start_ms)}{ev.duration_ms != null && <> · {fmtDuration(ev.duration_ms)} long</>}</p>
         {ev.attribution && <p className="text-xs italic text-ex-ink2">{ev.attribution}</p>}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-ex-line pt-2">
           {concept ? (
@@ -331,7 +333,7 @@ function EventCard({
 
 // ---------------------------------------------------------------------------------------------
 export default function LibraryScreen() {
-  const { concept, conceptId, refreshConcepts } = useApp()
+  const { concept, conceptId, refreshConcepts, setConceptId } = useApp()
   const params = useSearchParams()
   const [source, setSource] = useState('')
   const [labelled, setLabelled] = useState('any')
@@ -395,6 +397,12 @@ export default function LibraryScreen() {
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending, qs])
+
+  useEffect(() => {
+    const wanted = params.get('concept')
+    if (wanted && wanted !== conceptId) setConceptId(wanted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params])
 
   useEffect(() => {
     if (params.get('calibrate') === '1' && concept) setCalibrating(true)
@@ -535,7 +543,7 @@ export default function LibraryScreen() {
             {shown.length} clip{shown.length === 1 ? '' : 's'}
             {pending && <span className="ml-2 inline-flex items-center gap-1"><Badge tone="neutral" icon="clock">Reading new clips…</Badge></span>}
           </p>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {shown.map((ev) => (
               <EventCard
                 key={ev.id}

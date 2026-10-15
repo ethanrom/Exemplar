@@ -70,7 +70,7 @@ function Nav() {
                   <Link
                     href={l.href}
                     aria-current={active ? 'page' : undefined}
-                    className={`inline-flex min-h-[36px] items-center rounded-md px-3 text-sm font-medium transition-colors ${
+                    className={`inline-flex min-h-[36px] items-center rounded-md px-2 text-sm font-medium transition-colors sm:px-3 ${
                       active ? 'bg-ex-raised text-ex-ink shadow-[inset_0_-2px_0_0_#22d3ee]' : 'text-ex-ink2 hover:bg-ex-panel hover:text-ex-ink'
                     }`}
                   >

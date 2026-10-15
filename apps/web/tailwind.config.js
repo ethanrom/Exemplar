@@ -23,7 +23,8 @@ module.exports = {
         'ex-bg': '#0B1220',
         'ex-panel': '#111C2F',
         'ex-raised': '#1A2740',
-        'ex-line': '#3B4A63',
+        'ex-line': '#3B4A63', // decorative dividers and card outlines
+        'ex-edge': '#6B7C99', // boundaries of controls: >= 3:1 on every surface (WCAG 1.4.11)
         'ex-ink': '#F1F5F9',
         'ex-ink2': '#CBD5E1',
         'ex-ink3': '#A3B1C6',

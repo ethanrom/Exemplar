@@ -10,13 +10,13 @@ export const snapshotUrl = (eventId: string) => engineUrl(`/events/${encodeURICo
 export const clipUrl = (eventId: string) => engineUrl(`/events/${encodeURIComponent(eventId)}/clip`)
 
 /** Snapshot thumbnail. Decorative by default (the card text already describes the event). */
-export function EventThumb({ event, className = '', alt = '' }: { event: Pick<EventSummary, 'id' | 'has_snapshot'>; className?: string; alt?: string }) {
+export function EventThumb({ event, className = '', alt = '', showLabel = true }: { event: Pick<EventSummary, 'id' | 'has_snapshot'>; className?: string; alt?: string; showLabel?: boolean }) {
   if (!event.has_snapshot) {
     return (
       <div className={`grid place-items-center bg-ex-bg text-ex-ink3 ${className}`}>
         <span className="flex flex-col items-center gap-1 text-xs">
           <Icon name="camera" className="h-6 w-6" />
-          No snapshot
+          {showLabel && 'No snapshot'}
         </span>
       </div>
     )
@@ -97,7 +97,7 @@ export function LabelChips({
         disabled={disabled}
         onClick={() => onSet(v)}
         className={`grid h-9 w-9 place-items-center rounded-md border text-base font-bold transition-colors disabled:opacity-60 ${
-          pressed ? `${on} border-transparent` : 'border-ex-line bg-ex-bg text-ex-ink2 hover:bg-ex-raised'
+          pressed ? `${on} border-transparent` : 'border-ex-edge bg-ex-bg text-ex-ink2 hover:bg-ex-raised'
         }`}
       >
         <span aria-hidden="true">{glyph}</span>

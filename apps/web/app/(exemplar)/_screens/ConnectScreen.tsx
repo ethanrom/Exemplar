@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useApp } from '../_lib/app'
-import { errorMessage, post, put } from '../_lib/api'
+import { ApiError, errorMessage, get, post, put } from '../_lib/api'
 import { fmtCountdown, fmtDateTime } from '../_lib/format'
 import { useApi, useNow } from '../_lib/hooks'
 import type { Device, RingAuthStatus } from '../_lib/types'
@@ -33,7 +33,22 @@ function TokenCard() {
     setError(null)
     setSaved(false)
     try {
-      const next = await put<RingAuthStatus>('/ring/auth', { access_token: token.trim() })
+      // The web server keeps the token for the WHEP proxy and forwards it to the engine itself
+      // (PUT /api/ring/token). Where that route does not exist (UI built against the mock engine
+      // only) fall back to the engine's own PUT /ring/auth through the proxy.
+      const res = await fetch('/api/ring/token', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ access_token: token.trim() }),
+        cache: 'no-store',
+      })
+      if (res.status === 404) {
+        await put<RingAuthStatus>('/ring/auth', { access_token: token.trim() })
+      } else if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        throw new ApiError(res.status, body?.error || `The server rejected the token (${res.status})`)
+      }
+      const next = await get<RingAuthStatus>('/ring/auth')
       setAuth(next)
       setToken('')
       setSaved(true)
@@ -202,7 +217,7 @@ function DevicesCard() {
           <Link className="btn" href="/library">Open Library <Icon name="chevron-right" /></Link>
         </div>
       </div>
-      <div aria-live="polite" className="mt-2 min-h-[1.25rem] text-sm text-ex-ink2">{syncMsg}</div>
+      <div aria-live="polite" className={`text-sm text-ex-ink2 ${syncMsg ? "mt-2" : ""}`}>{syncMsg}</div>
 
       {!connected && <p className="mt-2 text-sm text-ex-ink2">Connect first: devices appear here once a token is accepted.</p>}
       {connected && devices.loading && !devices.data && <div className="mt-3"><Spinner label="Loading devices" /></div>}
@@ -240,7 +255,7 @@ export default function ConnectScreen() {
         title="Connect Ring"
         subtitle="Exemplar reads your camera's event history and live view through the Ring API. All Ring calls happen on the server."
       />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TokenCard />
         <OAuthCard />
         <DevicesCard />

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { processorRegistry } from '@/lib/video-processors'
 import { useVideoProcessing } from '@/lib/video-processors/useVideoProcessing'
 import '@/lib/video-processors' // registers the built-in processors (and the Exemplar frame grabber when present)
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
@@ -119,6 +120,12 @@ export default function LiveScreen() {
     fps: 2,
   })
   const grab = processors.find((p) => p.id === FRAME_GRAB_ID)
+  // The frame grabber (stream A) needs the device id for its uploads. Discovered through the registry
+  // so this screen builds with or without that processor being present.
+  useEffect(() => {
+    const p = processorRegistry.get(FRAME_GRAB_ID) as ({ configure?: (o: { deviceId?: string }) => void } & object) | undefined
+    if (deviceId && typeof p?.configure === 'function') p.configure({ deviceId })
+  }, [deviceId, grab])
 
   // ---- monitor stream state
   const [ticker, setTicker] = useState<TickerRow[]>([])
@@ -242,9 +249,9 @@ export default function LiveScreen() {
       )}
       {errors.length > 0 && <div className="mb-4"><Alert tone="neg" title="Monitor error">{errors[0]}</Alert></div>}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         {/* ----------------------------------------------------------- video + ticker */}
-        <div className="grid content-start gap-4">
+        <div className="grid min-w-0 grid-cols-1 content-start gap-4">
           <section aria-labelledby="vid-h" className="card">
             <h2 id="vid-h" className="sr-only">Live view</h2>
             {/* Ring requires its watermark (logo top-left, device and time top-right) to stay visible: nothing is ever drawn over the video. */}
@@ -311,7 +318,8 @@ export default function LiveScreen() {
               </button>
             </div>
             <p className="mt-1 text-xs text-ex-ink3">What the model currently sees, as predicates. Repeated frames are collapsed.</p>
-            <ol role="log" aria-live="polite" aria-relevant="additions" aria-atomic="false" aria-label="Live fact ticker" className="mt-3 max-h-64 space-y-1.5 overflow-y-auto" tabIndex={0}>
+            <div role="log" aria-live="polite" aria-relevant="additions" aria-atomic="false" aria-label="Live fact ticker" className="mt-3 max-h-64 overflow-y-auto" tabIndex={0}>
+            <ol className="space-y-1.5">
               {ticker.length === 0 && <li className="text-sm text-ex-ink2">Waiting for facts…</li>}
               {ticker.map((row) => (
                 <li key={row.key} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md bg-ex-bg px-2 py-1.5 text-sm motion-safe:animate-ex-in">
@@ -328,11 +336,12 @@ export default function LiveScreen() {
                 </li>
               ))}
             </ol>
+            </div>
           </section>
         </div>
 
         {/* ----------------------------------------------------------- monitors, log, cost */}
-        <div className="grid content-start gap-4">
+        <div className="grid min-w-0 grid-cols-1 content-start gap-4">
           <section aria-labelledby="mon-h" className="card">
             <h2 id="mon-h" className="card-title">Deployed rules</h2>
             {pipe && (
@@ -354,7 +363,8 @@ export default function LiveScreen() {
 
           <section aria-labelledby="log-h" className="card">
             <h2 id="log-h" className="card-title">Action log</h2>
-            <ol role="log" aria-live="polite" aria-relevant="additions" aria-label="Action log" className="mt-3 max-h-56 space-y-1.5 overflow-y-auto" tabIndex={0}>
+            <div role="log" aria-live="polite" aria-relevant="additions" aria-label="Action log" className="mt-3 max-h-56 overflow-y-auto" tabIndex={0}>
+            <ol className="space-y-1.5">
               {log.length === 0 && <li className="text-sm text-ex-ink2">Nothing has fired yet.</li>}
               {log.map((r) => (
                 <li key={r.key} className="flex items-start gap-2 rounded-md bg-ex-bg px-2 py-1.5 text-sm">
@@ -367,6 +377,7 @@ export default function LiveScreen() {
                 </li>
               ))}
             </ol>
+            </div>
           </section>
 
           <CostMeter cost={shownCost} />

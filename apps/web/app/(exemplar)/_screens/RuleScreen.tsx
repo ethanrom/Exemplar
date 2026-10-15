@@ -44,7 +44,7 @@ function ScoreBar({ score, tau }: { score: number; tau: number }) {
     <span aria-hidden="true" className="relative block h-3 w-28 rounded bg-ex-bg">
       <span className="absolute inset-y-0 left-1/2 w-px bg-ex-ink3" />
       <span
-        className={`absolute inset-y-[3px] rounded-sm ${score > tau ? 'bg-green-400' : pos ? 'bg-slate-400' : 'bg-red-400/80'}`}
+        className={`absolute inset-y-[3px] rounded-sm ${score > tau ? 'bg-green-400' : 'bg-slate-400'}`}
         style={pos ? { left: '50%', width: `${Math.min(0.5, score) * 100}%` } : { right: '50%', width: `${Math.min(0.5, -score) * 100}%` }}
       />
       <span className="absolute -inset-y-0.5 w-0.5 bg-cyan-300" style={{ left: pct(tau) }} />
@@ -58,6 +58,7 @@ function BacktestTable({
   const [filter, setFilter] = useState<'all' | 'matches' | 'errors' | 'unlabelled'>('all')
   const [asc, setAsc] = useState(false)
   const [open, setOpen] = useState<Set<string>>(new Set())
+  const [limit, setLimit] = useState(14)
   const tau = bt.calibration.tau
 
   const rows = useMemo(() => {
@@ -80,7 +81,7 @@ function BacktestTable({
         </div>
         <div>
           <label htmlFor="bt-filter" className="field-label">Show</label>
-          <select id="bt-filter" className="field" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
+          <select id="bt-filter" className="field" value={filter} onChange={(e) => { setFilter(e.target.value as typeof filter); setLimit(14) }}>
             <option value="all">All clips ({bt.rows.length})</option>
             <option value="matches">Matches only</option>
             <option value="errors">False alarms and misses</option>
@@ -98,7 +99,7 @@ function BacktestTable({
       </dl>
       <p className="mt-1 text-xs text-ex-ink3">Counts use all your labels. Only random labels feed the guarantee.</p>
 
-      <div className="mt-3 overflow-x-auto">
+      <div className="relative mt-3 overflow-x-auto">
         <table className="w-full min-w-[760px] border-separate border-spacing-0 text-sm">
           <caption className="sr-only">Backtest results, one row per clip. Press the Why button on a matching row to see its witness timeline.</caption>
           <thead>
@@ -117,7 +118,7 @@ function BacktestTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => {
+            {rows.slice(0, limit).map((r) => {
               const o = OUTCOME[outcomeOf(r)]
               const isOpen = open.has(r.clip_id)
               const flag = ['fp', 'fn'].includes(outcomeOf(r))
@@ -176,6 +177,11 @@ function BacktestTable({
         </table>
       </div>
       {rows.length === 0 && <div className="mt-3"><Empty title="No clips in this view" /></div>}
+      {rows.length > limit && (
+        <div className="mt-3 text-center">
+          <button type="button" className="btn" onClick={() => setLimit(limit + 40)}>Show {Math.min(40, rows.length - limit)} more ({rows.length - limit} remaining)</button>
+        </div>
+      )}
       <p className="mt-2 text-xs text-ex-ink3">
         The cyan tick on each bar is τ = {fmtNum(tau)}{bt.calibration.guarantee ? '' : ' (no guarantee yet: the rule fires on any score above 0)'}.
         {' '}Rule {rule.id}.
@@ -322,8 +328,8 @@ export default function RuleScreen() {
       {rule.error && <Alert tone="neg" title="Could not load the rule">{rule.error.message}</Alert>}
 
       {current && (
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-          <div className="grid content-start gap-4">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+          <div className="grid min-w-0 grid-cols-1 content-start gap-4">
             <section className="card" aria-label="Rule">
               <RuleHeadline rule={current} large />
               <RuleMetrics rule={current} />
@@ -333,11 +339,11 @@ export default function RuleScreen() {
             {backtest.error && <Alert tone="neg" title="Backtest failed">{backtest.error.message}</Alert>}
             {backtest.data && <BacktestTable bt={backtest.data} rule={current} onOpen={setOpenId} />}
           </div>
-          <div className="grid content-start gap-4">
+          <div className="grid min-w-0 grid-cols-1 content-start gap-4">
             {cal && conceptId && <CalibrationPanel cal={cal} conceptId={current.concept_id} />}
             <section className="card" aria-labelledby="cost-h">
               <h2 id="cost-h" className="card-title">Cost per event</h2>
-              {cost.data ? (
+              {cost.data && cost.data.events > 0 ? (
                 <>
                   <p className="mt-2 text-3xl font-semibold text-ex-ink">{fmtUsd(cost.data.per_event_usd)}<span className="ml-1 text-sm font-normal text-ex-ink3">per live event so far</span></p>
                   <dl className="mt-3 grid grid-cols-3 gap-2">
@@ -346,7 +352,7 @@ export default function RuleScreen() {
                     <Stat label="Escalated (stage 2)" value={fmtInt(cost.data.stage2_escalated)} />
                   </dl>
                 </>
-              ) : cost.loading ? <div className="mt-2"><Spinner /></div> : <p className="mt-2 text-sm text-ex-ink2">No live events yet.</p>}
+              ) : cost.loading ? <div className="mt-2"><Spinner /></div> : <p className="mt-2 text-sm text-ex-ink2">No live events yet: costs appear once this rule has watched some.</p>}
               <p className="mt-3 text-xs text-ex-ink3">Backtests are free: they reuse cached traces. Only new events cost a model call, and only those scoring within δ of τ use the stronger model.</p>
             </section>
             <DeployCard rule={current} onChanged={onChanged} hasGuarantee={!!cal?.guarantee} />

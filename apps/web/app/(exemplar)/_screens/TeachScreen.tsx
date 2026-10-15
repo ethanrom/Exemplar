@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../_lib/app'
 import { ApiError, errorMessage, get, post, put } from '../_lib/api'
 import { fmtNum } from '../_lib/format'
@@ -154,6 +154,7 @@ export default function TeachScreen() {
   const [running, setRunning] = useState(false)
   const [runError, setRunError] = useState<string | null>(null)
   const [streamPath, setStreamPath] = useState<string | null>(null)
+  const tlRef = useRef<HTMLDivElement>(null)
 
   const rules = useApi<RuleSummary[]>(conceptId ? `/concepts/${conceptId}/rules` : null)
   const question = useApi<Question>(conceptId ? `/concepts/${conceptId}/question` : null)
@@ -198,6 +199,12 @@ export default function TeachScreen() {
       setEventsErr(errorMessage(e))
     }
   }
+
+  // keep the newest step in view while the run is going
+  useEffect(() => {
+    const el = tlRef.current
+    if (el && running) el.scrollTop = el.scrollHeight
+  }, [timeline.length, running])
 
   // ---- run
   const status = useEventStream<RunEvent>(streamPath, RUN_TYPES, (type, data) => {
@@ -253,9 +260,9 @@ export default function TeachScreen() {
         subtitle="Show Exemplar a few clips of what you care about. It drafts rule sketches, a solver fills in the numbers, and you get readable rules to compare."
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         {/* ---------------------------------------------------------------- 1. examples */}
-        <section className="card" aria-labelledby="ex-h">
+        <section className="card xl:sticky xl:top-20 xl:self-start" aria-labelledby="ex-h">
           <h2 id="ex-h" className="card-title">1. Pick examples</h2>
           <div className="mt-3 flex flex-wrap items-end gap-3">
             <ConceptSelect id="teach-concept" label="Concept" />
@@ -314,7 +321,7 @@ export default function TeachScreen() {
           </div>
         </section>
 
-        <div className="grid content-start gap-4">
+        <div className="grid min-w-0 grid-cols-1 content-start gap-4">
           {/* -------------------------------------------------------------- 2. timeline */}
           <section className="card" aria-labelledby="tl-h">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -328,29 +335,11 @@ export default function TeachScreen() {
                 {running ? 'Waiting for the first step…' : 'Press Teach to watch the loop: sketch a rule, check its types, let Z3 solve the thresholds, then check the solution with an independent evaluator.'}
               </p>
             ) : (
-              <ol role="log" aria-live="polite" aria-relevant="additions" aria-label="Agent timeline" className="mt-4 space-y-3">
-                {timeline.map((e) => <TimelineItem key={e.seq} e={e} t0={t0} clips={byClip} />)}
-              </ol>
-            )}
-          </section>
-
-          {/* -------------------------------------------------------------- 3. candidates */}
-          <section className="card" aria-labelledby="cand-h">
-            <h2 id="cand-h" className="card-title">3. Candidate rules</h2>
-            {rules.loading && !rules.data && <div className="mt-3"><Spinner label="Loading rules" /></div>}
-            {rules.error && <div className="mt-3"><Alert tone="neg">{rules.error.message}</Alert></div>}
-            {!haveRules && !rules.loading && (
-              <p className="mt-3 text-sm text-ex-ink2">No rules yet. They appear here, simplest first, when a run finishes.</p>
-            )}
-            {haveRules && (
-              <>
-                <p className="mt-1 text-sm text-ex-ink2">Ranked by description length (simplest first), then margin.</p>
-                <div className="mt-3 space-y-3">
-                  {rules.data!.map((r, i) => (
-                    <RuleCard key={r.id} rule={r} rank={i + 1} events={byClip} onInspect={(id) => setOpenId(id)} />
-                  ))}
-                </div>
-              </>
+              <div ref={tlRef} tabIndex={0} role="log" aria-live="polite" aria-relevant="additions" aria-label="Agent timeline" className="mt-4 max-h-[460px] overflow-y-auto pr-2">
+                <ol className="space-y-3">
+                  {timeline.map((e) => <TimelineItem key={e.seq} e={e} t0={t0} clips={byClip} />)}
+                </ol>
+              </div>
             )}
           </section>
 
@@ -373,7 +362,7 @@ export default function TeachScreen() {
                 />
               ) : (
                 <div className="card">
-                  <h2 className="card-title">4. Question</h2>
+                  <h2 className="card-title">3. Question</h2>
                   <p className="mt-1 text-sm text-ex-ink2">
                     {question.data && skipped.includes(question.data.clip_id)
                       ? 'You skipped the question.'
@@ -386,6 +375,26 @@ export default function TeachScreen() {
               )}
             </section>
           )}
+          {/* -------------------------------------------------------------- 3. candidates */}
+          <section className="card" aria-labelledby="cand-h">
+            <h2 id="cand-h" className="card-title">4. Candidate rules</h2>
+            {rules.loading && !rules.data && <div className="mt-3"><Spinner label="Loading rules" /></div>}
+            {rules.error && <div className="mt-3"><Alert tone="neg">{rules.error.message}</Alert></div>}
+            {!haveRules && !rules.loading && (
+              <p className="mt-3 text-sm text-ex-ink2">No rules yet. They appear here, simplest first, when a run finishes.</p>
+            )}
+            {haveRules && (
+              <>
+                <p className="mt-1 text-sm text-ex-ink2">Ranked by description length (simplest first), then margin.</p>
+                <div className="mt-3 space-y-3">
+                  {rules.data!.map((r, i) => (
+                    <RuleCard key={r.id} rule={r} rank={i + 1} events={byClip} onInspect={(id) => setOpenId(id)} />
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
+
         </div>
       </div>
 

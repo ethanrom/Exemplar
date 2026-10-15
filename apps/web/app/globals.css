@@ -49,6 +49,14 @@ body {
   }
 }
 
+@layer base {
+  /* A bare `grid` gets one shrinkable column, so wide children (tables, charts) scroll inside their own
+     box instead of stretching the page on phones. grid-cols-* utilities (any breakpoint) still win. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @layer components {
   .card {
     @apply bg-ex-panel rounded-xl border border-ex-line p-4;
@@ -60,10 +68,10 @@ body {
     @apply block text-sm font-medium text-ex-ink2 mb-1;
   }
   .field {
-    @apply w-full min-h-[36px] rounded-md border border-ex-line bg-ex-bg px-3 py-1.5 text-sm text-ex-ink placeholder:text-ex-ink3;
+    @apply w-full min-h-[36px] rounded-md border border-ex-edge bg-ex-bg px-3 py-1.5 text-sm text-ex-ink placeholder:text-ex-ink3;
   }
   .btn {
-    @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-2 rounded-md border border-ex-line bg-ex-raised px-3 py-1.5 text-sm font-medium text-ex-ink transition-colors hover:bg-[#243556] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-2 rounded-md border border-ex-edge bg-ex-raised px-3 py-1.5 text-sm font-medium text-ex-ink transition-colors hover:bg-[#243556] disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
     @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-2 rounded-md border border-transparent bg-ex-accent px-3 py-1.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-200;
