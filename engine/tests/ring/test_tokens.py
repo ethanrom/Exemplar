@@ -290,14 +290,14 @@ async def test_account_link_post_then_patch():
     post = respx.post("https://api.amazonvision.com/v1/accounts/me/app-integrations").mock(
         return_value=httpx.Response(200, json={"status": "awaiting"}))
     patch = respx.patch("https://api.amazonvision.com/v1/accounts/me/app-integrations").mock(
-        return_value=httpx.Response(200, json={"account_identifier": "u***r@example.com", "status": "completed"}))
+        return_value=httpx.Response(200, json={"account_identifier": "u***r@example.test", "status": "completed"}))
     store = InMemoryTokenStore(StoredAuth(mode="oauth", access_token="A1", refresh_token="R1",
                                           expires_at_ms=int(NOW * 1000) + 3_600_000))
     app = _app(store=store)
-    r1 = await app.confirm_account_link("u***r@example.com", "nonce-1", access_token="MATCHED")
+    r1 = await app.confirm_account_link("u***r@example.test", "nonce-1", access_token="MATCHED")
     assert r1["status"] == "awaiting"
     assert post.calls.last.request.headers["authorization"] == "Bearer MATCHED"
-    assert json.loads(post.calls.last.request.content) == {"account_identifier": "u***r@example.com", "nonce": "nonce-1"}
+    assert json.loads(post.calls.last.request.content) == {"account_identifier": "u***r@example.test", "nonce": "nonce-1"}
     r2 = await app.complete_account_link()
     assert r2["status"] == "completed"
     assert json.loads(patch.calls.last.request.content) == {"status": "completed"}

@@ -35,7 +35,7 @@ from .conftest import FakeTime, load_fixture, make_jwt
 API = "https://api.amazonvision.com"
 DEV = "ava1.ring.device.FIXTUREDEVICE0001"
 DL = "https://download-ap-northeast-1.prod.phoenix.devices.amazon.dev/v1/download"
-PRESIGNED = f"{DL}?X-Amz-Signature=fakesig&req_type=video_download&req_id=abc"
+PRESIGNED = f"{DL}?sig=fakesig&req_type=video_download&req_id=abc"
 VIDEO_URL = f"{API}/v1/devices/{DEV}/media/video/download"
 IMAGE_URL = f"{API}/v1/devices/{DEV}/media/image/download"
 HIST_URL = f"{API}/v1/history/devices/{DEV}/events"
@@ -68,7 +68,7 @@ async def test_users_me(fake_time):
     async with make_client(fake_time) as c:
         me = await c.users_me()
     assert me.id == "ava1.ring.account.FIXTUREACCOUNT0001" and me.display_name == "Playground User"
-    assert "playground@example.com" not in repr(me)        # email is kept out of repr/logs
+    assert "playground@example.test" not in repr(me)        # email is kept out of repr/logs
 
 
 @respx.mock

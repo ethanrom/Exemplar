@@ -4,7 +4,7 @@
     "id": "ava1.ring.account.FIXTUREACCOUNT0001",
     "attributes": {
       "first_name": "Playground",
-      "email": "playground@example.com",
+      "email": "playground@example.test",
       "last_name": "User"
     }
   }
