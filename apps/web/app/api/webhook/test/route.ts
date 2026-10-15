@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { broadcastEvent } from '@/lib/sse-broadcast'
 
+// Development helper only: it injects UNSIGNED fake events straight into the dashboard's SSE feed,
+// so it does not exist in production builds (use scripts/send_signed_webhook.py for realistic replays).
+const notFound = () => NextResponse.json({ error: 'Not found' }, { status: 404 })
+const enabled = () => process.env.NODE_ENV !== 'production'
+
 /**
  * Test endpoint to simulate Ring webhook events for local development.
  * 
@@ -10,6 +15,7 @@ import { broadcastEvent } from '@/lib/sse-broadcast'
  *   POST /api/webhook/test?type=device_added
  */
 export async function POST(request: NextRequest) {
+  if (!enabled()) return notFound()
   const eventType = request.nextUrl.searchParams.get('type') || 'motion_detected'
   const deviceId = process.env.NEXT_PUBLIC_RING_DEVICE_ID || 'test-device-123'
   
@@ -83,6 +89,7 @@ export async function POST(request: NextRequest) {
 
 // GET - simple info about the test endpoint
 export async function GET() {
+  if (!enabled()) return notFound()
   return NextResponse.json({
     description: 'Test endpoint to simulate Ring webhook events',
     usage: {

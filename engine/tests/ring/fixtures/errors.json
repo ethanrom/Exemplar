@@ -1,0 +1,50 @@
+{
+  "403_time_range": {
+    "errors": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "status": "403",
+        "code": "TIME_RANGE_NOT_AUTHORIZED",
+        "detail": "Requested time range is not within authorized boundaries",
+        "meta": {
+          "timestamp": "2026-10-15T08:13:52Z"
+        }
+      }
+    ]
+  },
+  "416_media_not_found": {
+    "errors": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "status": "416",
+        "code": "MEDIA_NOT_FOUND",
+        "detail": "No media found in time range 1792051430095-1792051435095",
+        "meta": {
+          "timestamp": "2026-10-15T08:13:58Z"
+        }
+      }
+    ]
+  },
+  "422_greco": {
+    "errors": [
+      {
+        "id": "x",
+        "status": "422",
+        "code": "GRECO_NO_VALID_KEY",
+        "detail": "No valid Greco key available for decryption",
+        "meta": {
+          "timestamp": "2026-10-15T08:15:14Z"
+        }
+      }
+    ]
+  },
+  "404_not_found": {
+    "errors": [
+      {
+        "status": "404",
+        "title": "Not Found",
+        "detail": "Resource not found"
+      }
+    ]
+  }
+}

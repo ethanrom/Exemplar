@@ -1,0 +1,176 @@
+{
+  "data": [
+    {
+      "type": "devices",
+      "id": "ava1.ring.device.FIXTUREDEVICE0001",
+      "attributes": {
+        "name": "Playground Device",
+        "image_url": "https://app-content.ring.com/shared/images/devices/square_device_images/DoorbellPro/rvdp_3x.png"
+      },
+      "relationships": {
+        "location": {
+          "data": {
+            "type": "locations",
+            "id": "ava1.ring.location.FIXTURELOCATION0001"
+          },
+          "links": {
+            "related": "/v1/devices/ava1.ring.device.FIXTUREDEVICE0001/location"
+          }
+        },
+        "capabilities": {
+          "data": {
+            "type": "device-capabilities",
+            "id": "ava1.ring.device.capabilities.FIXTUREDEVICECAPABILITIES0001"
+          },
+          "links": {
+            "related": "/v1/devices/ava1.ring.device.FIXTUREDEVICE0001/capabilities"
+          }
+        },
+        "configurations": {
+          "data": {
+            "type": "device-configurations",
+            "id": "ava1.ring.device.configurations.FIXTUREDEVICECONFIGURATIONS0001"
+          },
+          "links": {
+            "related": "/v1/devices/ava1.ring.device.FIXTUREDEVICE0001/configurations"
+          }
+        },
+        "status": {
+          "data": {
+            "type": "device-status",
+            "id": "ava1.ring.device.status.FIXTUREDEVICESTATUS0001"
+          },
+          "links": {
+            "related": "/v1/devices/ava1.ring.device.FIXTUREDEVICE0001/status"
+          }
+        }
+      }
+    }
+  ],
+  "included": [
+    {
+      "type": "device-status",
+      "id": "ava1.ring.device.status.FIXTUREDEVICESTATUS0001",
+      "attributes": {
+        "state": null,
+        "audio": {
+          "snooze": {
+            "active": null,
+            "until": null
+          }
+        },
+        "online": true,
+        "reported_at": "2026-10-15T07:59:17Z"
+      }
+    },
+    {
+      "type": "device-capabilities",
+      "id": "ava1.ring.device.capabilities.FIXTUREDEVICECAPABILITIES0001",
+      "attributes": {
+        "glass_break_detection": null,
+        "battery_status": null,
+        "co_detection_listener": null,
+        "image_enhancements": {
+          "configurations": [
+            "color_night_vision",
+            "privacy_zones",
+            "snapshot"
+          ]
+        },
+        "smoke_detection": null,
+        "tamper_detection": null,
+        "flood_detection": null,
+        "freeze_detection": null,
+        "video": {
+          "configurations": [
+            "resolution_mode"
+          ],
+          "codecs": [
+            "AVC"
+          ],
+          "ratio": "16:9",
+          "max_resolution": 1080,
+          "supported_resolutions": [
+            1080
+          ]
+        },
+        "audio": {
+          "customizable_slots": null,
+          "supported_actions": null
+        },
+        "motion_detection": {
+          "configurations": [
+            "enabled",
+            "motion_zones"
+          ]
+        },
+        "contact_detection": null
+      }
+    },
+    {
+      "type": "device-configurations",
+      "id": "ava1.ring.device.configurations.FIXTUREDEVICECONFIGURATIONS0001",
+      "attributes": {
+        "motion_detection": {
+          "enabled": "on",
+          "motion_zones": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "vertices": [
+                {
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "x": 0.5,
+                  "y": 0
+                },
+                {
+                  "x": 1,
+                  "y": 0
+                },
+                {
+                  "x": 1,
+                  "y": 0.6
+                },
+                {
+                  "x": 1,
+                  "y": 1
+                },
+                {
+                  "x": 0.5,
+                  "y": 1
+                },
+                {
+                  "x": 0,
+                  "y": 1
+                },
+                {
+                  "x": 0,
+                  "y": 0.6
+                }
+              ]
+            }
+          ]
+        },
+        "e2e_encryption": {
+          "enabled": false
+        },
+        "audio": {
+          "customizable_slots": null,
+          "volume": 11
+        },
+        "image_enhancements": {
+          "color_night_vision": "off",
+          "hdr": "off",
+          "ir_led_night_vision": "off",
+          "auto_zoom_track": "off",
+          "privacy_zones": []
+        }
+      }
+    }
+  ],
+  "meta": {
+    "time": "2026-10-15T08:13:46Z"
+  }
+}

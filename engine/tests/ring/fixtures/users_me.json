@@ -1,0 +1,11 @@
+{
+  "data": {
+    "type": "users",
+    "id": "ava1.ring.account.FIXTUREACCOUNT0001",
+    "attributes": {
+      "first_name": "Playground",
+      "email": "playground@example.com",
+      "last_name": "User"
+    }
+  }
+}

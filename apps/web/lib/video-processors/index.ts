@@ -36,9 +36,14 @@ export { processorRegistry } from './registry'
 import { motionHeatmapProcessor } from './examples/motion-heatmap'
 import { brightnessAnalyzerProcessor } from './examples/brightness-analyzer'
 import { amazonLogoGame } from './examples/amazon-logo-game'
+import { frameGrabProcessor } from './frame-grab'
 import { processorRegistry } from './registry'
 
 // Auto-register example processors
 processorRegistry.register(motionHeatmapProcessor)
 processorRegistry.register(brightnessAnalyzerProcessor)
 processorRegistry.register(amazonLogoGame)
+// Exemplar: streams 2 fps JPEG frames to the engine (disabled until switched on)
+processorRegistry.register(frameGrabProcessor)
+
+export { frameGrabProcessor, FRAME_GRAB_ID } from './frame-grab'
