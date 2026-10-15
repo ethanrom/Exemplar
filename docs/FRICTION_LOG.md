@@ -164,7 +164,7 @@ Entries are grouped by tool. Our own feedback on each tool (what worked, onboard
 ### RING-12 History event ids are 140+ characters and only their tails differ
 <!-- orig: H-3 -->
 - **Task:** store a clip per event under a data directory on Windows.
-- **Actual:** ids look like `ava1.ring.history.event.OZIXHAV…CBUQJNH`. Used verbatim as file names they approach `MAX_PATH` (260) under a deep directory; truncating the front makes different events collide because the shared prefix is long.
+- **Actual:** ids look like `ava1.ring.history.event.<140+ characters>`. Used verbatim as file names they approach `MAX_PATH` (260) under a deep directory; truncating the front makes different events collide because the shared prefix is long.
 - **Severity:** low.
 - **Workaround:** keep short ids as they are, otherwise a sanitized prefix plus a 12-hex SHA-1 of the whole id.
 - **Suggestion:** document the id length bound, or put the unique part first.

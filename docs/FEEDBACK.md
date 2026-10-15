@@ -156,7 +156,7 @@ Exemplar is a multi-service AWS pipeline, not a single model call. Every integra
 - The conversation is re-sent on every tool call and `BedrockModel` exposes no prompt-cache switch, so tool-heavy agents cost quadratically; one 40-clip run was 128k input tokens for 2.5k output (STR-1). Prompt-cache support and a cost note in the docs would help most.
 - No mock model: testing offline meant implementing `Model` from the source (STR-2). Cancellation needs two hooks (STR-3). `structured_output` cannot be used with a model that rejects forced tool choice (BR-1), so a doc note on that combination would help.
 
-**Onboarding.** A one-tool agent on Bedrock came together quickly (our first spike ran in about 4 s); the examples are clear.
+**Onboarding.** A one-tool agent on Bedrock came together quickly (our first test ran in about 4 s); the examples are clear.
 
 **Would we build with it again?** **Yes.** It let us ship a genuine agent loop, rather than a prompt chain, in a few days.
 

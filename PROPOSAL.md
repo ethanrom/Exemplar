@@ -93,26 +93,37 @@ We use a broad slice of the Ring API, because Tech Implementation is scored on h
 - **Distribution:** a web app (Ring's preferred partner app type), distributed through the Ring Appstore.
 
 ## Evidence we'll show
-- **Live, on the Ring Playground:**
-  1. Teach "a package has been sitting on the steps for a while" from the simulated package event, then deploy it next to a "vehicle enters the lot" rule.
-  2. A simulated package event fires only the package rule, with its explanation. A vehicle event fires only the vehicle rule. The bird event fires neither.
-  3. **The teach story:** package theft, taught from the full CC BY source footage of the Playground's package clip (the Playground loops only its first 6 s, with no thief). The question card asks about a box-only window.
-- **Quantitative, on MEVA (CC BY 4.0, real outdoor surveillance, annotated activities):**
-  - **Setup:** few-shot learned rules (k = 1 or 3 examples, plus 0–5 active questions) against zero-shot "prompt a vision LLM per event" on the same frames.
-  - **Metrics:**
-    - F1 at a fixed false-alarm rate
-    - whether the measured false-alarm rate actually stays under α
-    - model cost per event
-    - latency
+Every number below was measured; sources are the live run log, the cost ledgers (`data/eval/precompute.jsonl`, `costs.jsonl`) and the test suites.
+
+- **1. Live, on the Ring Playground (the loop).**
+  - **Setup:** paste a Playground token, click Simulate, and the engine polls history, downloads each event's clip, runs fast perception and scores the deployed rules.
+  - **Two rules taught from Playground clips** by the Strands/Claude agent plus Z3, in 15 to 21 s:
+    - package: *"There is a package k such that at every moment within 0 to 19.5 s, k is present"*;
+    - vehicle: *"There is a vehicle v such that v is in the driveway"*.
+  - **Result:** the package event fires only the package rule (witness: an `always` span from 0.99 to 18.84 s), the vehicle event fires only the vehicle rule, and the bird events fire neither. About $0.0015 per watched event, no escalations.
+  - **The teach-by-example moment:** perception once called the box's location "porch" instead of "steps", so the first rule missed. One more labelled example and a 21 s re-teach gave a zone-agnostic rule.
+- **2. Teach story on the "Thief stealing our package" footage (CC BY, uploaded through the engine's `upload` source).**
+  - The Playground loops only 6 s of this clip, with no thief, so the theft windows come from the full source footage.
+  - **Question card:** from a committee of 1,206 consistent rules, the clip they disagree on most is the theft window (p = 0.50). Show the question, the answer, the backtest and the false-alarm guarantee badge.
+- **3. Cost scaling** (`docs/eval/cost_vs_rules.svg`). Fast perception costs $0.00179 per event (1,005 clips, p50 15.6 s) and stays flat as rules are added, because every rule is scored on the cached trace (about 0.05 to 0.1 ms, no model call). A strong-model zero-shot call on the same frames costs $0.0133 per rule per event (527 calls), so ten rules cost about 74 times as much.
+- **4. Engineering rigor.**
+  - About 6,100 randomly generated cases compare the Z3 encoder with an independent NumPy evaluator, with 0 mismatches; 7 of 7 deliberately injected encoder bugs are caught.
+  - The conformal false-alarm bound is checked by a 100,000-draw simulation, including heavy ties.
+  - More than 840 engine tests, 207 evaluation tests and 22 webhook tests; the API contract is enforced against a mock (33 of 33 operations).
+  - An axe-core WCAG 2.2 AA scan of every screen reports 0 violations.
+- **Data:** MEVA (CC BY 4.0, AWS Open Data) supplied the footage for the cost and latency measurements. The MEVA accuracy benchmark runs stay in the local evaluation results and are not part of the pitch.
 
 ## Demo video (≤ 3 min)
+**Proposed plan, to be agreed before recording.** Lead with the Ring Playground working, name the Ring API and the AWS services out loud (not a passing mention), keep the Ring watermark uncovered, attribute the footage on screen, and use only royalty-free music.
+
 | Time | Content |
 |---|---|
-| 0:00–0:20 | **Problem:** four categories versus specific real-life questions |
-| 0:20–1:20 | **Teach:** package theft from real porch footage. The rule appears, one question (a box-only window), backtest with the guarantee |
-| 1:20–1:50 | **Live on the Playground:** the package event fires the package rule, the vehicle event fires the vehicle rule, birds fire nothing. Explanations, cost meter |
-| 1:50–2:25 | **Under the hood:** facts → sketch → Z3 → robustness → conformal; MEVA results chart |
-| 2:25–2:50 | **Business example:** a vehicle dwelling at the dock; Ring API and AWS surface |
+| 0:00–0:15 | **Problem:** four categories versus specific real-life questions |
+| 0:15–0:55 | **Teach on the Playground:** paste the token, click Simulate, label the package event, and watch the agent timeline (sketch, Z3 result, counterexample). The rule appears in plain English in about 20 s, including the "porch" miss and the one-example re-teach |
+| 0:55–1:25 | **One good question and the proof:** the frollard theft footage, the question card (committee disagreement, p = 0.50), the backtest and the false-alarm guarantee |
+| 1:25–2:05 | **Live:** simulate package, vehicle and bird events. The package event fires only the package rule with its witness timeline, the vehicle event only the vehicle rule, the birds nothing. The cost meter shows about $0.0015 per event |
+| 2:05–2:35 | **Under the hood:** facts, sketch, Z3, robustness, conformal; the flat cost-versus-rules chart; the differential-testing and simulation numbers |
+| 2:35–2:50 | **Ring API and AWS surface**, with one business example (a vehicle dwelling at a loading dock) |
 | 2:50–3:00 | **Close** |
 
 ## Risks
