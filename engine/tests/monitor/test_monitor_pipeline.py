@@ -1,4 +1,4 @@
-"""calibrate -> deploy -> monitor, offline, as stream H wires it; plus an opt-in live smoke test on Bedrock."""
+"""calibrate -> deploy -> monitor, offline, as the API wires it; plus an opt-in live smoke test on Bedrock."""
 from __future__ import annotations
 
 import os
@@ -49,7 +49,7 @@ def test_calibrated_rule_deployed_fires_only_on_thefts():
 
 
 def test_playground_demo_two_rules_package_and_vehicle():
-    """Demo design (PLAN §5): package event fires the package rule, vehicle event fires the vehicle rule."""
+    """Demo scenario: package event fires the package rule, vehicle event fires the vehicle rule."""
     package_rule = parse(UNATTENDED)
     vehicle_rule = parse(DWELL)
     traces = {"pkg": load("unattended_package"), "veh": load("vehicle_dwell_dock"), "birds": load("birds_feeder")}
@@ -68,7 +68,8 @@ def test_playground_demo_two_rules_package_and_vehicle():
 
 # ------------------------------------------------------------------------------------------ live (opt-in)
 DATA = Path(os.environ.get("EXEMPLAR_DATA_DIR") or Path(__file__).parents[3] / "data")
-PKG = DATA / "spike" / "ring" / "CBDPSLBSIOVQ66XX" / "clip.mp4"
+# Point EXEMPLAR_PACKAGE_CLIP at the recorded Playground package clip (default: <data>/spike/ring/<event id>/clip.mp4).
+PKG = Path(os.environ.get("EXEMPLAR_PACKAGE_CLIP") or DATA / "spike" / "ring" / "EVENT_ID" / "clip.mp4")
 
 
 @pytest.mark.live

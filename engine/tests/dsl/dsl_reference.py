@@ -1,4 +1,4 @@
-"""Reference semantics, written as literally as possible from PLAN.md §2.2: scalar Python recursion, no
+"""Reference semantics, written as literally as possible from docs/DSL.md: scalar Python recursion, no
 NumPy, no shared code with `exemplar.dsl.evaluator`. Slow; used to cross-check the vectorised evaluator."""
 from __future__ import annotations
 

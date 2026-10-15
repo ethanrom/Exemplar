@@ -179,7 +179,7 @@ def test_teach_events_are_sequenced_stored_and_valid(tenv):
     assert [e["seq"] for e in stored] == list(range(1, len(stored) + 1))
     types = [e["type"] for e in stored]
     assert types[:4] == ["round_started", "sketch_proposed", "typecheck_failed", "solve_result"]
-    assert types[-3:] == ["candidates", "question_ready", "done"] and types.count("done") == 1     # D's own `done` is dropped
+    assert types[-3:] == ["candidates", "question_ready", "done"] and types.count("done") == 1     # the proposer's own `done` is dropped
     assert all(isinstance(e["at_ms"], int) and e["at_ms"] > 0 for e in stored)
     for e in stored:
         validate_component("RunEvent", e)

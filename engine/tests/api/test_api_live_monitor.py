@@ -166,7 +166,7 @@ def H_parse(lines):
 
 
 # ------------------------------------------------------------------------------------------ cost / firings / eval
-def test_price_table_reproduces_the_phase0_measurements():
+def test_price_table_reproduces_the_measured_costs():
     assert usd("perception_fast", 6400, 1400) == pytest.approx(0.0014, abs=0.0001)
     assert usd("perception_strong", 6200, 1600) == pytest.approx(0.028, abs=0.001)
 

@@ -1,5 +1,5 @@
-"""Helpers for the active-learning tests: local stand-ins for stream D's `Candidate` / `Example` (same fields
-as docs/streams/phase2-interfaces.md), a brute-force `box_fn`, and tiny synthetic traces."""
+"""Helpers for the active-learning tests: local stand-ins for synth's `Candidate` / `Example` (same fields),
+a brute-force `box_fn`, and tiny synthetic traces."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -107,7 +107,7 @@ def test_calibration_is_conformal_and_stored(renv):
     rule = parse(H.THEFT_DSL)
     neg = sorted(float(robustness(rule, H.load_trace(c))) for c in ALL if c not in EXAMPLES)
     assert cal["guarantee"] is True and cal["n_random_neg"] == 7 and cal["k"] == 7 and cal["alpha"] == 0.2
-    assert cal["tau"] == pytest.approx(max(0.0, neg[6]))                    # k-th smallest negative score, floored at 0 (E)
+    assert cal["tau"] == pytest.approx(max(0.0, neg[6]))                    # k-th smallest negative score, floored at 0
     row = renv.state.store.rules.get(renv.theft["id"])
     assert row.tau == pytest.approx(cal["tau"]) and row.delta == cal["delta"]
     assert json.loads(row.calibration_json) == cal

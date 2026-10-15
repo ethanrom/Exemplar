@@ -163,7 +163,7 @@ async def test_206_partial_content_is_flagged(fake_time):
 
 @respx.mock
 async def test_video_retries_416_then_425_then_200(fake_time):
-    """PLAN section 6: the clip-download retry logic against a mocked 416 -> 425 -> 200 sequence."""
+    """The clip-download retry logic against a mocked 416 -> 425 -> 200 sequence."""
     post = respx.post(VIDEO_URL).mock(return_value=redirect())
     get = respx.get(DL).mock(side_effect=[
         httpx.Response(416, json=err_body(416, "MEDIA_NOT_FOUND", "No media found in time range")),
@@ -601,7 +601,7 @@ async def test_chime_play_body_and_response(fake_time):
 
 @respx.mock
 async def test_chime_400_in_the_playground_is_typed_and_not_retried(fake_time):
-    """P0-4: the Playground answers 400 'Validation Error' (no chime slots on the virtual device)."""
+    """The Playground answers 400 'Validation Error' (no chime slots on the virtual device)."""
     route = respx.post(f"{API}/v1/devices/{DEV}/media/audio/playback").mock(return_value=httpx.Response(
         400, json={"errors": [{"detail": "The request contains invalid input.", "status": "400", "title": "Validation Error"}]}))
     async with make_client(fake_time, chime_enabled=True) as c:

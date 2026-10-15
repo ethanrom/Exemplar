@@ -1,7 +1,7 @@
 """Opt-in live validation on the demo concepts (spends Bedrock budget): EXEMPLAR_LIVE=1 uv run pytest tests/agent/test_agent_live.py -s
 
 Runs the real Strands/Bedrock agent on the fixture traces for the three demo concepts (a) package theft, (b) a package sitting
-on the steps, (c) a vehicle entering the lot, and on the cached real traces (stream B) when `data/cache/traces` exists.
+on the steps, (c) a vehicle entering the lot, and on the cached real traces when `data/cache/traces` exists.
 Prints each candidate (English, DSL, margin, MDL), timings and token spend; if EXEMPLAR_D_REPORT is set, also writes a JSON report.
 """
 from __future__ import annotations
@@ -121,7 +121,7 @@ def test_b_package_on_steps_real_traces(real):
 
 
 def test_meva_door_crossing_noisy(real):
-    """A noisy 40-clip concept from stream B's MEVA traces (labels from the clip ids): MaxSMT must tolerate violations."""
+    """A noisy 40-clip concept from cached MEVA traces (labels from the clip ids): MaxSMT must tolerate violations."""
     pos = sorted(c for c in real if c.startswith("door_crossing") and c.endswith("-pos"))[:10]
     neg = sorted(c for c in real if c.startswith("door_crossing") and c.endswith("-neg"))[:30]
     if len(pos) < 5:

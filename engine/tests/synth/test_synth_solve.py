@@ -1,9 +1,9 @@
-"""solve_sketch against an exhaustive reference, plus the concrete behaviours the plan promises.
+"""solve_sketch against an exhaustive reference, plus the concrete behaviours documented in docs/DSL.md.
 
 The reference (`synth_support.brute_force`) scores every equivalence class of hole values with the DSL evaluator, so
 agreement here means: Z3's optimum (violated weight, then margin) is the true optimum, an "unsat"/violated verdict is
 never wrong, and the returned rule really has the claimed margin.  This is the project's correctness guarantee for
-the encoder (PLAN.md section 2.3 "Differential check").
+the encoder (docs/DSL.md, "Hole placement").
 """
 from __future__ import annotations
 

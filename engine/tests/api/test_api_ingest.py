@@ -260,7 +260,7 @@ def test_auth_expiring_is_announced_once_five_minutes_before(make_env):
 
 # ------------------------------------------------------------------------------------------ real client + HTTP mock
 def test_clip_download_retries_416_and_425_through_stream_a(make_env, video_bytes, jpeg_bytes):
-    """Stream A's real RingClient against mocked Ring HTTP: 416 -> 425 -> 303 -> 200 for the video."""
+    """The real RingClient against mocked Ring HTTP: 416 -> 425 -> 303 -> 200 for the video."""
     async def no_sleep(_: float) -> None:
         return None
 

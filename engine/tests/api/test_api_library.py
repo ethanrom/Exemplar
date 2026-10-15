@@ -88,7 +88,7 @@ def test_event_detail_has_trace_and_fallback_trace_text(lib):
     d = lib.client.get(f"/events/fx_theft_a?concept_id={lib.cid}").json()
     assert d["trace"]["clip_id"] == "theft_a" and d["strong_trace"] is None
     assert d["label"]["value"] == "pos"
-    try:                                            # stream D's renderer is used once it is installed
+    try:                                            # the synth renderer is used when it is available
         from exemplar.synth import render_trace_text
     except ImportError:
         render_trace_text = None
