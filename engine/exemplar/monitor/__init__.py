@@ -1,4 +1,4 @@
-"""Online monitor (stream E, PLAN.md §2.6): sub_type prune -> fast score -> escalate near tau -> fire/drop, with
+"""Online monitor: sub_type prune -> fast score -> escalate near tau -> fire/drop, with
 witnesses, actions and a cost meter.
 
     mon = Monitor(perceive_fast=..., perceive_strong=..., on_firing=store.add_firing, on_event=sse.push,

@@ -1,13 +1,12 @@
-"""`Services`: the injection point for everything owned by other streams.
+"""`Services`: the injection point for the synthesis, active-learning, calibration and monitor modules.
 
-D (`exemplar.synth`, `exemplar.agent`) and E (`exemplar.active`, `exemplar.calibrate`, `exemplar.monitor`) were
-not merged when this was written, so nothing from them is imported at module load. Each capability is resolved
-on first use (`importlib`), and a missing module surfaces as `NotAvailable` -> HTTP 503
-`{"error": "... not available yet"}`. Tests (and the integrator) pass their own callables:
+`exemplar.synth`, `exemplar.agent`, `exemplar.active`, `exemplar.calibrate` and `exemplar.monitor` are not imported
+at module load. Each capability is resolved on first use (`importlib`), and a missing module surfaces as
+`NotAvailable` -> HTTP 503 `{"error": "... not available yet"}`. Tests pass their own callables:
 
     Services(run_cegis=fake_cegis, example_cls=Example, calibrate=fake_calibrate, disable=("monitor_cls",))
 
-Names follow docs/streams/phase2-interfaces.md exactly.
+The callables follow the signatures of the modules named above.
 """
 from __future__ import annotations
 
@@ -150,7 +149,7 @@ class Services:
         """The `ActionRunner` handed to the Monitor.
 
         An injected factory wins. Otherwise, when the real `exemplar.monitor` is in use (no `monitor_cls`
-        override), build E's runner from the config: Slack / outbound webhook URLs and the chime flag, with chime
+        override), build the monitor's `ActionRunner` from the config: Slack / outbound webhook URLs and the chime flag, with chime
         playback going through the app's Ring client on the app's event loop (`chime_via_ring_client`).
         """
         if self._action_runner_factory is not None:

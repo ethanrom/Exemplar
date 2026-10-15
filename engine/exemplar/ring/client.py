@@ -1,6 +1,6 @@
 """Async Ring (Amazon Vision) API client. Server-side only: the API blocks browser CORS.
 
-Retry policy (PLAN.md 2.7):
+Retry policy:
 * 429 -> wait `Retry-After`, 500/503 and transport errors (`RemoteProtocolError: Server disconnected`
   was seen while polling) -> exponential backoff.
 * Media downloads additionally retry 416 MEDIA_NOT_FOUND / 425 RECORDING_NOT_READY for ~2 min.
@@ -88,7 +88,7 @@ class RingDevice:
 
 @dataclass(frozen=True)
 class RingEvent:
-    """A history event. `sub_type` is NOT in the API (P0-5); it is only set by `history_tagged`."""
+    """A history event. `sub_type` is NOT in the API; it is only set by `history_tagged`."""
 
     id: str
     event_type: str                 # motion | on_demand | ding
@@ -364,7 +364,7 @@ class RingClient:
 
     async def history_tagged(self, device_id: str, *, since_ms: int | None = None,
                              subtypes: Sequence[str] = MOTION_SUBTYPES) -> list[RingEvent]:
-        """All events with `sub_type` filled in for motion events (P0-5 workaround): one unfiltered
+        """All events with `sub_type` filled in for motion events (workaround): one unfiltered
         query plus one `motion.<sub>` query per subtype. The Playground ignores the filter, so only
         events whose own `event_type` is `motion` are tagged - `on_demand` stays untagged."""
         import dataclasses
@@ -455,7 +455,7 @@ class RingClient:
         return await self._media("image", device_id, body)
 
     async def wait_until_ready(self, event: RingEvent, grace_s: float = 5.0) -> None:
-        """PLAN 2.7: wait until clip end + 5 s before downloading (a no-op for Playground history,
+        """Wait until clip end + 5 s before downloading (a no-op for Playground history,
         which only lists an event after it has ended)."""
         if event.end_ms is None:
             return
@@ -475,7 +475,7 @@ class RingClient:
         await self.wait_until_ready(event, grace_s)
         return await self.download_snapshot(device_id or event.device_id or "", at_ms=event.start_ms, **opts)
 
-    # ---- chime (early access; 400 in the Playground, P0-4)
+    # ---- chime (early access; 400 in the Playground)
     async def chime_play(self, device_id: str, audio_ref: str) -> dict[str, Any]:
         if not self.chime_enabled:
             raise FeatureDisabledError("Chime playback is disabled (construct RingClient(chime_enabled=True))")

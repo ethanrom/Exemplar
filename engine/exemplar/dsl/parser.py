@@ -1,4 +1,4 @@
-"""DSL text -> AST (`parse`). Uses the frozen Lark grammar `contracts.dsl_ast.GRAMMAR` unchanged."""
+"""DSL text -> AST (`parse`). Uses the Lark grammar `contracts.dsl_ast.GRAMMAR` unchanged."""
 from __future__ import annotations
 
 from functools import lru_cache

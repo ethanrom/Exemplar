@@ -1,4 +1,4 @@
-"""Stream A - Ring integration. Server-side only (the Ring API blocks browser CORS).
+"""Ring integration. Server-side only (the Ring API blocks browser CORS).
 
     from exemplar.ring import AuthManager, RingClient
 

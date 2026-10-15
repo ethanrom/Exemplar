@@ -1,11 +1,11 @@
-"""Live capture (PLAN.md §2.7 "Live view"): JPEG frames from the browser's WHEP `<video>` -> `ring_live` clip.
+"""Live capture: JPEG frames from the browser's WHEP `<video>` -> `ring_live` clip.
 
 Frames are stored per session under `<data_dir>/live/<session_id>/<t_ms>.jpg`. `finish` assembles them into an
 mp4 (ffmpeg, timeline = `t_ms`), makes a `ring_live` event + clip, runs fast perception and the deployed
 monitors, exactly like a Ring event.
 
 `live_facts` MonitorEvents: a fast-perception call per few frames would lag the video by 10-30 s (Bedrock
-latency, PLAN spike 5) and cost real money, so facts are summarised at `finish`: right after the trace is
+latency) and cost real money, so facts are summarised at `finish`: right after the trace is
 stored (and before the monitors run) one `live_facts` event per trace frame that has facts is published, so
 the Live screen's ticker fills in order and the rule monitors light up after it.
 """

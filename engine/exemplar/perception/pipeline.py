@@ -27,7 +27,7 @@ MAX_SAMPLES = 3
 
 @dataclass
 class PerceptionReport:
-    """What happened while producing a trace (not part of the frozen `Trace` contract; cached beside it)."""
+    """What happened while producing a trace (not part of the `Trace` model; cached beside it)."""
     attempts: int = 0                                   # Converse calls made, over all samples
     dropped: dict[str, int] = field(default_factory=dict)   # harmless repairs, e.g. {"fact_unknown_entity": 2}
     retry_errors: list[str] = field(default_factory=list)   # validation errors that triggered a retry

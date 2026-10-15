@@ -1,4 +1,4 @@
-"""Cost meter: per-stage counts and token spend of the monitor (PLAN.md §2.6, api.yaml `CostSummary`).
+"""Cost meter: per-stage counts and token spend of the monitor (api.yaml `CostSummary`).
 
 Counting rules:
 

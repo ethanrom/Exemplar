@@ -1,4 +1,4 @@
-"""Trace: the symbolic output of perception for one clip (PLAN.md §2.1). Frozen contract.
+"""Trace: the symbolic output of perception for one clip.
 
 Perception runs once per clip; everything downstream (synthesis, backtest, active learning,
 calibration, monitor) reads only `Trace` objects.
@@ -6,7 +6,7 @@ calibration, monitor) reads only `Trace` objects.
 Time is **integer milliseconds from clip start** (`Frame.t_ms`). Evaluators must compute window
 offsets as `(t_ms[j] - t_ms[i]) / 1000` — one correctly-rounded division — never as a difference
 of float seconds. This keeps the Z3 encoder and the NumPy evaluator in agreement when a solved
-hole lands exactly on an observed gap (Phase 0 spike 6, see docs/DSL.md).
+hole lands exactly on an observed gap (see docs/DSL.md, "Time is integer milliseconds").
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from .ontology import (ABSENT_VALUE, CONF_VALUE, PREDICATES, VAR_TYPES, ZONES, Conf, EntityType,
                        SubType, kind_admits)
 
-MAX_FRAMES = 32          # escalation mode allows 32; fast mode samples ≤ 24 (§2.1)
+MAX_FRAMES = 32          # escalation mode allows 32; fast mode samples ≤ 24
 SCHEMA_VERSION = 1
 
 
@@ -45,7 +45,7 @@ class Frame(_Frozen):
 
 
 class TraceContext(_Frozen):
-    """Context signals (§2.1.6). Context atoms in rules read these; all optional."""
+    """Context signals. Context atoms in rules read these; all optional."""
     sub_type: Optional[SubType] = None
     event_kind: Optional[Literal["motion", "ding", "on_demand", "live", "upload"]] = None
     local_hour: Optional[int] = Field(default=None, ge=0, le=23)
@@ -95,7 +95,7 @@ class Trace(_Frozen):
         return next((e for e in self.entities if e.id == eid), None)
 
     def signal(self, pred: str, args: tuple[str, ...]) -> np.ndarray:
-        """s_pred(args)(t_i) for every frame (§2.1.5), as float64.
+        """s_pred(args)(t_i) for every frame, as float64.
 
         - asserted → CONF_VALUE[conf] (max over duplicate assertions in a frame); else ABSENT_VALUE.
         - `present(e)` is also implied by any other fact mentioning `e` in that frame
@@ -124,7 +124,7 @@ class Trace(_Frozen):
 
 
 def trace_errors(tr: Trace) -> list[str]:
-    """Schema + ontology errors (§2.1.7). Empty list means valid. Used for the perception retry message."""
+    """Schema + ontology errors. Empty list means valid. Used for the perception retry message."""
     errs: list[str] = []
     ids = [e.id for e in tr.entities]
     if len(ids) != len(set(ids)):

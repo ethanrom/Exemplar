@@ -35,7 +35,7 @@ class BadRequest(ApiError):
 
 
 class NotAvailable(ApiError):
-    """A feature owned by a stream that is not merged yet (synth/agent = D, active/calibrate/monitor = E)."""
+    """A feature whose module is not available (synth/agent, active/calibrate/monitor)."""
 
     def __init__(self, what: str) -> None:
         super().__init__(503, f"{what} not available yet", "NOT_AVAILABLE")
@@ -63,6 +63,6 @@ def ring_error(e: RingError) -> ApiError:
 
 
 def short_error(e: BaseException, limit: int = 300) -> str:
-    """One-line description for status columns and logs (never includes tokens or model ids: A and B scrub them)."""
+    """One-line description for status columns and logs (never includes tokens or model ids: the Ring and perception layers scrub them)."""
     msg = str(e) or type(e).__name__
     return (f"{type(e).__name__}: {msg}" if type(e).__name__ not in msg else msg)[:limit]

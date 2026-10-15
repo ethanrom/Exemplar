@@ -2,7 +2,7 @@
 
 The key hashes the *identity* of a perception request — clip id, window, sampling parameters, ROI, mode,
 samples, PROMPT_VERSION, model alias — and deliberately **not** the clip bytes: Ring re-renders the watermark
-(`Generated-At`) on every download, so the bytes of the same event differ run to run (phase0 P0-7).  A model
+(`Generated-At`) on every download, so the bytes of the same event differ run to run.  A model
 fingerprint (8 hex chars of sha256 of the Bedrock model id — never the id itself) is mixed in so that pointing
 `.env` at a different model invalidates old entries even if the alias string stays the same.
 

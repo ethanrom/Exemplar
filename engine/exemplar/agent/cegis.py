@@ -1,4 +1,4 @@
-"""Counterexample-guided synthesis loop (PLAN.md section 2.3): propose sketches, typecheck, solve, feed counterexamples back.
+"""Counterexample-guided synthesis loop: propose sketches, typecheck, solve, feed counterexamples back.
 
     for round in 1..max_rounds:
         proposer -> up to K sketches        (LLM agent, or a deterministic proposer)

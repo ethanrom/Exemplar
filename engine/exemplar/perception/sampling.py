@@ -1,4 +1,4 @@
-"""Frame sampling (PLAN.md §2.1.1).
+"""Frame sampling.
 
 ffmpeg comes from `imageio-ffmpeg` (no system install, no ffprobe).  Frames are sampled uniformly (the
 midpoints of N equal sub-windows, so the first/last frame never sit on a possibly-black boundary frame)
@@ -17,8 +17,8 @@ from typing import Optional
 
 import imageio_ffmpeg
 
-MAX_FRAMES_FAST = 24         # PLAN.md §2.1.1
-MAX_FRAMES_STRONG = 32       # PLAN.md §2.1.8 / contracts.trace.MAX_FRAMES
+MAX_FRAMES_FAST = 24
+MAX_FRAMES_STRONG = 32       # = contracts.trace.MAX_FRAMES
 DEFAULT_WIDTH = 640
 DEFAULT_MIN_GAP_S = 0.5
 

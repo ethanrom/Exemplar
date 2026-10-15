@@ -1,4 +1,4 @@
-"""Stage 0 (free): drop rules that cannot match, from the Ring sub_type alone (PLAN.md §2.6).
+"""Stage 0 (free): drop rules that cannot match, from the Ring sub_type alone.
 
 Ring's smart-alert sub_type says what the camera classified the motion as. A `vehicle` event has no person
 and an `other_motion` event has neither person nor vehicle; `human`, `package_delivery`, `motion`, `ding`,

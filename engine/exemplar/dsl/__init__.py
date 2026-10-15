@@ -1,4 +1,4 @@
-"""Exemplar DSL: parser, typechecker, printers and evaluators (PLAN.md §2.2, docs/DSL.md)."""
+"""Exemplar DSL: parser, typechecker, printers and evaluators (see docs/DSL.md)."""
 from .boolean import evaluate_bool, truth_series
 from .english import to_english
 from .errors import DSLError, DSLSyntaxError, UnboundHoleError

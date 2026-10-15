@@ -1,4 +1,4 @@
-"""Split-conformal false-alarm calibration and the recall confidence interval (PLAN.md §2.5).
+"""Split-conformal false-alarm calibration and the recall confidence interval.
 
 Setting. A rule scores a clip with its STL robustness (`exemplar.dsl.robustness`, in [-C, C], C = 0.5) and
 fires when ``score > tau``. Take the scores of ``n`` negatives that were sampled uniformly from history
@@ -108,7 +108,7 @@ def escalation_delta(neg_scores: Sequence[float]) -> float:
 
 
 def conformal_threshold(neg_scores: Sequence[float], alpha: float) -> Calibration:
-    """tau_alpha from the scores of random negatives (PLAN §2.5). Fire iff ``score > tau``.
+    """tau_alpha from the scores of random negatives. Fire iff ``score > tau``.
 
     Returns a `Calibration` with ``n_random_pos = 0`` and no recall; `calibrate` fills those in.
     """

@@ -1,6 +1,6 @@
 """Turn the raw `emit_trace` tool input into validated `Trace` pieces.
 
-Two kinds of problems, handled differently (PLAN.md §2.1.7):
+Two kinds of problems, handled differently:
 
 * **Harmless** — repaired silently and *counted* (`Normalized.dropped`): ids/zones/labels/types in the wrong
   case, `medium` for `med`, duplicate facts or entities, frames the model skipped or numbered out of range,

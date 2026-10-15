@@ -1,4 +1,4 @@
-"""Value types of the online monitor (docs/streams/phase2-interfaces.md, E section)."""
+"""Value types of the online monitor."""
 from __future__ import annotations
 
 from dataclasses import dataclass

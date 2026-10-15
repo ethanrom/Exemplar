@@ -1,6 +1,6 @@
 """Rule lifecycle: calibration, backtest, deploy.
 
-Calibration uses ONLY `random`-provenance labels (PLAN.md §2.5, docs/DSL.md): actively chosen or hand-picked
+Calibration uses ONLY `random`-provenance labels (docs/DSL.md): actively chosen or hand-picked
 clips are not exchangeable with deployment events, so including them would void the conformal guarantee.
 """
 from __future__ import annotations
@@ -40,7 +40,7 @@ def calibration_set(state: "AppState", concept_id: str) -> list[tuple[Trace, Lab
 
 
 def calibrate_rule(state: "AppState", row: RuleRow) -> dict[str, Any]:
-    """Run E's `calibrate` on the random labels, store tau/delta/calibration_json, refresh a deployed monitor."""
+    """Run `calibrate` on the random labels, store tau/delta/calibration_json, refresh a deployed monitor."""
     calibrate = state.services.calibrate
     concept = state.store.concepts.get(row.concept_id)
     assert concept is not None
@@ -56,7 +56,7 @@ def calibrate_rule(state: "AppState", row: RuleRow) -> dict[str, Any]:
 
 
 def backtest(state: "AppState", row: RuleRow) -> dict[str, Any]:
-    """Score every traced clip with C's `robustness`; calibration from random labels; witnesses for matches."""
+    """Score every traced clip with the DSL's `robustness`; calibration from random labels; witnesses for matches."""
     cal = calibrate_rule(state, row)
     tau = float(cal["tau"])
     rule = Rule.model_validate_json(row.ast_json)

@@ -3,8 +3,8 @@ info:
   title: Exemplar engine API
   version: "1.0.0"
   description: |
-    Engine REST + SSE consumed by apps/web (PLAN.md §1, §2.8). Frozen contract — changes go through
-    the integrator. The engine listens on http://127.0.0.1:8787 by default; apps/web proxies
+    Engine REST + SSE consumed by apps/web. This is the stable interface between the two; changes
+    must update the web client and the contract tests together. The engine listens on http://127.0.0.1:8787 by default; apps/web proxies
     /api/engine/* to it server-side (the browser never talks to Ring or the engine directly).
 
     Model schemas marked `x-pydantic` mirror exemplar.contracts.* and are generated into
@@ -343,7 +343,7 @@ paths:
     get:
       tags: [teach]
       operationId: getQuestion
-      description: The unlabelled clip the candidate rules disagree on most (§2.4). 204 when nothing is informative.
+      description: The unlabelled clip the candidate rules disagree on most. 204 when nothing is informative.
       parameters: [{ $ref: "#/components/parameters/ConceptId" }]
       responses:
         "200":
@@ -733,7 +733,7 @@ components:
 
     Witness:
       type: object
-      description: Why a rule fired — bindings and the times chosen for each temporal operator (§2.6).
+      description: Why a rule fired — bindings and the times chosen for each temporal operator.
       required: [rule_id, clip_id, score, bindings, spans]
       properties:
         rule_id: { type: string }
