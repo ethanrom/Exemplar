@@ -1,5 +1,7 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 import { Shell } from './(exemplar)/_components/Shell'
 
 export const metadata: Metadata = {
@@ -7,10 +9,12 @@ export const metadata: Metadata = {
   description: 'Teach your Ring camera new detectors by example: readable rules, proven before they go live.',
 }
 
+export const viewport: Viewport = { themeColor: '#0A0B0D', colorScheme: 'dark' }
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-ex-bg text-ex-ink">
+    <html lang="en" className={`dark ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className="min-h-screen bg-ex-bg font-sans text-ex-ink">
         <Shell>{children}</Shell>
       </body>
     </html>
