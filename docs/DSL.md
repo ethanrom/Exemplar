@@ -232,3 +232,10 @@ Plus example tests: the three concept rules above on all 12 fixtures, hand-compu
 
 ## Performance
 `tests/dsl/test_dsl_perf.py` (T = 24 frames, 3 persons × 2 packages = 6 bindings, a 4-node sketch with 3 holes and a context atom): ≈ 0.05–0.10 ms per `(rule, trace)` through `CompiledRule.score` on a `PreparedTrace` (also with every window distinct), ≈ 0.08 ms through `evaluate(sketch, trace, holes)`, ≈ 0.6 ms for a first call on a fresh `Trace` (includes `prepare`), `evaluate_bool` ≈ 0.6 ms, `witness` ≈ 0.2 ms. A 200-point × 40-clip sweep is therefore about 0.5 s. The evaluator batches all bindings into `(B, T, T)` NumPy arrays, caches window masks and atom matrices per prepared trace, and builds the signal index in one pass over the facts.
+
+## Perception conventions the evaluators rely on (integrator, from stream B)
+- `near(a, b)` is symmetric in traces: perception adds the mirrored fact, so rules may use either argument order.
+- `present(e)` may be omitted by perception whenever another fact mentions `e` (`Trace.signal` implies it).
+- Sampled frames sit at the midpoints of equal sub-windows, so the first frame is at `t > 0` and the last is before the clip end. `holds_for` and window edges are evaluated on these sampled frames only.
+- `context.sub_type` must be filled at ingest (`human`, `vehicle`, `package_delivery`, `other_motion`, or the extras `motion`, `ding`, `on_demand`). `subtype = S` is strict equality, and a missing value makes the atom false.
+- `exists` ranges only over entities that appear in the trace, so "nobody is around" isn't expressible as such. Write the positive form instead, e.g. `exists k: Package: holds_for >= 20 in_zone(k, steps)`.

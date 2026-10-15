@@ -332,7 +332,7 @@ Do these before branching and record the results in the friction log.
 | 8 | Strands agent with one tool on `BedrockModel` + `.env` ARN | **Yes.** strands-agents 1.61, both models call the tool, ~4 s, ~1.1–1.6k tokens. Pass the region via `boto3.Session` (not `region_name` as well). Don't set `temperature`. The fast model invented `rings_doorbell`, so the sketch prompt must list the ontology and the typechecker must reject unknown predicates. |
 
 ### Demo design (decided after the spikes)
-- **Live on the Playground:** two rules taught from Playground events. "A package is on the steps and nobody comes for it" fires on the package event. "A vehicle moves through the lot" fires on the vehicle event. The bird event fires neither.
+- **Live on the Playground:** two rules taught from Playground events. "A package has been sitting on the steps for over N s" fires on the package event. "A vehicle enters the lot or driveway" fires on the vehicle event. The bird event fires neither. (`exists` only ranges over entities in the clip, so "nobody around" can't be written as such; the package-only rule expresses it, because a person would add a `picks_up`.)
 - **Teach story, the package theft:** windows cut from the full source clip ("Thief stealing our package" by frollard, CC BY 4.0, youtube.com/watch?v=TfTFu8lGrwk; a person arrives ~12 s in, takes the box at ~18–21 s and leaves) through the engine's `upload` source. Theft windows are positives and box-only windows are natural hard negatives, which drives the "should this one count?" question.
 - **Quantitative:** the MEVA chart (§3).
 
@@ -341,9 +341,9 @@ Do these before branching and record the results in the friction log.
 - **End-to-end on the Playground:**
   1. Paste the token, and the device list appears.
   2. Trigger the simulated package and vehicle events. Both arrive as `on_demand` events, and their traces appear.
-  3. Teach "package left on the steps, nobody around" from the package event (the vehicle and bird events are negatives), and get a rule.
+  3. Teach "a package has been sitting on the steps for over N s" from the package event (the vehicle and bird events are negatives), and get a rule.
   4. Answer one active-learning question, then label random clips for calibration.
-  5. Deploy. Teach and deploy "vehicle moving through the lot" the same way.
+  5. Deploy. Teach and deploy "a vehicle enters the lot or driveway" the same way.
   6. Trigger the package event again: the package rule fires with a witness, and the vehicle rule is dropped at stage 1.
   7. Trigger the vehicle event: the vehicle rule fires, and the package rule is dropped at stage 1. Stage 0 can't prune, because Playground events carry no `sub_type`. Stage-0 pruning is shown with the signed webhook fixtures through `scripts/send_signed_webhook`.
   8. Upload the frollard clip, teach "package theft" from its windows, and show the backtest and the question card.

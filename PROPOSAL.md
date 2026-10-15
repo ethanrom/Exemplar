@@ -94,7 +94,7 @@ We use a broad slice of the Ring API, because Tech Implementation is scored on h
 
 ## Evidence we'll show
 - **Live, on the Ring Playground:**
-  1. Teach "a package is on the steps and nobody comes for it" from the simulated package event, then deploy it next to a "vehicle moving through the lot" rule.
+  1. Teach "a package has been sitting on the steps for a while" from the simulated package event, then deploy it next to a "vehicle enters the lot" rule.
   2. A simulated package event fires only the package rule, with its explanation. A vehicle event fires only the vehicle rule. The bird event fires neither.
   3. **The teach story:** package theft, taught from the full CC BY source footage of the Playground's package clip (the Playground loops only its first 6 s, with no thief). The question card asks about a box-only window.
 - **Quantitative, on MEVA (CC BY 4.0, real outdoor surveillance, annotated activities):**

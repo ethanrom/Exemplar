@@ -62,7 +62,7 @@ class PerceptionMeta(_Frozen):
     tokens_in: int = 0
     tokens_out: int = 0
     latency_ms: int = 0
-    cache_key: Optional[str] = None    # content hash of (clip bytes, sampling params, prompt version, mode)
+    cache_key: Optional[str] = None    # hash of clip identity + window + sampling params + prompt version + mode (never clip bytes)
 
 
 class Trace(_Frozen):
