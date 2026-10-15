@@ -120,6 +120,7 @@ function CalibrationPanel({
       await post(`/concepts/${concept.id}/labels/bulk-negative`, { clip_ids: rest, provenance: 'random' })
       setAnswers((a) => ({ ...a, ...Object.fromEntries(rest.map((id) => [id, 'neg' as const])) }))
       onChanged()
+      headingRef.current?.focus()
     } catch (e) {
       setError(errorMessage(e))
     } finally {

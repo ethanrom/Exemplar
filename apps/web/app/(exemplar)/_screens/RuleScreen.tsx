@@ -76,7 +76,7 @@ function BacktestTable({
     <section aria-labelledby="bt-h" className="card">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="bt-h" className="card-title">Backtest on your history</h2>
+          <h2 id="bt-h" tabIndex={-1} className="card-title focus:outline-none">Backtest on your history</h2>
           <p className="mt-1 text-sm text-ex-ink2">Every traced clip scored with this rule. No model calls: traces are cached.</p>
         </div>
         <div>
@@ -179,7 +179,7 @@ function BacktestTable({
       {rows.length === 0 && <div className="mt-3"><Empty title="No clips in this view" /></div>}
       {rows.length > limit && (
         <div className="mt-3 text-center">
-          <button type="button" className="btn" onClick={() => setLimit(limit + 40)}>Show {Math.min(40, rows.length - limit)} more ({rows.length - limit} remaining)</button>
+          <button type="button" className="btn" onClick={() => { setLimit(limit + 40); requestAnimationFrame(() => document.getElementById('bt-h')?.focus()) }}>Show {Math.min(40, rows.length - limit)} more ({rows.length - limit} remaining)</button>
         </div>
       )}
       <p className="mt-2 text-xs text-ex-ink3">
@@ -207,10 +207,12 @@ function DeployCard({
   const actions = new Set(rule.actions ?? [])
 
   async function setStatus(next: 'deployed' | 'selected') {
+    if (busy) return
     setBusy(true); setError(null)
     try { onChanged(await patch<RuleSummary>(`/rules/${rule.id}`, { status: next })) } catch (e) { setError(errorMessage(e)) } finally { setBusy(false) }
   }
   async function toggleAction(id: RuleAction) {
+    if (busy) return
     const next = new Set(actions)
     if (next.has(id)) next.delete(id); else next.add(id)
     setBusy(true); setError(null)
@@ -226,7 +228,7 @@ function DeployCard({
           role="switch"
           aria-checked={deployed}
           aria-labelledby="dep-label"
-          disabled={busy}
+          aria-disabled={busy || undefined}
           onClick={() => setStatus(deployed ? 'selected' : 'deployed')}
           className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-2 transition-colors ${deployed ? 'border-green-300 bg-green-500' : 'border-ex-ink3 bg-ex-raised'}`}
         >
@@ -251,7 +253,7 @@ function DeployCard({
         <div className="mt-2 grid gap-2">
           {ACTIONS.map((a) => (
             <label key={a.id} className="flex cursor-pointer items-start gap-2 text-sm">
-              <input type="checkbox" className="mt-1 h-4 w-4 accent-cyan-400" checked={actions.has(a.id)} disabled={busy} onChange={() => toggleAction(a.id)} />
+              <input type="checkbox" className="mt-1 h-4 w-4 accent-cyan-400" checked={actions.has(a.id)} aria-disabled={busy || undefined} onChange={() => toggleAction(a.id)} />
               <span><span className="text-ex-ink">{a.label}</span><span className="block text-xs text-ex-ink3">{a.hint}</span></span>
             </label>
           ))}

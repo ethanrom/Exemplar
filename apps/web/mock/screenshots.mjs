@@ -59,15 +59,30 @@ const paste = async (value) => {
 await step('connect: expiring', async () => { await paste('short-lived-demo-token'); await shot('02a-connect-expiring') })
 await step('connect: ok', async () => { await paste('ava.v1.demo-token-0123456789'); await shot('02b-connect-ok') })
 
-// ---- rule, before any calibration labels exist for the theft concept (no guarantee yet)
-await go('/rule')
-await step('rule: theft, no guarantee', async () => { await pickConcept('Package theft'); await shot('05a-rule-no-guarantee') })
-
 // ---- library
 await go('/library')
 await page.getByRole('button', { name: /View details/ }).first().waitFor()
 await page.waitForTimeout(700)
 await shot('03a-library', { full: false })
+// ---- teach
+await go('/teach')
+await step('teach: select theft', async () => { await pickConcept('Package theft') })
+await shot('04a-teach-empty', { full: false })
+await step('teach: run', async () => {
+  await page.getByRole('button', { name: /^Teach$/ }).click()
+  await page.waitForTimeout(3000)
+  await shot('04b-teach-running', { full: false })
+  await page.getByText('Candidate rules ready').waitFor({ timeout: 15000 })
+  await page.getByText('Should this one count?').waitFor({ timeout: 15000 })
+  await page.waitForTimeout(1500)
+  await shot('04c-teach-done')
+})
+
+// ---- rule for the freshly taught theft concept: only 4 random negatives, so no guarantee yet
+await go('/rule')
+await step('rule: theft, no guarantee', async () => { await pickConcept('Package theft'); await shot('05a-rule-no-guarantee') })
+
+await go('/library')
 await step('library: calibration flow', async () => {
   await pickConcept('Package theft')
   await page.getByRole('button', { name: /Label 10 random/ }).click()
@@ -94,19 +109,9 @@ await step('library: upload dialog', async () => {
   await page.keyboard.press('Escape')
 })
 
-// ---- teach
-await go('/teach')
-await step('teach: select theft', async () => { await pickConcept('Package theft') })
-await shot('04a-teach-empty', { full: false })
-await step('teach: run', async () => {
-  await page.getByRole('button', { name: /^Teach$/ }).click()
-  await page.waitForTimeout(3000)
-  await shot('04b-teach-running', { full: false })
-  await page.getByText('Candidate rules ready').waitFor({ timeout: 15000 })
-  await page.getByText('Should this one count?').waitFor({ timeout: 15000 })
-  await page.waitForTimeout(1500)
-  await shot('04c-teach-done')
-})
+// ---- same rule after the calibration labels: the guarantee appears
+await go('/rule')
+await step('rule: theft, with guarantee', async () => { await pickConcept('Package theft'); await shot('05c-rule-theft-guarantee') })
 
 // ---- rule with guarantee
 await go('/rule')

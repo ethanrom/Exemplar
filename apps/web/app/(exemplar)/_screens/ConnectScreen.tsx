@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useApp } from '../_lib/app'
 import { ApiError, errorMessage, get, post, put } from '../_lib/api'
 import { fmtCountdown, fmtDateTime } from '../_lib/format'
@@ -22,6 +22,7 @@ function TokenCard() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const playground = auth?.mode === 'playground' && auth.expires_at_ms != null
   const left = playground ? auth!.expires_at_ms! - now : null
@@ -53,6 +54,7 @@ function TokenCard() {
       setToken('')
       setSaved(true)
       refreshAuth()
+      inputRef.current?.focus()
     } catch (err) {
       setError(errorMessage(err))
     } finally {
@@ -127,6 +129,7 @@ function TokenCard() {
         <div className="flex gap-2">
           <input
             id="token-input"
+            ref={inputRef}
             className="field font-mono"
             type={show ? 'text' : 'password'}
             autoComplete="off"

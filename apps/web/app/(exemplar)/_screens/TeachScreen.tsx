@@ -155,6 +155,8 @@ export default function TeachScreen() {
   const [runError, setRunError] = useState<string | null>(null)
   const [streamPath, setStreamPath] = useState<string | null>(null)
   const tlRef = useRef<HTMLDivElement>(null)
+  const tlHeadRef = useRef<HTMLHeadingElement>(null)
+  const answerRef = useRef<HTMLDivElement>(null)
 
   const rules = useApi<RuleSummary[]>(conceptId ? `/concepts/${conceptId}/rules` : null)
   const question = useApi<Question>(conceptId ? `/concepts/${conceptId}/question` : null)
@@ -227,6 +229,7 @@ export default function TeachScreen() {
       setRun(r)
       setRunning(true)
       setStreamPath(`/runs/${r.id}/stream`)
+      requestAnimationFrame(() => tlHeadRef.current?.focus()) // the Teach button disables itself while the run is going
     } catch (e) {
       setRunError(e instanceof ApiError && e.status === 409 ? 'A run is already in progress for this concept.' : errorMessage(e))
     }
@@ -241,6 +244,7 @@ export default function TeachScreen() {
       setAnswered(v === 'pos' ? 'Counted as a positive example.' : 'Counted as a negative example.')
       setNotice(`Answer saved: ${v === 'pos' ? 'yes' : 'no'}.`)
       await Promise.all([question.reload(), refreshConcepts(), loadEvents()])
+      requestAnimationFrame(() => answerRef.current?.focus())
     } catch (e) {
       setRunError(errorMessage(e))
     } finally {
@@ -325,7 +329,7 @@ export default function TeachScreen() {
           {/* -------------------------------------------------------------- 2. timeline */}
           <section className="card" aria-labelledby="tl-h">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 id="tl-h" className="card-title">2. What the agent is doing</h2>
+              <h2 id="tl-h" ref={tlHeadRef} tabIndex={-1} className="card-title focus:outline-none">2. What the agent is doing</h2>
               {running ? <Spinner label="Running" /> : run ? <Badge tone={runError ? 'neg' : 'pos'}>{runError ? 'Failed' : 'Finished'}</Badge> : null}
             </div>
             {runError && <div className="mt-3"><Alert tone="neg" title="Teaching did not finish">{runError}</Alert></div>}
@@ -347,10 +351,12 @@ export default function TeachScreen() {
           {haveRules && (
             <section aria-label="Question from Exemplar" className="grid gap-3">
               {answered && (
-                <Alert tone="pos" title="Answer saved">
-                  {answered} Teach again to fold it into the candidates.
-                  <div className="mt-2"><button type="button" className="btn" onClick={startTeach} disabled={running}><Icon name="bolt" /> Teach again</button></div>
-                </Alert>
+                <div ref={answerRef} tabIndex={-1} className="focus:outline-none">
+                  <Alert tone="pos" title="Answer saved">
+                    {answered} Teach again to fold it into the candidates.
+                    <div className="mt-2"><button type="button" className="btn" onClick={startTeach} disabled={running}><Icon name="bolt" /> Teach again</button></div>
+                  </Alert>
+                </div>
               )}
               {q ? (
                 <QuestionCard
