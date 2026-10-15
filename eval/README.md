@@ -8,6 +8,7 @@ event (zero-shot)**, on the same frames, with a **calibrated false-alarm guarant
 |---|---|
 | `precompute.py` | fast perception (B) of every manifest clip and the 18 demo windows; cached, resumable, budget-guarded |
 | `baselines/zero_shot.py` | zero-shot baseline: strong model, same 16 frames, concept description, `{"match", "confidence"}` by tool use |
+| `trace_probe.py` | `python -m eval.trace_probe`: AUC of cheap trace features per concept (is there any signal for a rule to use?) |
 | `run.py` | `python -m eval.run`: the Exemplar trials (D synthesis, E active learning and calibration, C robustness) |
 | `harness/experiment.py` | the trial protocol with leakage assertions (all D and E calls go through an injected `Services`) |
 | `harness/metrics.py` | conformal threshold, precision / recall / F1, false-alarm rate, Clopper-Pearson, escalation band, cost |
@@ -47,7 +48,9 @@ Per concept (4: `vehicle_stop`, `person_exits_vehicle`, `door_crossing`, `vehicl
 
 **Zero-shot baseline** (`method = zero_shot_vlm`, k = q = seed = 0, deterministic): the strong model sees the same 16 frames
 (`sample_window(path, 16)`, 640 px, same timestamps and captions as perception) and the concept description, and answers by tool
-use. `confidence` is its probability that the event occurs. Two operating points are reported: the **calibrated** one (tau from the
+use. `confidence` is asked to be its probability that the event occurs; in 9.5 % of the calls the model instead gave its confidence in a
+`match=false` answer, so the score is `confidence` when it agrees with `match` and `1 - confidence` otherwise (`match` fixes the direction;
+the raw answers stay cached unchanged). Two operating points are reported: the **calibrated** one (tau from the
 calib negatives' confidences at the same alpha, so both methods get the same false-alarm target; these are the main rows) and the
 **native** one (`match == true`, fields `native_*`), which has no guarantee. It is run on the calib and test windows only.
 
@@ -109,6 +112,11 @@ uv run --project engine pytest eval/tests
 * MEVA people are small; G336 / G339 / G436 are far-field views where perception is weak (`eval/data/README.md`).
 * Confidence scores of an LLM are coarse (many ties), which makes its conformal threshold conservative.
 * The active-learning pool is the concept's own train windows (about 25 % positives), not a mixed event history.
+* `--proposer offline` is D's template library, which builds rules from clip-level `attr` labels and so tends to memorise the examples; it exists to
+  make the 40-trial grid free and reproducible, not to be the best Exemplar. `--proposer llm` is the strong-model sketch proposer: about 0.24 USD per
+  synthesis run with the current agent loop (q active rounds mean q + 1 runs per trial), so budget it for a single (k, q) cell.
+* Run `python -m eval.trace_probe` first: if no cheap trace feature separates a concept's positives from its negatives (AUC near 0.5, as for
+  `vehicle_stop`), no rule over the ontology-v1 facts can, and that is a perception / ontology limit rather than a synthesis result.
 
 ## Attribution
 
