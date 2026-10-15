@@ -139,8 +139,8 @@ def perceive(clip_path: str | Path, *, clip_id: str, source: Source, context: Tr
       the lookup (and overwrites the entry).  `perception_failed` traces are not cached.
     * `client`: a bedrock-runtime client or any object with `.converse(**kw)`; default built from `.env`.
     * Model-quality problems return `Trace(status="perception_failed", error=...)` after one retry; they never
-      raise.  Bad arguments raise `ValueError`; unreadable clips raise `SamplingError`; AWS/network failures
-      propagate as botocore exceptions.
+      raise.  Bad arguments raise `ValueError`; unreadable clips raise `SamplingError`; AWS/network failures raise
+      `PerceptionBackendError` (model id scrubbed from the message).
     * `trace.perception` carries mode, model alias, n_frames, samples, tokens, wall-clock latency (sampling +
       model calls) and the cache key.  Nothing is written to SQLite or any cost ledger; callers record usage
       (and should skip recording when `perceive_detailed(...).cached` is True).

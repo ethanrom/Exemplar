@@ -152,6 +152,20 @@ def test_infrastructure_errors_propagate(video):
         run(video, FakeBedrock(RuntimeError("throttled")))
 
 
+def test_aws_errors_become_backend_errors_without_the_model_id(video):
+    from botocore.exceptions import ClientError, ConnectionClosedError
+
+    from exemplar.perception import PerceptionBackendError
+    err = ClientError({"Error": {"Code": "ThrottlingException", "Message": "slow down fake-fast-model"}}, "Converse")
+    with pytest.raises(PerceptionBackendError) as ei:
+        run(video, FakeBedrock(err))
+    assert ei.value.code == "ThrottlingException" and "fake-fast-model" not in str(ei.value)
+    conn = ConnectionClosedError(endpoint_url="https://bedrock-runtime.x.amazonaws.com/model/fake-fast-model/converse")
+    with pytest.raises(PerceptionBackendError) as ei:
+        run(video, FakeBedrock(conn))
+    assert "fake-fast-model" not in str(ei.value) and "<model>" in str(ei.value)
+
+
 # ------------------------------------------------------------------ self-consistency
 def test_two_samples_are_merged(video):
     a = theft_payload(N)

@@ -3,7 +3,7 @@
 Model-quality problems never raise: after one retry (the validation errors go back to the model as a
 `toolResult` with status "error", or as plain text when it never called the tool) the result is
 `Trace(status="perception_failed", error=...)`.  Infrastructure errors (credentials, throttling that outlasts
-botocore's retries, network) propagate as the underlying botocore exceptions.
+botocore's retries, network) raise `PerceptionBackendError`.
 
 `client` is anything with a boto3-style `converse(**kwargs) -> dict` (a `bedrock-runtime` client, or a fake).
 """
@@ -15,6 +15,8 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Optional, Sequence
 
+from botocore.exceptions import BotoCoreError, ClientError
+
 from exemplar.contracts.trace import PerceptionMeta, Trace, TraceContext
 
 from . import prompt
@@ -24,6 +26,16 @@ from .sampling import SampledFrame
 log = logging.getLogger("exemplar.perception")
 
 MAX_ATTEMPTS = 2           # first try + ONE retry (PLAN.md §2.1.7)
+
+
+class PerceptionBackendError(RuntimeError):
+    """The Bedrock call itself failed (credentials, throttling that outlasted botocore's retries, connection
+    drops, rejected parameters) — not a model-quality problem.  The model id is scrubbed from the message
+    (botocore puts it in the endpoint URL).  `code` is the AWS error code when there is one."""
+
+    def __init__(self, message: str, code: Optional[str] = None):
+        super().__init__(message)
+        self.code = code
 
 
 @dataclass
@@ -72,8 +84,12 @@ def run_sample(client: Any, *, model_id: str, strong: bool, model_alias: Optiona
     errors: list[str] = []
     trace: Optional[Trace] = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
-        resp = client.converse(modelId=model_id, system=system, messages=messages, toolConfig=tool_cfg,
-                               inferenceConfig={"maxTokens": max_tokens}, additionalModelRequestFields=extra)
+        try:
+            resp = client.converse(modelId=model_id, system=system, messages=messages, toolConfig=tool_cfg,
+                                   inferenceConfig={"maxTokens": max_tokens}, additionalModelRequestFields=extra)
+        except (BotoCoreError, ClientError) as e:
+            code = e.response.get("Error", {}).get("Code") if isinstance(e, ClientError) else type(e).__name__
+            raise PerceptionBackendError(f"{code}: {str(e).replace(model_id, '<model>')}"[:500], code) from None
         res.attempts = attempt
         usage = resp.get("usage") or {}
         res.tokens_in += int(usage.get("inputTokens", 0))
