@@ -1,188 +1,55 @@
-'use client'
+import Link from 'next/link'
 
-import { useState, useEffect, useRef } from 'react'
-import { useVideoProcessing } from '@/lib/video-processors/useVideoProcessing'
-import '@/lib/video-processors' // Register built-in processors
+const STEPS = [
+  { href: '/connect', n: 1, title: 'Connect', text: 'Paste a Ring Developer Playground token or link a Ring account. Devices and history appear.' },
+  { href: '/library', n: 2, title: 'Library', text: 'Browse your events, add footage, and mark a few clips as + or − for the thing you care about.' },
+  { href: '/teach', n: 3, title: 'Teach', text: 'Watch the agent sketch rules and a solver fit their numbers. Answer the one question it asks.' },
+  { href: '/rule', n: 4, title: 'Rule', text: 'Backtest on your history with a false-alarm guarantee, see why each match fired, then deploy.' },
+  { href: '/live', n: 5, title: 'Live', text: 'Deployed rules watch new events. Every alert comes with its explanation and its cost.' },
+  { href: '/eval', n: 6, title: 'Eval', text: 'The same method on MEVA surveillance footage, against prompting a vision model per event.' },
+]
 
-import { Header } from './components/Header'
-import { EventPanel } from './components/EventPanel'
-import { ProcessorPanel } from './components/ProcessorPanel'
-import { useWebRTCStream } from './hooks/useWebRTCStream'
-import { useEventStream } from './hooks/useEventStream'
-import { useCanvasOverlay } from './hooks/useCanvasOverlay'
-
-type RightPanelTab = 'events' | 'processors'
-type AuthMode = 'access_token' | 'refresh_token' | null
-
-export default function Dashboard() {
-  const [rightPanelTab, setRightPanelTab] = useState<RightPanelTab>('events')
-  const [webhookUrl, setWebhookUrl] = useState('')
-  const [deviceId, setDeviceId] = useState<string | undefined>(undefined)
-  const [deviceError, setDeviceError] = useState<string | null>(null)
-  const [authMode, setAuthMode] = useState<AuthMode>(null)
-  const [authError, setAuthError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  // Fetch auth mode on mount
-  useEffect(() => {
-    fetch('/api/ring/config')
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          setAuthError(data.error)
-        } else {
-          setAuthMode(data.mode)
-        }
-      })
-      .catch(err => setAuthError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
-
-  // Auto-discover device on mount (after auth mode is confirmed)
-  useEffect(() => {
-    if (!authMode) return
-    fetch('/api/ring/devices')
-      .then(res => res.json())
-      .then(data => {
-        if (data.devices && data.devices.length > 0) {
-          setDeviceId(data.devices[0].id)
-        } else {
-          setDeviceError(data.error || 'No devices found')
-        }
-      })
-      .catch(err => setDeviceError(err.message))
-  }, [authMode])
-
-  // Custom hooks
-  const { streamActive, streamError, startStream, stopStream } = useWebRTCStream({ videoRef, deviceId })
-  const { events, connected } = useEventStream({})
-  const { processors, results, toggleProcessor, enabledCount } = useVideoProcessing({
-    video: videoRef.current,
-    canvas: canvasRef.current,
-    enabled: streamActive,
-    fps: 10,
-  })
-
-  // Canvas overlay rendering
-  useCanvasOverlay({ videoRef, canvasRef, events, results })
-
-  // Set webhook URL on mount
-  useEffect(() => {
-    setWebhookUrl(`${window.location.origin}/api/webhook`)
-  }, [])
-
-  const isSimpleMode = authMode === 'access_token'
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-dash-bg">
-        <p className="text-slate-400">Loading...</p>
-      </div>
-    )
-  }
-
-  // Auth error state
-  if (authError) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-dash-bg">
-        <div className="text-center max-w-md">
-          <p className="text-red-400 text-lg font-medium mb-2">Configuration Error</p>
-          <p className="text-slate-400">{authError}</p>
-        </div>
-      </div>
-    )
-  }
-
+export default function Home() {
   return (
-    <div className="h-screen flex flex-col">
-      <Header
-        connected={isSimpleMode ? false : connected}
-        enabledCount={isSimpleMode ? 0 : enabledCount}
-        simpleMode={isSimpleMode}
-      />
-
-      {/* Main content */}
-      <div className="flex-1 flex min-h-0">
-        {/* Video section — full width in simple mode, 60% in full mode */}
-        <div className={`${isSimpleMode ? 'w-full' : 'w-[60%]'} p-4 flex flex-col`}>
-          <div className="relative flex-1 bg-black rounded-xl overflow-hidden">
-            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-contain" />
-            <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-
-            {!streamActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                <button
-                  onClick={startStream}
-                  disabled={!deviceId}
-                  className={`px-6 py-3 font-bold rounded-lg transition ${deviceId ? 'bg-dash-cyan text-black hover:bg-cyan-300' : 'bg-slate-600 text-slate-400 cursor-not-allowed'}`}
-                >
-                  {deviceId ? '▶ Start Live Stream' : '⏳ Discovering device...'}
-                </button>
-                {streamError && (
-                  <p className="text-red-400 text-sm">{streamError}</p>
-                )}
-                {deviceError && (
-                  <p className="text-red-400 text-sm">{deviceError}</p>
-                )}
-              </div>
-            )}
-
-            {streamActive && (
-              <button
-                onClick={stopStream}
-                className="absolute top-3 right-3 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-500"
-              >
-                ■ Stop
-              </button>
-            )}
-          </div>
-
-          {/* Webhook URL helper — only in full mode */}
-          {!isSimpleMode && (
-            <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
-              <span>Webhook URL:</span>
-              <code className="bg-dash-card px-2 py-1 rounded text-slate-300 flex-1 truncate">{webhookUrl}</code>
-              <button
-                onClick={() => navigator.clipboard.writeText(webhookUrl)}
-                className="px-2 py-1 bg-dash-card rounded hover:bg-slate-600 text-slate-400"
-              >
-                Copy
-              </button>
-            </div>
-          )}
+    <div>
+      <section className="rounded-2xl border border-ex-line bg-gradient-to-br from-ex-panel to-ex-bg px-6 py-10 sm:px-10">
+        <p className="text-sm font-medium text-ex-accent">Ring developer hackathon 2026</p>
+        <h1 className="mt-2 max-w-3xl text-4xl font-semibold tracking-tight text-ex-ink sm:text-5xl">
+          Teach your Ring camera new detectors by example.
+        </h1>
+        <p className="mt-4 max-w-2xl text-lg text-ex-ink2">
+          Ring understands four things: person, vehicle, package, other motion. Show Exemplar a clip or two of what you actually care about
+          and it learns a readable rule, proves it on your history, and watches for it live.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/connect" className="btn-primary">Get started</Link>
+          <Link href="/eval" className="btn">See the evaluation</Link>
         </div>
+      </section>
 
-        {/* Right panel — only shown in refresh_token (full) mode */}
-        {!isSimpleMode && (
-          <div className="w-[40%] border-l border-slate-700 flex flex-col">
-            {/* Tab switcher */}
-            <div className="p-3 border-b border-slate-700 flex gap-2">
-              <button
-                onClick={() => setRightPanelTab('events')}
-                className={`text-xs px-3 py-1 rounded-full ${rightPanelTab === 'events' ? 'bg-dash-cyan text-black font-medium' : 'bg-dash-card text-slate-400 hover:bg-slate-600'}`}
-              >
-                Events
-              </button>
-              <button
-                onClick={() => setRightPanelTab('processors')}
-                className={`text-xs px-3 py-1 rounded-full ${rightPanelTab === 'processors' ? 'bg-dash-cyan text-black font-medium' : 'bg-dash-card text-slate-400 hover:bg-slate-600'}`}
-              >
-                Processors {enabledCount > 0 && `(${enabledCount})`}
-              </button>
-            </div>
+      <section aria-labelledby="steps-h" className="mt-8">
+        <h2 id="steps-h" className="text-lg font-semibold text-ex-ink">How it works</h2>
+        <ol className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {STEPS.map((s) => (
+            <li key={s.href}>
+              <Link href={s.href} className="block h-full rounded-xl border border-ex-line bg-ex-panel p-4 transition-colors hover:bg-ex-raised">
+                <span className="flex items-center gap-3">
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-ex-raised text-sm font-bold text-ex-accent" aria-hidden="true">{s.n}</span>
+                  <span className="text-base font-semibold text-ex-ink">{s.title}</span>
+                </span>
+                <span className="mt-2 block text-sm text-ex-ink2">{s.text}</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-            {rightPanelTab === 'events' ? (
-              <EventPanel events={events} webhookUrl={webhookUrl} />
-            ) : (
-              <ProcessorPanel processors={processors} results={results} onToggle={toggleProcessor} />
-            )}
-          </div>
-        )}
-      </div>
+      <section aria-labelledby="honest-h" className="mt-8 grid gap-4 md:grid-cols-3">
+        <h2 id="honest-h" className="sr-only">What makes it different</h2>
+        <div className="card"><p className="font-semibold text-ex-ink">Rules you can read</p><p className="mt-1 text-sm text-ex-ink2">Every rule is shown in plain English and in a small logic language. A solver, not a prompt, computes its thresholds.</p></div>
+        <div className="card"><p className="font-semibold text-ex-ink">Proven before it goes live</p><p className="mt-1 text-sm text-ex-ink2">Backtests on your own history, with a false-alarm guarantee from randomly sampled labels, or an honest note that you don’t have one yet.</p></div>
+        <div className="card"><p className="font-semibold text-ex-ink">Explained and cheap</p><p className="mt-1 text-sm text-ex-ink2">Each alert carries the facts and times that satisfied the rule. Clear matches and clear misses cost almost nothing.</p></div>
+      </section>
     </div>
   )
 }
