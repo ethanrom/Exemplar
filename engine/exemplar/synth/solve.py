@@ -102,15 +102,40 @@ def _diff_check_point(enc: Encoder, cr, holes: dict[str, float], m_star: float, 
     return scores
 
 
+def _closure_value(e) -> Fraction:
+    """Numeric value of an optimum reported by Z3, with the infinitesimal ``epsilon`` (an open bound, e.g. ``a > 0.5``)
+    set to 0, i.e. the closure of the feasible set."""
+    if z3.is_rational_value(e):
+        return Fraction(e.as_fraction())
+    if z3.is_int_value(e):
+        return Fraction(e.as_long())
+    name = e.decl().name()
+    kids = [_closure_value(c) for c in e.children()]
+    if name == "epsilon":
+        return Fraction(0)
+    if name == "+":
+        return sum(kids, Fraction(0))
+    if name == "*":
+        out = Fraction(1)
+        for k in kids:
+            out *= k
+        return out
+    if name == "-":
+        return -kids[0] if len(kids) == 1 else kids[0] - sum(kids[1:], Fraction(0))
+    if name == "/":
+        return kids[0] / kids[1]
+    raise ValueError(f"unexpected optimum term {e.sexpr()}")
+
+
 def _extremum(enc: Encoder, hard: list, h: str, direction: str, timeout_s: float) -> Optional[float]:
+    """Infimum / supremum of hole ``h`` over the models of ``hard`` (the closure: open bounds are reported at the edge)."""
     opt = z3.Optimize(ctx=enc.ctx)
     opt.set("timeout", max(1, int(timeout_s * 1000)))
     opt.add(*hard)
-    (opt.minimize if direction == "min" else opt.maximize)(enc.hv[h])
-    r = opt.check()
-    if r != z3.sat:
+    handle = (opt.minimize if direction == "min" else opt.maximize)(enc.hv[h])
+    if opt.check() != z3.sat:
         return None
-    return enc.read_holes(opt.model())[h]
+    return float(_closure_value(handle.lower() if direction == "min" else handle.upper()))
 
 
 def _box(enc: Encoder, idx: Sequence[int], timeout_s: float) -> dict[str, tuple[float, float]]:
@@ -133,7 +158,8 @@ def _box(enc: Encoder, idx: Sequence[int], timeout_s: float) -> dict[str, tuple[
         dom = (0.0, 23.0) if hour else (0.0, enc.clip_len)
         lo = _extremum(enc, hard, h, "min", per)
         hi = _extremum(enc, hard, h, "max", per)
-        out[h] = (dom[0] if lo is None else lo, dom[1] if hi is None else hi)
+        lo, hi = (dom[0] if lo is None else lo), (dom[1] if hi is None else hi)
+        out[h] = (int(lo), int(hi)) if hour else (lo, hi)
     return out
 
 
@@ -373,11 +399,12 @@ def solve_sketch(sketch: Rule, examples: Sequence[Example], *, timeout_s: float 
     z3_ok1 = [_is_true(model, enc.goal(k)) for k in range(len(examples))]
     sat1 = [k for k, o in enumerate(z3_ok1) if o]
     has_pos = any(ex.positive for ex in examples)
-    if not sat1 or (has_pos and not any(examples[k].positive for k in sat1)):
+    never_fires = sum(ex.weight for ex in examples if ex.positive) if has_pos else sum(ex.weight for ex in examples)
+    if w_star >= never_fires - 1e-9:                           # no better than the trivial "never fires" rule
         _diff_check_point(enc, cr, p1, float(enc.margin), z3_ok1)
         return SolveResult("unsat", sketch, None, {}, 0.0, tuple(e.clip_id for e, o in zip(examples, z3_ok1) if not o),
                            tuple(e.clip_id for e, o in zip(examples, z3_ok1) if o), True, ms(),
-                           note="the best assignment fits no positive example")
+                           note="the best assignment is no better than a rule that never fires")
     best_enc, best_model = enc, model
     start = _best_level(levels, min(abs(s1[k]) for k in sat1))
     note_extra = ""

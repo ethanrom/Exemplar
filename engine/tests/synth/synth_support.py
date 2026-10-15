@@ -76,8 +76,9 @@ def _windows_with_holes(rule: Rule) -> list[tuple]:
     return out
 
 
-def hole_candidates(sketch: Rule, examples) -> dict[str, list[float]]:
-    kinds = hole_kinds(sketch)
+def _nodes(sketch: Rule, examples) -> list[Fraction]:
+    """Offsets a time hole can be compared with: 0, the clip length, every pairwise frame offset and every constant
+    window bound of the sketch (a hole is also ordered against those).  Between two nodes all values are equivalent."""
     deltas = {Fraction(0)}
     L = 0
     for ex in examples:
@@ -85,7 +86,21 @@ def hole_candidates(sketch: Rule, examples) -> dict[str, list[float]]:
         L = max(L, ex.trace.duration_ms, t[-1] if t else 0)
         deltas |= {Fraction(b - a, 1000) for a in t for b in t if b >= a}
     deltas.add(Fraction(L, 1000))
-    s = sorted(deltas)
+    for lo, hi in _windows_with_holes(sketch):
+        for x in (lo, hi):
+            if not isinstance(x, Hole) and Fraction(x).limit_denominator(10**6) <= Fraction(L, 1000):
+                deltas.add(Fraction(x).limit_denominator(10**6))
+    return sorted(deltas)
+
+
+def node_values(sketch: Rule, examples) -> list[float]:
+    return [float(v) for v in _nodes(sketch, examples)]
+
+
+def hole_candidates(sketch: Rule, examples) -> dict[str, list[float]]:
+    """Per hole, one representative of every equivalence class: each node and the midpoint of consecutive nodes."""
+    kinds = hole_kinds(sketch)
+    s = _nodes(sketch, examples)
     vals = sorted(set(s) | {(x + y) / 2 for x, y in zip(s, s[1:])})
     out = {}
     for h in ast_holes(sketch):
@@ -132,6 +147,8 @@ def brute_force(sketch: Rule, examples, *, max_points: int = 40_000):
             continue
         pts.append((pt, [cr.score(p, pt) for p in preps]))
     levels = [float(x) for x in margin_levels()]
+    if not pts:                                  # the hole domain itself is empty (e.g. window [10, ?b] on a 4 s clip)
+        return Brute([], float('inf'), levels, 0.0)
 
     def weight(scores, m):
         return sum(e.weight for e, s in zip(examples, scores) if not _holds(e.positive, s, m))

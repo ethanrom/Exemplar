@@ -255,7 +255,7 @@ class Encoder:
         self.var_types = tuple(v.type for v in sketch.vars)
         self.ir = _Lowering(self.var_names).lower(sketch.body)
         ends = [max(p.trace.duration_ms, int(p.t_ms[-1]) if p.T else 0) for p in self.preps]
-        self.clip_len_ms: int = max(ends) if ends and max(ends) > 0 else 1000
+        self.clip_len_ms: int = max(ends) if ends else 0               # holes live in [0, longest clip]
         self.clip_len: float = self.clip_len_ms / 1000
 
         c = self.ctx

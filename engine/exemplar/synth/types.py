@@ -46,11 +46,13 @@ class SolveResult:
     """Outcome of solving one sketch.
 
     status
-      * ``sat``           a rule was found that satisfies at least one positive example (when there are
-                          positives); ``violated`` lists the examples it misses (empty = fully consistent).
-                          Exact (Z3 MaxSMT + max-margin), temporal-slack placed, differential-checked.
-      * ``unsat``         even the best MaxSMT assignment fits no positive example: the sketch cannot express
-                          the concept. ``rule`` is None.
+      * ``sat``           the best MaxSMT assignment beats the trivial rule that never fires (its violated weight is
+                          below the total positive weight), so it fits at least one positive example. ``rule`` is the
+                          closed, temporal-slack-placed, differentially checked rule; ``violated`` lists the examples
+                          it misses (empty = fully consistent, otherwise perception-suspect clips). Exact: the violated
+                          weight is minimal and the margin maximal among minimal-weight assignments.
+      * ``unsat``         even the best assignment is no better than "never fires": the sketch cannot express the
+                          concept on these clips. ``rule`` is None.
       * ``timeout``       Z3 timed out and the grid fallback found nothing useful. ``rule`` is None.
       * ``grid_fallback`` Z3 timed out; ``rule`` is the best point of a 0.5 s grid search scored with the
                           NumPy evaluator (not guaranteed optimal).
@@ -78,11 +80,17 @@ class Candidate:
     sketch_text: str
     dsl_text: str                       # closed rule, from exemplar.dsl.to_text
     english: str                        # exemplar.dsl.to_english: deterministic, never an LLM paraphrase
-    rule: Rule
+    rule: Rule                          # CLOSED: holes filled, after temporal-slack placement
     holes: dict[str, float]
     margin: float
     mdl: float
     violated_clip_ids: tuple[str, ...]
+    sketch: Rule | None = None          # the sketch with its holes (parsed from `sketch_text` when not given)
+
+    def __post_init__(self) -> None:
+        if self.sketch is None:
+            from ..dsl import parse
+            object.__setattr__(self, "sketch", parse(self.sketch_text))
 
     def to_api(self, *, id: str, concept_id: str, status: str = "candidate") -> dict:
         """api.yaml ``RuleSummary``."""
@@ -100,4 +108,4 @@ class Candidate:
             raise ValueError("cannot build a Candidate from a result without a rule")
         return cls(sketch_text=to_text(res.sketch), dsl_text=to_text(res.rule), english=to_english(res.rule),
                    rule=res.rule, holes=dict(res.holes), margin=res.margin, mdl=mdl_value,
-                   violated_clip_ids=tuple(res.violated))
+                   violated_clip_ids=tuple(res.violated), sketch=res.sketch)
