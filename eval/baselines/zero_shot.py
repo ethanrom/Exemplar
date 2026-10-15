@@ -31,7 +31,7 @@ from typing import Any, Callable, Iterable, Optional, Sequence
 
 from eval.harness import metrics
 from eval.harness.budget import DEFAULT_MAX_USD, BudgetGuard, read_ledger, usd
-from eval.harness.dataset import N_FRAMES, Window, concept_descriptions, data_dir, eval_dir, load_windows
+from eval.harness.dataset import N_FRAMES, Window, concept_descriptions, eval_dir, load_windows
 
 PROMPT_VERSION = "zs1"
 TOOL_NAME = "report_match"
@@ -334,7 +334,7 @@ def main(argv: Optional[Sequence[str]] = None, *, client: Any = None) -> int:
         frac = fit_fraction(windows, cached=cached, est_usd=est, remaining=guard.remaining(), seed=a.seed)
     else:
         frac = float(a.subsample)
-    chosen = stratified_subset(windows, frac, seed=a.seed) if frac < 1.0 else stratified_subset(windows, 1.0, seed=a.seed)
+    chosen = stratified_subset(windows, frac, seed=a.seed)
     todo = [w for w in chosen if w.id not in cached]
     print(f"{len(windows)} calib/test windows; subset fraction {frac:.2f} -> {len(chosen)} windows, {len(chosen) - len(todo)} cached, "
           f"{len(todo)} to run; est ${est:.4f}/call; cap ${guard.limit:.2f}, spent ${guard.spent:.4f}", flush=True)

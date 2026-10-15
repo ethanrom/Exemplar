@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Optional, Sequence
 
 from eval.harness import results as resmod
-from eval.harness.budget import DEFAULT_MAX_USD, HARD_CAP_USD, BudgetExceeded, BudgetGuard
+from eval.harness.budget import HARD_CAP_USD, BudgetExceeded, BudgetGuard
 from eval.harness.dataset import Window, concept_ids, eval_dir, load_windows
 from eval.harness.experiment import Services, TrialConfig, run_trial
 from eval.harness.traces import load_cached, perceive_window

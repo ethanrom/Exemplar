@@ -135,7 +135,8 @@ def summarize(records: dict[str, dict[str, Any]], ids: Iterable[str]) -> dict[st
         status[r["status"]] = status.get(r["status"], 0) + 1
     return {"clips": len(rs), "status": status, "tokens_in": sum(r["tokens_in"] for r in billed),
             "tokens_out": sum(r["tokens_out"] for r in billed), "usd": round(sum(r["usd"] for r in rs), 4),
-            "paid_calls": len(paid), "latency_s_p50": round(_pct(lat, 0.5), 1), "latency_s_p90": round(_pct(lat, 0.9), 1)}
+            "paid_calls": len(paid), "latency_s_p50": round(_pct(lat, 0.5), 1) if lat else None,
+            "latency_s_p90": round(_pct(lat, 0.9), 1) if lat else None}
 
 
 def select_windows(args: argparse.Namespace) -> list[Window]:

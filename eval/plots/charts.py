@@ -14,7 +14,7 @@ from typing import Any, Iterable, Optional, Sequence
 
 from eval.harness import metrics
 
-from .svg import SERIES, Svg, fmt, legend, text_width
+from .svg import SERIES, Svg, legend
 
 Row = dict[str, Any]
 ZS = "zero_shot_vlm"
