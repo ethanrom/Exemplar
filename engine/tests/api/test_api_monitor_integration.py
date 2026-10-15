@@ -1,6 +1,6 @@
-"""The API against the REAL stream E (monitor, calibrate) once it is merged; skipped while the modules are stubs.
+"""The API against the REAL monitor and calibrate modules; skipped when they cannot be imported.
 
-Stream D is faked here (its `Example` / `Candidate` are duck-typed by E), so these tests need only E.
+Synthesis is faked here (its `Example` / `Candidate` are duck-typed by the monitor), so these tests need only the monitor.
 """
 from __future__ import annotations
 
@@ -14,10 +14,10 @@ try:
     from exemplar.calibrate import calibrate as real_calibrate
     from exemplar.monitor import ActionRunner, DeployedRule, EventInput, Monitor
     HAVE_E = True
-except ImportError:                     # E not merged in this checkout
+except ImportError:                     # monitor/calibrate not importable
     HAVE_E = False
 
-pytestmark = pytest.mark.skipif(not HAVE_E, reason="stream E (exemplar.monitor / exemplar.calibrate) is not merged")
+pytestmark = pytest.mark.skipif(not HAVE_E, reason="exemplar.monitor / exemplar.calibrate are not available")
 
 
 @pytest.fixture

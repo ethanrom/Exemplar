@@ -1,7 +1,7 @@
 """The FastAPI app implementing every path of `contracts/api.yaml`.
 
     from exemplar.api.app import create_app
-    app = create_app()                      # settings from .env, real streams
+    app = create_app()                      # settings from .env
     app = create_app(services=Services(run_cegis=fake, ...), start_background=False)   # tests
 
 `exemplar.api.app.app` (module attribute, built on first access) is the default instance for

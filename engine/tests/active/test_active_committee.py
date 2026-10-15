@@ -1,4 +1,4 @@
-"""build_committee: consistent members, box handling, fallback, weights, determinism (offline, fake D)."""
+"""build_committee: consistent members, box handling, fallback, weights, determinism (offline, fake synth)."""
 from __future__ import annotations
 
 import math

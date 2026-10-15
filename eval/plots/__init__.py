@@ -1,1 +1,1 @@
-"""Charts from eval results.json (stream G-run)."""
+"""Charts from eval results.json."""

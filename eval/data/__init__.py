@@ -1,1 +1,1 @@
-"""Stream G (eval-data): MEVA subset selection, ROI crops, windows, splits, clip cutting."""
+"""Evaluation data: MEVA subset selection, ROI crops, windows, splits, clip cutting."""

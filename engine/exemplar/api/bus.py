@@ -61,7 +61,7 @@ class Fanout:
 
 
 class MonitorBus:
-    """MonitorEvent stream (`GET /monitor/stream`): E's `on_event` plus the ingest events.
+    """MonitorEvent stream (`GET /monitor/stream`): the monitor's `on_event` plus the ingest events.
 
     Every event gets a monotonically increasing id (the SSE `id:`) and `at_ms`; the last `replay` events are
     kept so a reconnecting client can resume with `Last-Event-ID`.

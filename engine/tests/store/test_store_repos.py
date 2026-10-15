@@ -34,7 +34,7 @@ def add_event(s: Store, eid: str, start: int = 1000, *, source="ring", device="d
 
 
 # ------------------------------------------------------------------------------------------ schema / connection
-def test_applies_the_frozen_schema_and_pragmas(store):
+def test_applies_the_schema_and_pragmas(store):
     tables = {r["name"] for r in store.query("SELECT name FROM sqlite_master WHERE type='table'")}
     assert {"events", "clips", "traces", "concepts", "labels", "runs", "run_events", "rules", "firings", "actions_log",
             "webhook_deliveries", "cost_ledger", "ring_auth"} <= tables
@@ -279,7 +279,7 @@ def test_firing_upsert_is_unique_per_rule_and_event(store):
         store.firings.upsert({**base, "id": "fx", "rule_id": "nope", "event_id": "e1"})
 
 
-# ------------------------------------------------------------------------------------------ A's protocols
+# ------------------------------------------------------------------------------------------ Ring protocols
 def test_token_store_roundtrip_and_auth_manager(store):
     assert store.auth.load() is None
     store.auth.save(StoredAuth(mode="playground", access_token="tok", issued_at_ms=1, expires_at_ms=2, updated_at_ms=3))
@@ -287,7 +287,7 @@ def test_token_store_roundtrip_and_auth_manager(store):
     got = store.auth.load()
     assert (got.access_token, got.issued_at_ms, got.expires_at_ms) == ("tok2", 5, 6)
     assert store.query_one("SELECT COUNT(*) FROM ring_auth")[0] == 1                # single row
-    assert "tok2" not in repr(got)                                                  # A's repr hides the token
+    assert "tok2" not in repr(got)                                                  # the repr hides the token
     store.auth.clear()
     assert store.auth.load() is None
 

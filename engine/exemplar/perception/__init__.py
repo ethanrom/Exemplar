@@ -1,4 +1,4 @@
-"""Perception (stream B): clip -> frames -> Claude on Bedrock -> symbolic `Trace` (PLAN.md §2.1).
+"""Perception: clip -> frames -> Claude on Bedrock -> symbolic `Trace`.
 
     from exemplar.perception import perceive, sample_frames, PROMPT_VERSION
     trace = perceive("clip.mp4", clip_id="evt123", source="ring", mode="fast")

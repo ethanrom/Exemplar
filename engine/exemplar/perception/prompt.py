@@ -137,7 +137,7 @@ def emit_trace_schema() -> dict[str, Any]:
 def tool_config(strong: bool) -> dict[str, Any]:
     cfg: dict[str, Any] = {"tools": [{"toolSpec": {"name": TOOL_NAME, "description": "Emit the symbolic trace.",
                                                    "inputSchema": {"json": emit_trace_schema()}}}]}
-    # Strong model: forced tool choice ("tool"/"any") is rejected -> auto + explicit instruction (phase0 P0-12).
+    # Strong model: forced tool choice ("tool"/"any") is rejected -> auto + explicit instruction.
     cfg["toolChoice"] = {"auto": {}} if strong else {"tool": {"name": TOOL_NAME}}
     return cfg
 

@@ -1,4 +1,4 @@
--- Exemplar SQLite schema (PLAN.md §1 store/). Frozen contract — changes go through the integrator.
+-- Exemplar SQLite schema. Applied by exemplar.store on startup.
 -- JSON columns hold the pydantic models from exemplar.contracts (model_dump_json()).
 -- Times: *_ms columns are epoch milliseconds (UTC) unless noted.
 PRAGMA foreign_keys = ON;
@@ -131,14 +131,14 @@ CREATE TABLE IF NOT EXISTS actions_log (
     created_at_ms   INTEGER NOT NULL
 );
 
--- Webhook dedupe on meta.request_id (PLAN.md §2.7).
+-- Webhook dedupe on meta.request_id.
 CREATE TABLE IF NOT EXISTS webhook_deliveries (
     request_id      TEXT PRIMARY KEY,
     event_type      TEXT,
     received_at_ms  INTEGER NOT NULL
 );
 
--- Cost meter (§2.6): one row per model call.
+-- Cost meter: one row per model call.
 CREATE TABLE IF NOT EXISTS cost_ledger (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     purpose         TEXT NOT NULL CHECK (purpose IN ('perception_fast', 'perception_strong', 'sketch', 'baseline')),
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS ring_auth (
     updated_at_ms   INTEGER NOT NULL
 );
 
--- Added in contracts 1.1.0 (from stream H) ---------------------------------------------------------
+-- Added in contracts 1.1.0 ---------------------------------------------------------
 -- Actions configured on a rule (PATCH /rules/{id} actions).
 -- Clips handed out by POST /concepts/{id}/random-sample: only these may be labelled with provenance
 -- 'random' (the engine returns 400 INVALID_PROVENANCE otherwise), which keeps calibration labels

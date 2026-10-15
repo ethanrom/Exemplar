@@ -15,7 +15,7 @@ BULK_WEIGHT = 1.0
 
 
 def _fallback(o: Any) -> Any:
-    """json fallback for numpy scalars / arrays and other stray types in events coming from other streams."""
+    """json fallback for numpy scalars / arrays and other stray types in events coming from other modules."""
     if hasattr(o, "item") and callable(o.item):
         try:
             return o.item()
@@ -63,7 +63,7 @@ def concept_view(store: Store, c: ConceptRow) -> dict[str, Any]:
 
 
 def trace_text_fallback(trace: Trace) -> str:
-    """Compact rendering used when D's `render_trace_text` is not merged: one line per frame."""
+    """Compact rendering used when `exemplar.synth.render_trace_text` is not available: one line per frame."""
     lines = [f"clip {trace.clip_id} ({trace.duration_ms / 1000:.1f} s): {trace.summary}".rstrip(": ")]
     if trace.entities:
         lines.append("entities: " + " ".join(

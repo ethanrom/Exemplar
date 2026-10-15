@@ -1,8 +1,8 @@
-"""Fakes and utilities for the API tests: fake Ring, fake perception, and stand-ins for streams D and E.
+"""Fakes and utilities for the API tests: fake Ring, fake perception, and stand-ins for synthesis and the monitor.
 
-D and E are not merged when this suite is written, so their interface-sheet signatures
-(docs/streams/phase2-interfaces.md) are reproduced here as small fakes. The fake Monitor and the fake
-`calibrate` use the REAL DSL evaluator (stream C), so deploy -> event -> firing runs through real scoring.
+The signatures of `exemplar.synth`, `exemplar.agent`, `exemplar.monitor` and `exemplar.calibrate` are reproduced
+here as small fakes. The fake Monitor and the fake
+`calibrate` use the REAL DSL evaluator, so deploy -> event -> firing runs through real scoring.
 """
 from __future__ import annotations
 
@@ -207,7 +207,7 @@ class FakeRing:
         pass
 
 
-# ------------------------------------------------------------------------------------------ stream D stand-ins
+# ------------------------------------------------------------------------------------------ synthesis stand-ins
 @dataclass(frozen=True)
 class Example:
     trace: Trace
@@ -263,7 +263,7 @@ class FakeCegis:
               "margin": np.float64(0.3), "violated_clip_ids": []})
         for ev in self.extra_events:
             emit(ev)
-        emit({"type": "done"})                       # H must ignore D's own `done` and send its own
+        emit({"type": "done"})                       # the API must ignore the proposer's own `done` and send its own
         if self.gate is not None:
             self.gate.wait(10)
         if self.error:
@@ -271,7 +271,7 @@ class FakeCegis:
         return list(self.candidates)
 
 
-# ------------------------------------------------------------------------------------------ stream E stand-ins
+# ------------------------------------------------------------------------------------------ monitor / calibration stand-ins
 @dataclass(frozen=True)
 class FakeCalibration:
     alpha: float
@@ -292,7 +292,7 @@ class FakeCalibration:
 
 
 class FakeCalibrate:
-    """§2.5 conformal threshold on the labels it is given (scored with the real DSL evaluator)."""
+    """Conformal threshold on the labels it is given (scored with the real DSL evaluator)."""
 
     def __init__(self) -> None:
         self.calls: list[dict[str, Any]] = []
@@ -357,13 +357,13 @@ class FiringRecord:
 
 
 def _unwrap(res: Any) -> Trace:
-    """Like E's monitor: perceivers may return a Trace or a PerceptionResult-like object (`.trace`, `.cached`)."""
+    """Like the real monitor: perceivers may return a Trace or a PerceptionResult-like object (`.trace`, `.cached`)."""
     return res if isinstance(res, Trace) else res.trace
 
 
 class FakeMonitor:
     """Funnel in miniature: stage 0 drops impossible sub_types, stage 1 scores the fast trace, stage 2 escalates
-    when |score - tau| <= delta. Constructed with the signature from the interface sheet."""
+    when |score - tau| <= delta. Constructed with the same signature as the real `Monitor`."""
 
     instances: list["FakeMonitor"] = []
 

@@ -3,7 +3,7 @@
 Windows are cut with ffmpeg (`imageio_ffmpeg`), each becomes an `upload` event with a clip carrying
 `source_ref` and the CC BY `attribution`. Uploads are not Ring events: they never reach deployed monitors.
 Ids are deterministic (`up_<sha256[:10]>_<start_ms>_<window_ms>`), so re-importing the same file is idempotent
-and B's perception cache (keyed by clip id, not bytes) makes repeats free.
+and the perception cache (keyed by clip id, not bytes) makes repeats free.
 """
 from __future__ import annotations
 

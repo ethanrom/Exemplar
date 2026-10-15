@@ -1,7 +1,7 @@
 """Synchronous per-clip processing shared by the HTTP pipeline, uploads, live capture and the seed CLI:
 
-    media ready -> fast perception (B) -> trace row (+ cost ledger unless cached) -> trace_ready
-                -> Monitor.process for deployed rules (E; Ring-sourced events only)
+    media ready -> fast perception -> trace row (+ cost ledger unless cached) -> trace_ready
+                -> Monitor.process for deployed rules (Ring-sourced events only)
 
 Everything here is plain blocking code; async callers run it with `loop.run_in_executor`.
 """
@@ -48,7 +48,7 @@ class Processor:
 
     # ------------------------------------------------------------------ context
     def context_for(self, event: EventRow) -> TraceContext:
-        """`TraceContext` for an event (PLAN.md §2.1.6): sub_type, event_kind, local hour/weekday, device, start."""
+        """`TraceContext` for an event: sub_type, event_kind, local hour/weekday, device, start."""
         hour = weekday = None
         if event.source in MONITORED_SOURCES:
             hour, weekday = local_parts(event.start_ms, self.state.tz_for_device(event.device_id))
@@ -151,7 +151,7 @@ class Processor:
         kw: dict[str, Any] = dict(event_id=event.id, clip_id=clip.id, clip_path=clip.path, sub_type=event.sub_type,
                                   device_id=event.device_id, context=self.context_for(event), trace=trace)
         # The fast trace was paid for (and ledgered) at ingest: tell the monitor so it neither perceives again nor
-        # counts the tokens a second time. Older EventInput versions (interface sheet) have no such field.
+        # counts the tokens a second time. Older EventInput versions have no such field.
         if trace is not None and "trace_cached" in {f.name for f in dataclasses.fields(cls)}:
             kw["trace_cached"] = True
         return cls(**kw)

@@ -1,7 +1,7 @@
-"""Cost meter (PLAN.md §2.6): `GET /monitor/cost` -> api.yaml `CostSummary`.
+"""Cost meter: `GET /monitor/cost` -> api.yaml `CostSummary`.
 
 Token counts come from `cost_ledger` (one row per model call, written for every non-cached perception).
-Prices are ESTIMATES derived from the Phase 0 spike (PLAN.md §5, row 5): fast ~6.4k in / 1.5k out ~ $0.0014 per
+Prices are ESTIMATES derived from early measurements on Bedrock: fast ~6.4k in / 1.5k out ~ $0.0014 per
 clip, strong ~6.2k in / 1.6k out ~ $0.028 per clip. They are rates per million tokens chosen to reproduce
 those two measurements, not Bedrock's price list; override with `PRICE_PER_MTOK` if prices are known.
 """

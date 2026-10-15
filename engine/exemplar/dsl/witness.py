@@ -1,4 +1,4 @@
-"""Witness extraction: why a rule scored what it did (PLAN.md §2.6, api.yaml `Witness`).
+"""Witness extraction: why a rule scored what it did (api.yaml `Witness`).
 
 Deterministic: ties go to the first binding (in `Trace.bindings` order) and the earliest frame.
 

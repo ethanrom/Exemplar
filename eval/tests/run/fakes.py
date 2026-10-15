@@ -1,4 +1,4 @@
-"""Fixture-like traces, windows and fake D / E services for the harness tests (no model, no Z3, no data files)."""
+"""Fixture-like traces, windows and fake synthesis / calibration services for the harness tests (no model, no Z3, no data files)."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -96,7 +96,7 @@ class FakeCalibration:
 
 
 class Recorder:
-    """What the fake D / E saw, for the leakage assertions."""
+    """What the fake services saw, for the leakage assertions."""
 
     def __init__(self) -> None:
         self.cegis_ids: list[list[str]] = []

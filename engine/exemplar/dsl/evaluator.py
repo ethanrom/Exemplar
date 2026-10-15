@@ -1,4 +1,4 @@
-"""Quantitative (robustness) evaluator: PLAN.md §2.2, docs/DSL.md.
+"""Quantitative (robustness) evaluator; semantics in docs/DSL.md.
 
 Vectorised with NumPy over (bindings x frames) arrays. Window offsets are computed once per trace as
 ``D[i, j] = (t_ms[j] - t_ms[i]) / 1000`` (integer ms, a single correctly-rounded division) and compared

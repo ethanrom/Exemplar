@@ -289,7 +289,7 @@ class _Served:
 
 @pytest.fixture
 def make_env(tmp_path, video_bytes, jpeg_bytes) -> Callable[..., Any]:
-    """Factory: `make_env(disable=("monitor_cls",))`; the default env has fakes for D, E, perception and Ring.
+    """Factory: `make_env(disable=("monitor_cls",))`; the default env has fakes for synthesis, monitor, perception and Ring.
     `serve=True` runs the app on a real server (httpx client) for SSE tests."""
     closers: list[Callable[[], None]] = []
 

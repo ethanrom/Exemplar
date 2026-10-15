@@ -50,7 +50,7 @@ def get_event(event_id: str, concept_id: str | None = None, st: AppState = Depen
     strong = st.store.traces.get(view.clip_id, "strong")
     text = None
     if trace is not None and trace.status == "ok":
-        render = st.services.render_trace_text          # D's renderer (what the sketch LLM sees) when merged
+        render = st.services.render_trace_text          # the synth renderer (what the sketch LLM sees) when available
         try:
             text = render(trace) if render else trace_text_fallback(trace)
         except Exception:  # noqa: BLE001

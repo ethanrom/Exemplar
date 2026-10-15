@@ -1,4 +1,4 @@
-"""Actions run when a rule fires (PLAN.md §2.6): ui, webhook_out, slack, chime.
+"""Actions run when a rule fires: ui, webhook_out, slack, chime.
 
 Every action yields ``{"action", "status": ok|skipped|failed, "detail"}`` and an ``action_result``
 MonitorEvent; none of them ever raises into the monitor.

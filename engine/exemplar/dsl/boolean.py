@@ -1,4 +1,4 @@
-"""Plain boolean evaluator (PLAN.md §2.2 required implementation #1).
+"""Plain boolean evaluator (one of the independent implementations of the semantics in docs/DSL.md).
 
 Deliberately independent of the robustness evaluator: pure Python loops over frame indices, window
 membership decided with ``a <= (t_ms[j] - t_ms[i]) / 1000 <= b`` on Python ints, atoms read through

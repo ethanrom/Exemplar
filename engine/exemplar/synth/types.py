@@ -1,4 +1,4 @@
-"""Value types shared by the synthesis layer (interface sheet: docs/streams/phase2-interfaces.md)."""
+"""Value types shared by the synthesis layer."""
 from __future__ import annotations
 
 from dataclasses import dataclass

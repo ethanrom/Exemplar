@@ -163,7 +163,7 @@
     },
     "TraceContext": {
       "additionalProperties": false,
-      "description": "Context signals (\u00a72.1.6). Context atoms in rules read these; all optional.",
+      "description": "Context signals. Context atoms in rules read these; all optional.",
       "properties": {
         "device_id": {
           "anyOf": [

@@ -1,4 +1,4 @@
-"""Query-by-committee over the version space of rule hypotheses (PLAN.md §2.4).
+"""Query-by-committee over the version space of rule hypotheses.
 
 The CEGIS agent returns a few ranked candidates (sketch + solved holes). Each sketch has numeric holes
 (window bounds, durations, hours); the labelled clips constrain them to a feasible region. The committee is
@@ -12,17 +12,17 @@ a weighted sample of closed rules from the union of those regions:
 3. **Fallback** (acceptance below `MIN_ACCEPTANCE` = 5%): the box is a bounding box, so a thin or diagonal
    feasible region is mostly missed by uniform sampling. A second batch of ``n_samples`` points is drawn in
    the box shrunk to `SHRINK` (25%) of its width around the candidate's own holes, and its consistent points
-   are added. True Z3 blocking-clause sampling is a stretch goal (PLAN §2.4) and is not implemented; the
+   are added. True Z3 blocking-clause sampling is not implemented; the
    shrunk box trades coverage of the version space for guaranteed non-emptiness around a known solution.
-4. **Weights** are proportional to exp(-MDL / T) per candidate (T = ``mdl_temperature``, default 1, i.e. the
-   plan's exp(-MDL)), spread evenly over the candidate's accepted points, then normalised with a stable
+4. **Weights** are proportional to exp(-MDL / T) per candidate (T = ``mdl_temperature``, default 1, i.e.
+   plain exp(-MDL)), spread evenly over the candidate's accepted points, then normalised with a stable
    softmax (max subtracted, so MDL values of any size neither overflow nor underflow to a zero sum).
    MDL gaps of a few bits already make the best candidate dominate; raise T to keep the others alive.
 
 Everything is deterministic for a given ``seed`` (each candidate draws from its own child stream, so adding a
 candidate does not change the samples of the others).
 
-`exemplar.synth` (stream D) is imported lazily, only when ``box_fn`` is not given.
+`exemplar.synth` is imported lazily, only when ``box_fn`` is not given.
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ from exemplar.contracts.dsl_ast import Hole, HourIn, Rule, fill_holes
 from exemplar.contracts.dsl_ast import holes as ast_holes
 from exemplar.dsl import DSLError, compile_rule, parse, prepare
 
-if TYPE_CHECKING:       # stream D: not imported at module load
+if TYPE_CHECKING:       # not imported at module load
     from exemplar.synth import Candidate, Example
 
 log = logging.getLogger("exemplar.active")
@@ -177,7 +177,7 @@ def build_committee(candidates: "Sequence[Candidate]", examples: "Sequence[Examp
     if mdl_temperature <= 0:
         raise ValueError("mdl_temperature must be > 0")
     if box_fn is None:
-        from exemplar.synth import hole_box as box_fn          # lazy: stream D
+        from exemplar.synth import hole_box as box_fn          # lazy import
     prepared = [(ex.clip_id, bool(ex.positive), prepare(ex.trace)) for ex in examples]
     groups: list[tuple[float, list[Rule]]] = []
     diagnostics: list[dict] = []

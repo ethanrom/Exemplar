@@ -1,7 +1,7 @@
-"""DSL AST node types and text grammar (PLAN.md §2.2). Frozen contract.
+"""DSL AST node types and text grammar (see docs/DSL.md).
 
-Stream C implements the parser (using `GRAMMAR`), typechecker, printers and evaluators against
-these types; streams D/E/H build and consume them. Nodes are immutable pydantic models with an
+The parser (using `GRAMMAR`), typechecker, printers and evaluators in `exemplar.dsl` are written against
+these types; synthesis, calibration, the monitor and the API build and consume them. Nodes are immutable pydantic models with an
 `op` discriminator, so a rule round-trips through JSON (API, SQLite) unchanged.
 
 Time bounds and durations are in **seconds** (floats); `hour` bounds are integers 0–23.
@@ -174,7 +174,7 @@ def fill_holes(node: BaseModel, values: dict[str, float]) -> BaseModel:
 
 
 def node_count(node: BaseModel) -> int:
-    """AST nodes excluding bounds (used by MDL, §2.3)."""
+    """AST nodes excluding bounds (used by MDL)."""
     return 1 + sum(node_count(c) for c in children(node))
 
 

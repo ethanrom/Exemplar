@@ -1,4 +1,4 @@
-"""Ontology v1 (PLAN.md §2.1). Frozen contract — changes go through the integrator.
+"""Ontology v1: the closed vocabulary of entities, predicates and zones that perception may emit and rules may use.
 
 Shared by perception (what the model may assert), the trace validator, and the DSL typechecker.
 """
@@ -14,9 +14,9 @@ ZONES: tuple[str, ...] = ("door", "porch", "steps", "yard", "driveway", "sidewal
 
 Conf = Literal["low", "med", "high"]
 CONF_VALUE: dict[str, float] = {"low": 0.6, "med": 0.8, "high": 0.95}
-ABSENT_VALUE = 0.05          # signal value when a predicate is not asserted in a frame (§2.1.5)
-THRESHOLD = 0.5              # ρ(atom, t) = s(t) − THRESHOLD (§2.2)
-CLAMP = 0.5                  # C: robustness of empty windows / crisp context atoms is ±CLAMP (§2.2)
+ABSENT_VALUE = 0.05          # signal value when a predicate is not asserted in a frame
+THRESHOLD = 0.5              # ρ(atom, t) = s(t) − THRESHOLD (docs/DSL.md)
+CLAMP = 0.5                  # C: robustness of empty windows / crisp context atoms is ±CLAMP
 
 # Ring smart-alert subtypes (webhook `data.subType`, history filter `motion.<sub>`) + our two extras.
 SubType = Literal["human", "vehicle", "package_delivery", "other_motion", "motion", "ding", "on_demand"]

@@ -1,4 +1,4 @@
-"""Query selection: ask about the clip the committee is most split on (PLAN.md §2.4).
+"""Query selection: ask about the clip the committee is most split on.
 
     p(u) = sum of member weights whose rule matches u (score > 0)      # "your rules disagree on this one"
 

@@ -1,6 +1,6 @@
 """Seed CLI for demos and UI integration.
 
-    uv run --project engine python -m exemplar.api.seed --media-dir "<main checkout>/data" --playground-spike --frollard
+    uv run --project engine python -m exemplar.api.seed --media-dir "<data dir>" --playground-spike --frollard
     uv run --project engine python -m exemplar.api.seed --fixtures
 
 * `--playground-spike`  the recorded Developer Playground events (`<media>/spike/ring/<id>/{event.json,clip.mp4,
@@ -9,7 +9,7 @@
                         is cut into 20 s windows every 5 s and imported as `upload` events with the attribution.
 * `--fixtures`          `engine/tests/fixtures/traces/*.json` as `fixture` events without media (no perception).
 
-Each imported clip gets a fast trace (B's cache makes repeats free; the cost ledger skips cached results).
+Each imported clip gets a fast trace (the perception cache makes repeats free; the cost ledger skips cached results).
 The target database is `settings.db_path` (`EXEMPLAR_DATA_DIR` / `EXEMPLAR_DB`); the server need not be running.
 """
 from __future__ import annotations
@@ -42,7 +42,7 @@ _DEVICE_RE = re.compile(r"ava1\.ring\.device\.(?!status|capabilities|configurati
 
 
 def discover_device_id(spike_dir: Path) -> str:
-    """The Playground device id, from the spike's request log (event.json does not carry it)."""
+    """The Playground device id, from the recording's request log (event.json does not carry it)."""
     try:
         m = _DEVICE_RE.search((spike_dir / "log.jsonl").read_text(encoding="utf-8"))
         if m:

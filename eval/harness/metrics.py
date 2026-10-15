@@ -1,4 +1,4 @@
-"""Metric arithmetic for the MEVA evaluation (PLAN.md section 3 and 2.5).
+"""Metric arithmetic for the MEVA evaluation.
 
 Everything here is a pure function of scores and labels, so it is unit-tested without any model or data.
 

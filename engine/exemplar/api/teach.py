@@ -1,4 +1,4 @@
-"""Teach flow: labelled examples -> D's `run_cegis` in a worker thread -> run events + candidate rules -> question.
+"""Teach flow: labelled examples -> `run_cegis` in a worker thread -> run events + candidate rules -> question.
 
 Provenance (docs/DSL.md): synthesis sees ONLY `example` + `active` labels. `random` labels are held out for
 calibration (see rules_logic.py).
@@ -35,7 +35,7 @@ def new_id(prefix: str) -> str:
 
 # ====================================================================================== examples
 def labelled_examples(state: "AppState", concept_id: str) -> list[Any]:
-    """D's `Example`s for the concept's example+active labels whose clips have an ok trace."""
+    """`Example`s for the concept's example+active labels whose clips have an ok trace."""
     labels = state.store.labels.list(concept_id, provenance=SYNTHESIS_PROVENANCE)
     assert all(l.provenance in SYNTHESIS_PROVENANCE for l in labels)
     traces = state.store.traces.primary_ok_for([l.clip_id for l in labels])
@@ -70,7 +70,7 @@ class RunRecorder:
 
 # ====================================================================================== persistence
 def persist_candidates(state: "AppState", concept_id: str, run_id: str, candidates: list[Any]) -> list[str]:
-    """Candidate -> `rules` rows (dsl_text / english from C's printers). Returns rule ids in rank order."""
+    """Candidate -> `rules` rows (dsl_text / english from the DSL printers). Returns rule ids in rank order."""
     store = state.store
     ids: list[str] = []
     for cand in candidates:
@@ -152,7 +152,7 @@ def _worker(state: "AppState", run: RunRow, concept: ConceptRow, run_cegis: Any,
 
 # ====================================================================================== question
 def candidate_objects(state: "AppState", concept_id: str) -> list[Any]:
-    """Stored rules -> D's `Candidate`s (what E's `build_committee` expects)."""
+    """Stored rules -> `Candidate`s (what `build_committee` expects)."""
     Candidate = state.services.candidate_cls
     out = []
     for r in state.store.rules.list_for_concept(concept_id):
@@ -163,7 +163,7 @@ def candidate_objects(state: "AppState", concept_id: str) -> list[Any]:
 
 
 def compute_question(state: "AppState", concept_id: str) -> dict[str, Any] | None:
-    """The unlabelled traced clip the committee disagrees on most (PLAN.md §2.4), as an api.yaml `Question`.
+    """The unlabelled traced clip the committee disagrees on most, as an api.yaml `Question`.
 
     Clips drawn by `/random-sample` but not yet labelled are excluded: pulling them into the active set would
     bias the calibration sample.

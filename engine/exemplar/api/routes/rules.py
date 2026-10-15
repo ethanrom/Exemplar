@@ -36,7 +36,7 @@ def get_rule(rule_id: str, st: AppState = Depends(get_state)) -> dict[str, Any]:
 
 @router.patch("/rules/{rule_id}")
 def update_rule(rule_id: str, body: RulePatch, st: AppState = Depends(get_state)) -> dict[str, Any]:
-    """`status: deployed` registers the rule with the monitor (503 until E is merged); `retired` undeploys it."""
+    """`status: deployed` registers the rule with the monitor (503 when the monitor module is unavailable); `retired` undeploys it."""
     row = _rule(st, rule_id)
     deploying = body.status == "deployed" and row.status != "deployed"
     if deploying:

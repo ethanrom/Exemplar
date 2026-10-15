@@ -1,5 +1,5 @@
-"""Ring ingest (PLAN.md §2.7, phase2-interfaces H): history poller and webhook -> event row -> clip download
-(clip end + 5 s, 416/425 backoff lives in stream A) -> snapshot -> fast perception -> trace -> monitor.
+"""Ring ingest: history poller and webhook -> event row -> clip download
+(clip end + 5 s, 416/425 backoff lives in `exemplar.ring`) -> snapshot -> fast perception -> trace -> monitor.
 
 Playground events are `on_demand` with no `sub_type`; their `TraceContext.sub_type` is `"on_demand"`.
 Webhook events keep Ring's `subType` (`motion`, `human`, `vehicle`, ...); `button_press` becomes kind/sub_type
@@ -179,7 +179,7 @@ class IngestPipeline:
         await loop.run_in_executor(self.state.executor, self.state.processor.process_clip, clip_id)
 
     async def _download(self, event: EventRow, clip: ClipRow) -> bool:
-        """Fetch video + snapshot through stream A's client. Returns True when the clip is ready."""
+        """Fetch video + snapshot through the Ring client. Returns True when the clip is ready."""
         st, cfg = self.state, self.state.config
         st.store.clips.set_status(clip.id, "downloading")
         end = event.end_ms if event.end_ms is not None else event.start_ms + int(cfg.webhook_assumed_clip_s * 1000)

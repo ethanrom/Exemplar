@@ -1,8 +1,8 @@
-"""Phase 0 spike (PLAN.md §5 Q5): sample frames from a clip, send them to Claude on Bedrock in one
-Converse request with a forced tool schema (PLAN.md §2.1), validate against the ontology, and
+"""Exploratory probe used while integrating with Amazon Bedrock: sample frames from a clip, send them to
+Claude in one Converse request with a forced tool schema, validate the result against the ontology, and
 report latency + tokens.
 
-Throwaway — stream B owns the real pipeline (`engine/exemplar/perception/`).
+Not used at runtime: the production pipeline is `engine/exemplar/perception/`.
 
     uv run --project engine python scripts/spikes/bedrock_frames.py CLIP.mp4 [--n 16] [--strong] [--start S --len L]
 """
@@ -121,7 +121,7 @@ def main() -> None:
                     # the strong model rejects forced tool choice ("tool"/"any"); use auto + instruction
                     "toolChoice": {"auto": {}} if a.strong else {"tool": {"name": "emit_trace"}}}
         usage, t0, obj, errs = {"inputTokens": 0, "outputTokens": 0}, time.perf_counter(), None, []
-        for attempt in range(2):                       # PLAN.md §2.1.7: retry once with the error
+        for attempt in range(2):                       # retry once, feeding the validation error back
             r = brt.converse(modelId=model_id, system=[{"text": SYSTEM}], messages=messages, toolConfig=tool_cfg,
                              inferenceConfig={"maxTokens": 8000},
                              # forced toolChoice is incompatible with extended thinking; the Haiku-class

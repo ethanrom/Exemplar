@@ -1,5 +1,5 @@
 """Statistical validity of the conformal threshold: P(false alarm) <= alpha for exchangeable negatives,
-including heavy ties at the -C = -0.5 plateau (PLAN.md §2.5).
+including heavy ties at the -C = -0.5 plateau.
 
 Two independent checks:
 

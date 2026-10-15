@@ -1,4 +1,4 @@
-"""Hand-written fixture traces + signed webhook payloads (PLAN.md §4 Phase 0). Part of the contract.
+"""Hand-written fixture traces + signed webhook payloads. Shared by many tests.
 
     uv run --project engine python tests/fixtures/make_fixtures.py
 

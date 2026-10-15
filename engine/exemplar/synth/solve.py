@@ -2,7 +2,7 @@
 
 `solve_sketch` is the entry point the agent and the API use; `hole_box` is what the active-learning committee uses.
 
-Pipeline for one sketch (PLAN.md section 2.3, docs/DSL.md "Hole placement"):
+Pipeline for one sketch (docs/DSL.md "Hole placement"):
 
 1. `Encoder` builds GE/LE per example; ``z3.Optimize`` minimises the violated weight, then maximises the margin
    ``m`` (lexicographic).  Timeout/unknown -> grid search on a 0.5 s grid scored with the NumPy evaluator.
@@ -167,7 +167,7 @@ def _box(enc: Encoder, idx: Sequence[int], timeout_s: float) -> dict[str, tuple[
 def hole_box(sketch: Rule, examples: Sequence[Example], *, satisfied: Sequence[str], margin: float,
              timeout_s: float = 10.0) -> dict[str, tuple[float, float]]:
     """Feasible interval ``(lo, hi)`` of every hole: Z3 min/max with the ``satisfied`` examples (clip ids) required to
-    hold at ``margin`` and every other example unconstrained (PLAN.md section 2.4, the box the committee samples).
+    hold at ``margin`` and every other example unconstrained (the box the committee samples).
 
     Pass the same ``examples`` list that was given to `solve_sketch` (the hole domain ``[0, clip_len]`` is derived
     from it).  A query that times out falls back to the hole's full domain for that side.  Raises `InfeasibleBox`

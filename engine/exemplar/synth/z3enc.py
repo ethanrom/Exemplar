@@ -1,4 +1,4 @@
-"""Z3 encoding of the DSL semantics (PLAN.md section 2.3, docs/DSL.md).
+"""Z3 encoding of the DSL semantics (docs/DSL.md).
 
 For a *sketch* (a rule whose only free symbols are holes), labelled examples and a *margin level* ``m``, `Encoder`
 builds, per example,
@@ -14,7 +14,7 @@ so Z3 receives a DAG.  Every atom's robustness is a constant ``s(t) - 0.5`` read
 index, and every robustness value is one of a few constants (min / max / negation only select among them).  The
 margin is therefore not a Z3 variable but a constant *level* from `margin_levels()`: atoms fold to Python booleans,
 the formulas only contain window comparisons on the holes, and `solve_sketch` maximises the margin by walking the
-levels.  (This is the PLAN.md section 2.3 encoding with ``m`` specialised; it is much smaller than carrying ``m``
+levels.  (This is the encoding with a symbolic margin ``m`` specialised to constants; it is much smaller than carrying ``m``
 symbolically because ``rho(atom) <= -m`` is no longer a live constraint for every absent atom.)
 
 Conventions that must match `exemplar.dsl.evaluator` exactly (and are property-tested against it):

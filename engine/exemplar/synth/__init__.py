@@ -1,4 +1,4 @@
-"""Rule synthesis: Z3 hole solving (MaxSMT + max-margin), differential check, MDL ranking (PLAN.md section 2.3)."""
+"""Rule synthesis: Z3 hole solving (MaxSMT + max-margin), differential check, MDL ranking."""
 from .mdl import mdl
 from .render import render_trace_text
 from .solve import InfeasibleBox, hole_box, solve_sketch

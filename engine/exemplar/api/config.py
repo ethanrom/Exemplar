@@ -31,7 +31,7 @@ def configure_logging(level: str = "INFO") -> None:
 @dataclass
 class ApiConfig:
     # --- Ring ingest
-    poll_interval_s: float = 15.0            # history poll while a valid token exists (PLAN.md §2.7)
+    poll_interval_s: float = 15.0            # history poll while a valid token exists
     poll_enabled: bool = True
     clip_grace_s: float = 5.0                # download after clip end + 5 s
     webhook_assumed_clip_s: float = 10.0     # webhook events carry no end time: assume a 10 s clip
@@ -39,7 +39,7 @@ class ApiConfig:
     device_cache_s: float = 300.0
     dedupe_window_ms: int = 5_000            # a poll hit within this of a webhook event is the same physical event
     # --- perception
-    perception_concurrency: int = 2          # PLAN.md: max 2 concurrent Bedrock calls
+    perception_concurrency: int = 2          # max 2 concurrent Bedrock calls
     fast_frames: int = 16
     strong_frames: int = 32
     # --- teach
@@ -56,7 +56,7 @@ class ApiConfig:
     sse_ping_s: float = 15.0
     ui_url: str = "http://localhost:3000/"   # where the OAuth callback sends the browser back to
     default_timezone: str = "America/Los_Angeles"
-    # --- rule actions (stream E's ActionRunner); URLs / secrets are credentials: env only, never logged
+    # --- rule actions (used by the monitor's ActionRunner); URLs / secrets are credentials: env only, never logged
     chime_enabled: bool = False              # early-access Ring chime playback; the Playground answers 400
     chime_audio_ref: str = "default"
     slack_webhook_url: str | None = None     # EXEMPLAR_SLACK_WEBHOOK_URL

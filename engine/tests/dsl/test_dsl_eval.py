@@ -36,7 +36,7 @@ def score_and_bool(rule_text, tr, holes=None):
     return robustness(r, tr, holes), evaluate_bool(r, tr, holes)
 
 
-# ------------------------------------------------------------------ fixtures: the PLAN's example concepts
+# ------------------------------------------------------------------ fixtures: the example concepts
 THEFT = "exists p: Person, k: Package: picks_up(p, k) then[0, 10] carrying(p, k) and not attr(p, delivery_uniform)"
 DWELL = "exists v: Vehicle: holds_for >= 120 in_zone(v, dock)"
 UNATTENDED = "exists k: Package: always[0, 24] in_zone(k, steps)"
@@ -328,16 +328,16 @@ def test_prepared_trace_is_reusable_and_robust_to_identity_reuse():
     assert np.array_equal(p.t_ms, tr.t_ms)
 
 
-# ------------------------------------------------------------------ agreement with the Phase 0 spike evaluator
-def test_then_agrees_with_the_phase0_spike_evaluator():
-    """scripts/spikes/z3_then.py::rho_then is the NumPy evaluator that agreed with Z3 in spike 6."""
+# ------------------------------------------------------------------ agreement with the exploratory evaluator
+def test_then_agrees_with_the_exploratory_evaluator():
+    """scripts/spikes/z3_then.py::rho_then is the exploratory NumPy evaluator that agreed with Z3 on `then`."""
     import importlib.util
     import random
     from pathlib import Path
 
     path = Path(__file__).parents[3] / "scripts" / "spikes" / "z3_then.py"
     if not path.exists():
-        pytest.skip("spike script not present")
+        pytest.skip("scripts/spikes/z3_then.py not present")
     spec = importlib.util.spec_from_file_location("z3_then_spike", path)
     spike = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(spike)

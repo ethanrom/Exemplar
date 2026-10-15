@@ -717,7 +717,7 @@ class FiringsRepo(_Repo):
 # =================================================================================================== webhooks / cost / auth
 class WebhooksRepo(_Repo):
     def claim(self, request_id: str, event_type: str | None = None) -> bool:
-        """A's `WebhookDeduper.claim`: atomically record `request_id` (an insert that ignores only a duplicate
+        """Same contract as `WebhookDeduper.claim` (exemplar.ring): atomically record `request_id` (an insert that ignores only a duplicate
         primary key); False if it was already delivered."""
         return self.s.execute(
             "INSERT INTO webhook_deliveries (request_id, event_type, received_at_ms) VALUES (?,?,?) "
@@ -760,7 +760,7 @@ class CostRepo(_Repo):
 
 
 class AuthRepo(_Repo):
-    """A's `TokenStore` over the single-row `ring_auth` table."""
+    """The Ring `TokenStore` (exemplar.ring.tokens) over the single-row `ring_auth` table."""
 
     def load(self) -> StoredAuth | None:
         r = self.s.query_one("SELECT * FROM ring_auth WHERE id = 1")

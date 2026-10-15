@@ -1,4 +1,4 @@
-"""Property tests (PLAN.md §2.2.3 + extras). Strategies live in dsl_strategies.py."""
+"""Property tests for the evaluators. Strategies live in dsl_strategies.py."""
 from __future__ import annotations
 
 import os

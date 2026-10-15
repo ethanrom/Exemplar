@@ -1,4 +1,4 @@
-"""Labels with provenance (PLAN.md §2.4, §2.5). Frozen contract.
+"""Labels with provenance (see docs/DSL.md, "Label provenance").
 
 A label is per (concept, clip): the same clip can be a positive for "package theft" and a negative
 for "loitering". Provenance decides what a label may be used for, and that rule is what keeps the
@@ -7,7 +7,7 @@ conformal guarantee honest:
   provenance  | chosen by                       | synthesis | calibration / recall CI
   ------------|---------------------------------|-----------|------------------------
   example     | the user, as a teaching example | yes       | no
-  active      | the active learner (§2.4)       | yes       | no  — not exchangeable with deployment
+  active      | the active learner              | yes       | no  — not exchangeable with deployment
   random      | uniform sample of history       | no        | yes — must be held out from fitting
 
 `random` labels are excluded from synthesis as well: conformal calibration needs scores from data
@@ -23,7 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field
 Provenance = Literal["example", "active", "random"]
 LabelValue = Literal["pos", "neg"]
 
-WEIGHT_CONFIRMED = 3.0   # the user looked at this clip and chose the label (§2.3)
+WEIGHT_CONFIRMED = 3.0   # the user looked at this clip and chose the label
 WEIGHT_BULK = 1.0        # bulk-negative / auto labels
 
 

@@ -18,7 +18,8 @@ pytestmark = pytest.mark.live
 
 DATA = Path(os.environ.get("EXEMPLAR_DATA_DIR") or Path(__file__).parents[3] / "data")
 FROLLARD = DATA / "external" / "frollard_thief.mp4"
-PKG = DATA / "spike" / "ring" / "CBDPSLBSIOVQ66XX" / "clip.mp4"
+# Point EXEMPLAR_PACKAGE_CLIP at the recorded Playground package clip (default: <data>/spike/ring/<event id>/clip.mp4).
+PKG = Path(os.environ.get("EXEMPLAR_PACKAGE_CLIP") or DATA / "spike" / "ring" / "EVENT_ID" / "clip.mp4")
 MEVA = DATA / "meva" / "clips" / "G339_unloads_280.mp4"
 
 

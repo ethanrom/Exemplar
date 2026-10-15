@@ -1,4 +1,4 @@
-"""SQLite store (PLAN.md §1 `store/`) over the frozen `contracts/schema.sql`.
+"""SQLite store over `contracts/schema.sql`.
 
 One connection shared by every thread behind an `RLock` (FastAPI calls in via its threadpool, the ingest
 workers, the teach thread and the event loop all touch it). Statements are tiny, so the lock is held for

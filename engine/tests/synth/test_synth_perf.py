@@ -1,4 +1,4 @@
-"""One sketch on 40 labelled clips x 24 frames solves well inside the 10 s per-sketch timeout (PLAN.md section 2.3)."""
+"""One sketch on 40 labelled clips x 24 frames solves well inside the 10 s per-sketch timeout."""
 from __future__ import annotations
 
 import random

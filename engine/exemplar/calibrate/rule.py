@@ -1,4 +1,4 @@
-"""Calibrating a closed rule on random-labelled clips (PLAN.md §2.5, docs/DSL.md "Label provenance")."""
+"""Calibrating a closed rule on random-labelled clips (docs/DSL.md "Label provenance")."""
 from __future__ import annotations
 
 import dataclasses

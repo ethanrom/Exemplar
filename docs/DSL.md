@@ -1,11 +1,11 @@
 # Exemplar DSL — semantics
 
-**Owner:** stream C (Phase 1) completed this document. It is normative: `engine/exemplar/contracts/dsl_ast.py` (AST + grammar) and `engine/tests/test_contracts.py` must agree with it, and PLAN.md §2.2 is the source it elaborates. The sections below were fixed in Phase 0 because the contracts depend on them.
+This document is normative: `engine/exemplar/contracts/dsl_ast.py` (AST + grammar) and `engine/tests/test_contracts.py` must agree with it.
 
 ## Grammar
 The Lark LALR grammar is `GRAMMAR` in `contracts/dsl_ast.py`. Precedence, loosest to tightest: `or` < `and` < `then` < prefix (`not`, `eventually[a,b]`, `always[a,b]`, `holds_for >= d`). `then` is left-associative. Any `name(` parses as an atom. Unknown predicates are rejected by the **typechecker** with a readable message, because the CEGIS agent feeds that message back to the LLM. Bounds are seconds; `hour` bounds are integers 0–23; `?name` is a hole.
 
-## Time is integer milliseconds (Phase 0, spike 6)
+## Time is integer milliseconds
 `Frame.t_ms` is an integer offset from clip start. Evaluators compute a window offset as `(t_ms[j] - t_ms[i]) / 1000`, a single correctly-rounded division, and compare it with `a <= Δ <= b`. They never subtract float seconds. Why it matters: the solver's tightness tiebreak puts holes *exactly* on observed gaps, so evaluators must agree at equality. With float seconds, `0.3 - 0.1 >= 0.2` is `False`. With integer ms, if exact `Δ == b` then the rounded values are equal too, because rounding is monotone. The Z3 encoder uses the exact rationals `t_ms/1000`.
 
 ## Signals (`Trace.signal`)
@@ -14,7 +14,7 @@ The Lark LALR grammar is `GRAMMAR` in `contracts/dsl_ast.py`. Precedence, looses
 - `attr(e, L)` is at least `CONF_VALUE["med"]` in every frame when `L ∈ e.attrs` (clip-level labels).
 
 ## Encoder bound
-The margin variable is bounded `0 ≤ m ≤ C`. With the plan's empty-window convention (`ρ = −C`), an `LE` constraint over an empty window is `−C ≤ −m`, so `m ≤ C`.
+The margin variable is bounded `0 ≤ m ≤ C`. With the empty-window convention (`ρ = −C`), an `LE` constraint over an empty window is `−C ≤ −m`, so `m ≤ C`.
 
 ## Label provenance and the conformal guarantee
 | provenance | used by synthesis | used by calibration / recall CI |
@@ -23,15 +23,15 @@ The margin variable is bounded `0 ≤ m ≤ C`. With the plan's empty-window con
 | `active` | yes | no (actively chosen, so not exchangeable with deployment events) |
 | `random` | **no** | yes |
 
-`random` labels are also kept **out of synthesis**. The engine accepts provenance `random` only for clips that `POST /concepts/{id}/random-sample` actually drew (table `random_samples`) and rejects any other with 400 `INVALID_PROVENANCE`. Without that check, a user could hand-pick "random" clips. The conformal bound `P(false alarm) ≤ α` needs calibration scores from negatives the rule was not fitted on. If they were used for fitting, τ_α would be biased low and the guarantee would not hold. (PLAN.md §2.5 only says active labels never calibrate; this is the other half.)
+`random` labels are also kept **out of synthesis**. The engine accepts provenance `random` only for clips that `POST /concepts/{id}/random-sample` actually drew (table `random_samples`) and rejects any other with 400 `INVALID_PROVENANCE`. Without that check, a user could hand-pick "random" clips. The conformal bound `P(false alarm) ≤ α` needs calibration scores from negatives the rule was not fitted on. If they were used for fitting, τ_α would be biased low and the guarantee would not hold.
 
-## Hole placement: temporal slack (decided 2026-10-15, replaces "prefer tighter windows")
-Spike 6: with "prefer tighter windows" as the third objective, positives with gaps of 6 s and 7 s solve to exactly `[6, 7]`, and a rule taught from one clip matches only that exact timing. Instead, after minimising violations and maximising `m`, each hole is moved away from the edges of its feasible interval `[lo_h, hi_h]` (computed by Z3 min/max with the satisfied set and `m*` fixed):
+## Hole placement: temporal slack
+Using "prefer tighter windows" as the third objective would make positives with gaps of 6 s and 7 s solve to exactly `[6, 7]`, so a rule taught from one clip would match only that exact timing. Instead, after minimising violations and maximising `m`, each hole is moved away from the edges of its feasible interval `[lo_h, hi_h]` (computed by Z3 min/max with the satisfied set and `m*` fixed):
 - lower window bounds `a`: `0` if feasible, else the centre of the interval;
 - all other holes (`b`, `d`, `h1`, `h2`): the centre of the interval;
 - snap to a 0.5 s grid (hours: integers), then re-verify with the NumPy evaluator. If that fails, step back from the Z3 model point towards the snapped point until it passes.
 
-Example: one positive with gap 7 s in a 24 s clip gives `then[0, 15.5]`, not `then[7, 7]`. Owned by stream D (`synth/`), and tested there.
+Example: one positive with gap 7 s in a 24 s clip gives `then[0, 15.5]`, not `then[7, 7]`. Implemented in `synth/` and tested there.
 
 ## Semantics
 
@@ -40,7 +40,7 @@ Everything below is implemented in `engine/exemplar/dsl/` and pinned by `engine/
     W(i; a, b) = { j : a ≤ Δ(i,j) ≤ b }          the frames in the window [t_i + a, t_i + b], both ends inclusive
     C = 0.5                                       CLAMP; ρ always lies in [−C, C]
 
-`s_P(args)(i)` is the signal of Phase 0 ("Signals"). Atoms are the only place the trace enters.
+`s_P(args)(i)` is the signal defined under "Signals". Atoms are the only place the trace enters.
 
 ### Robustness ρ(φ, i) and boolean truth ⟦φ⟧(i), operator by operator
 
@@ -71,7 +71,7 @@ Everything below is implemented in `engine/exemplar/dsl/` and pinned by `engine/
 
 1. **Empty windows are `−C` for both `eventually` and `always`.** "No evidence" is never vacuous truth. Consequences: `not always[a,b] φ` over an empty window is `+C` (true), and widening an `always` window is monotone *only where the narrower window already contained a frame* (the property test is stated that way; `test_always_widening_exception_is_the_empty_window_convention` shows the exception). `eventually` widening is monotone everywhere.
 2. **Windows are clipped to the clip.** Offsets beyond the last frame have no frames, so `always[0, 1000] φ` on a 30 s clip is the min over all remaining frames. Use `holds_for` when "for at least d seconds" must be proven by evidence that long.
-3. **`then` and `holds_for` search forward over every start `i1 ≥ i`**, exactly as PLAN §2.2 defines them. Nested inside a bounded operator (`eventually[0,5] (a then[0,3] b)`) the start `i1` is therefore *not* confined to the enclosing window. At the top of a rule it makes no difference, because the score already maximises over `i`.
+3. **`then` and `holds_for` search forward over every start `i1 ≥ i`**, exactly as the operator table above defines them. Nested inside a bounded operator (`eventually[0,5] (a then[0,3] b)`) the start `i1` is therefore *not* confined to the enclosing window. At the top of a rule it makes no difference, because the score already maximises over `i`.
 4. **`holds_for` is evidence-based.** "Continuously" means every *sampled* frame in `[t1, t1+d]` holds. With frame spacing larger than `d` a single true frame is enough; the run must also fit inside the clip (`t1 + d ≤ t_end`, equality allowed). The dock fixture is sampled every 6 s from 6 s to 126 s plus 156 s, so `holds_for >= 150` holds and `holds_for >= 151` does not.
 5. **Start-time semantics of absence.** The score maximises over the start time, so `A and not eventually[0,w] B` means "there is a start time at which A holds and B does not occur in the next `w` seconds", **not** "B never occurs in the clip" (a start after the last B qualifies). Rules that must exclude an event anywhere in a clip cannot be expressed this way; teach them with a positive formulation or with a context/attribute atom.
 6. **Existential bindings.** `exists` ranges over entities that exist in the trace, so "nobody is around" cannot be said as an absence of persons; `unattended_package` (no person entity at all) is matched by `exists k: Package: always[0, 24] in_zone(k, steps)` or `holds_for >= 20 in_zone(k, steps)` instead. A variable that has no admissible entity makes the score `−C`.
@@ -79,7 +79,7 @@ Everything below is implemented in `engine/exemplar/dsl/` and pinned by `engine/
 8. **Determinism.** Everything is a pure function of `(rule, trace, holes)`. Ties in witnesses resolve to the first binding (in `Trace.bindings` order) and the earliest frame.
 
 ### Differential testing hooks
-The encoder (stream D) must agree with this evaluator: it uses the same `Δ`, the same `−C` conventions (including empty `always`, which is why `m ≤ C`), and `t_end = last frame`. `tests/dsl/dsl_reference.py` is a third, literal implementation of the table above (scalar recursion over Python lists) used to cross-check the vectorised code.
+The Z3 encoder (`synth/z3enc.py`) must agree with this evaluator: it uses the same `Δ`, the same `−C` conventions (including empty `always`, which is why `m ≤ C`), and `t_end = last frame`. `tests/dsl/dsl_reference.py` is a third, literal implementation of the table above (scalar recursion over Python lists) used to cross-check the vectorised code.
 
 ## Typechecker (`typecheck(rule) -> list[str]`)
 Returns every problem found, in tree order; empty means well-typed. Messages are written for the LLM sketch loop (they name the predicate, argument position, expected kind and what was found):
@@ -111,7 +111,7 @@ Minimal parentheses by precedence (`or` < `and` < `then` < prefix operators; `th
 ### Parser notes
 * `parse` accepts exactly `contracts.dsl_ast.GRAMMAR`; numbers become floats, hour bounds ints (a non-integral hour is a syntax error), nested `and`/`or` are flattened, `a then b then c` folds left.
 * Errors are `DSLSyntaxError(message, line, column)` with `str(e) == "line L, column C: message"` and `e.context` = the source line with a caret. "Expected" sets come from the parser's exact accept set, e.g. `line 1, column 35: unexpected 'present'; expected '['`.
-* Known grammar defect, worked around in the parser (no contract change): `PRED.2` is "a name followed by `(`", which also matches the keyword in `not (…)` / `not(…)`; the parser re-tags a `PRED` token whose text is `not` as the `NOT` keyword (`lexer_callbacks`). Suggested contract fix: give the keyword priority or exclude it in the `PRED` regex (`(?!not\b)`).
+* Known grammar defect, worked around in the parser (the grammar itself is unchanged): `PRED.2` is "a name followed by `(`", which also matches the keyword in `not (…)` / `not(…)`; the parser re-tags a `PRED` token whose text is `not` as the `NOT` keyword (`lexer_callbacks`). Possible grammar fix: give the keyword priority or exclude it in the `PRED` regex (`(?!not\b)`).
 
 ### English (`to_english`)
 Deterministic templates; no LLM ever paraphrases a rule. A rule is `There is <vars> such that <body>[, when <context>].`
@@ -233,14 +233,14 @@ Plus example tests: the three concept rules above on all 12 fixtures, hand-compu
 ## Performance
 `tests/dsl/test_dsl_perf.py` (T = 24 frames, 3 persons × 2 packages = 6 bindings, a 4-node sketch with 3 holes and a context atom): ≈ 0.05–0.10 ms per `(rule, trace)` through `CompiledRule.score` on a `PreparedTrace` (also with every window distinct), ≈ 0.08 ms through `evaluate(sketch, trace, holes)`, ≈ 0.6 ms for a first call on a fresh `Trace` (includes `prepare`), `evaluate_bool` ≈ 0.6 ms, `witness` ≈ 0.2 ms. A 200-point × 40-clip sweep is therefore about 0.5 s. The evaluator batches all bindings into `(B, T, T)` NumPy arrays, caches window masks and atom matrices per prepared trace, and builds the signal index in one pass over the facts.
 
-## Perception conventions the evaluators rely on (integrator, from stream B)
+## Perception conventions the evaluators rely on
 - `near(a, b)` is symmetric in traces: perception adds the mirrored fact, so rules may use either argument order.
 - `present(e)` may be omitted by perception whenever another fact mentions `e` (`Trace.signal` implies it).
 - Sampled frames sit at the midpoints of equal sub-windows, so the first frame is at `t > 0` and the last is before the clip end. `holds_for` and window edges are evaluated on these sampled frames only.
 - `context.sub_type` must be filled at ingest (`human`, `vehicle`, `package_delivery`, `other_motion`, or the extras `motion`, `ding`, `on_demand`). `subtype = S` is strict equality, and a missing value makes the atom false.
 - `exists` ranges only over entities that appear in the trace, so "nobody is around" isn't expressible as such. Write the positive form instead, e.g. `exists k: Package: holds_for >= 20 in_zone(k, steps)`.
 
-## Calibration details (integrator, from stream E)
+## Calibration details
 - The conformal rank `k = ⌈(n+1)(1−α)⌉` uses exact `Fraction` arithmetic (float `ceil` is wrong for e.g. α = 0.18, n = 149). Firing is strict: `score > τ`.
 - `τ = max(τ_α, 0)`. A rule never fires where it doesn't hold (score ≤ 0), even when the raw quantile τ_α is negative, which is common with ties on the −C plateau. Flooring only makes firing stricter, so `P(false alarm) ≤ α` still holds. The raw quantile is kept as `Calibration.tau_alpha`.
 - The guarantee covers the **stage-1** decision on fast-perception scores against random-labelled negatives. Stage-2 escalation re-decides only events inside `|score − τ| ≤ δ`. If strong perception fails, the stage-1 decision stands and an `error` event is emitted.

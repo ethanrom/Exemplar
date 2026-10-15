@@ -8,7 +8,7 @@ from exemplar.contracts.dsl_ast import (Always, And, Atom, Eventually, HoldsFor,
 from exemplar.contracts.ontology import PREDICATES
 from exemplar.dsl import (DSLSyntaxError, fmt_num, normalize, parse, to_english, to_text, typecheck)
 
-# The five grammar examples frozen in tests/test_contracts.py.
+# The five grammar examples pinned in tests/test_contracts.py.
 EXAMPLES = [
     "exists p: Person, k: Package: picks_up(p, k) then[0, ?b] leaves(p, porch)",
     "exists v: Vehicle: holds_for >= 120 in_zone(v, dock) when hour in [6, 22]",
@@ -28,7 +28,7 @@ def at(pred, *args):
 def test_contract_examples_parse_typecheck_and_roundtrip(text):
     r = parse(text)
     assert typecheck(r) == []
-    assert to_text(r) == text                    # the contract examples are already canonical
+    assert to_text(r) == text                    # the pinned grammar examples are already canonical
     assert parse(to_text(r)) == r
 
 

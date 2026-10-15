@@ -1,4 +1,4 @@
-"""`python -m eval.run` end to end with fake D / E: results.json rows, resume, trace cache access without a client."""
+"""`python -m eval.run` end to end with fake services: results.json rows, resume, trace cache access without a client."""
 import json
 import sys
 from types import SimpleNamespace
@@ -120,8 +120,8 @@ def test_trace_cache_key_matches_what_perceive_detailed_uses(data_dir):
     assert res.cached and res.trace.clip_id == w.id
 
 
-def test_make_services_explains_what_is_missing_when_d_or_e_are_absent(monkeypatch):
-    monkeypatch.setitem(sys.modules, "exemplar.active", None)                      # simulate "stream E not merged"
+def test_make_services_explains_what_is_missing_when_modules_are_absent(monkeypatch):
+    monkeypatch.setitem(sys.modules, "exemplar.active", None)                      # simulate "exemplar.active unavailable"
     with pytest.raises(SystemExit) as e:
         run.make_services("offline")
-    assert "streams D" in str(e.value) and "merged" in str(e.value)
+    assert "exemplar.active" in str(e.value) and "importable" in str(e.value)

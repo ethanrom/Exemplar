@@ -2,12 +2,12 @@
 
 * `PlaygroundToken` - the Developer Playground's read-only JWT (30 min, `ava.v1:read`). We never verify
   the signature (we don't have the key); we only decode `iat`/`exp` to drive the countdown and to know
-  the media consent boundary (`issued_at_ms` of the FIRST token - see docs/friction/phase0.md P0-1).
+  the media consent boundary (`issued_at_ms` of the FIRST token - see docs/FRICTION_LOG.md).
 * `OAuthApp` - the real app mode: authorization_code (+PKCE) and refresh_token grants against
   https://oauth.ring.com/oauth/token, refresh-token ROTATION (every refresh returns a new refresh
   token, the old one stops working), and the app-integrations account-link calls.
 * `AuthManager` - what FastAPI holds: the "current" provider, swappable at runtime (`PUT /ring/auth`),
-  persisted through a `TokenStore` (H backs it with the `ring_auth` table).
+  persisted through a `TokenStore` (the API backs it with the `ring_auth` table).
 
 Tokens are secrets: nothing in this module logs or repr()s them.
 """

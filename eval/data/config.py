@@ -9,7 +9,7 @@ import yaml
 
 from .paths import EVAL_DATA
 
-# Exterior EO cameras (PLAN.md section 3). G474-G479 are thermal 352x240 and are skipped.
+# Exterior EO cameras. G474-G479 are thermal 352x240 and are skipped.
 EXTERIOR_CAMERAS = ("G300", "G301", "G328", "G336", "G339", "G340", "G341", "G424", "G436", "G505", "G506", "G509", "G638", "G639")
 SPLITS = ("train", "calib", "test")
 

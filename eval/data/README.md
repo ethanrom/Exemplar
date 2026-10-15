@@ -1,6 +1,6 @@
 # eval/data: the Exemplar evaluation dataset
 
-Stream G (eval-data). Turns the public MEVA surveillance corpus into a small benchmark of **labelled 10-20 s clips**
+Turns the public MEVA surveillance corpus into a small benchmark of **labelled 10-20 s clips**
 for four coarse concepts, plus 18 windows of a CC BY "package theft" video for the demo's teach story.
 Everything below is deterministic (seed 0) and reproducible from the committed configs; only the large files
 (videos, clips) live outside git, under `$EXEMPLAR_DATA_DIR` (gitignored `data/`).
@@ -20,7 +20,7 @@ Everything below is deterministic (seed 0) and reproducible from the committed c
 
 ```bash
 export PYTHONUTF8=1
-export EXEMPLAR_DATA_DIR="D:/kaskara/amazon dev hackathon/data"     # large data; any writable dir works
+export EXEMPLAR_DATA_DIR="/path/to/exemplar-data"     # large data; any writable dir works
 # once: blob-less sparse clone of gitlab.kitware.com/meva/meva-data-repo at $EXEMPLAR_DATA_DIR/meva/meva-data-repo,
 #       with /annotation/DIVA-phase-2/MEVA/kitware/*/*/*.activities.yml checked out (geometry is fetched on demand)
 uv run --project engine python -m eval.data.select        # videos.yaml  (S3 listing is cached; --refresh-s3 to re-list)
@@ -46,8 +46,8 @@ to get the clips; rerunning the earlier steps must reproduce the committed files
 | `door_crossing` | `person_enters_scene_through_structure`, `person_exits_scene_through_structure` | A person walks through a building doorway, either coming out of a door into the camera view or going into a door and leaving the view. |
 | `vehicle_loading` | `person_loads_vehicle`, `person_unloads_vehicle` | A person loads items into, or unloads items from, a vehicle, for example at an open trunk or rear door. |
 
-MEVA's public annotations contain no theft or abandonment activity, so these are the coarse, countable concepts
-(PLAN.md section 3). `confusers` (related activities such as `vehicle_starts`, `person_opens_trunk`) define *hard* negatives.
+MEVA's public annotations contain no theft or abandonment activity, so these are the coarse, countable concepts.
+`confusers` (related activities such as `vehicle_starts`, `person_opens_trunk`) define *hard* negatives.
 
 ## Windows (`windows.py`)
 

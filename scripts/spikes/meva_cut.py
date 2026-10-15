@@ -1,6 +1,7 @@
-"""Phase 0 spike (PLAN.md §5 Q7): read MEVA KPF activity annotations and cut a clip window around one.
+"""Exploratory probe used while building the MEVA benchmark: read MEVA KPF activity annotations and cut a
+clip window around one instance.
 
-Throwaway — stream G owns the real pipeline (`eval/data/`).
+Not used at runtime: the benchmark pipeline is `eval/data/`.
 
     uv run --project engine python scripts/spikes/meva_cut.py VIDEO.avi ANNOT.activities.yml [--activity person_unloads_vehicle] [--pad 3]
 """

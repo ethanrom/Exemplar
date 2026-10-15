@@ -87,7 +87,7 @@ class AppState:
 
     # ------------------------------------------------------------------ monitor
     def deployed_rule(self, row: RuleRow) -> Any:
-        """E's `DeployedRule` for a stored rule."""
+        """The monitor's `DeployedRule` for a stored rule."""
         return self.services.deployed_rule_cls(
             rule_id=row.id, concept_id=row.concept_id, rule=Rule.model_validate_json(row.ast_json),
             tau=float(row.tau if row.tau is not None else 0.0), delta=float(row.delta),

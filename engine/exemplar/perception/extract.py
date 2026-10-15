@@ -26,7 +26,7 @@ from .sampling import SampledFrame
 
 log = logging.getLogger("exemplar.perception")
 
-MAX_ATTEMPTS = 2           # first try + ONE retry (PLAN.md §2.1.7)
+MAX_ATTEMPTS = 2           # first try + ONE retry
 
 
 class PerceptionBackendError(RuntimeError):

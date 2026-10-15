@@ -1,8 +1,8 @@
-"""Shared runtime settings. Reads `.env` once; every stream uses this instead of its own loader.
+"""Shared runtime settings. Reads `.env` once; all modules use this instead of their own loaders.
 
 Resolution order for the dotenv file: $EXEMPLAR_DOTENV, then the first `.env` found walking up from
-the current directory, then the repo root. Worktrees set EXEMPLAR_DOTENV / EXEMPLAR_DATA_DIR to the
-main checkout so secrets and large data are never copied.
+the current directory, then the repo root. Set EXEMPLAR_DOTENV / EXEMPLAR_DATA_DIR to point a secondary checkout
+(for example a git worktree) at an existing `.env` and data directory instead of copying them.
 """
 from __future__ import annotations
 

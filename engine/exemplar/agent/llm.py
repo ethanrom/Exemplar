@@ -1,6 +1,6 @@
 """The LLM side of the CEGIS loop: a Strands agent on Bedrock that proposes sketches through tool calls.
 
-Bedrock quirks (spike-verified, docs/friction): never send ``temperature``; the strong model rejects forced tool choice,
+Bedrock quirks (verified against the live service, see docs/FRICTION_LOG.md): never send ``temperature``; the strong model rejects forced tool choice,
 so the agent submits sketches through an ordinary tool call (``submit_sketches``) and `structured_output` is not used;
 the region goes into the `boto3.Session`, not into `BedrockModel(region_name=...)`.  The model id comes from the
 environment (`exemplar.settings`), never from code, and is never logged.

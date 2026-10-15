@@ -1,6 +1,6 @@
-"""Integrator test: the whole pipeline through the API with every REAL stream (C, D, E, H) wired by default.
+"""End-to-end test: the whole pipeline through the API with the real DSL, synthesis, active learning, calibration and monitor.
 
-Only Ring and perception are fakes (fixture traces), and the LLM is replaced by stream D's deterministic
+Only Ring and perception are fakes (fixture traces), and the LLM is replaced by the deterministic
 TemplateProposer, so this runs offline and free: teach -> candidates -> active question -> random
 calibration labels -> backtest with the conformal badge -> deploy -> webhook event -> firing with witness.
 """

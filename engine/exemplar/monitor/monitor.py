@@ -1,4 +1,4 @@
-"""The online monitor: stage 0 prune -> stage 1 fast score -> stage 2 escalation -> fire or drop (PLAN.md §2.6).
+"""The online monitor: stage 0 prune -> stage 1 fast score -> stage 2 escalation -> fire or drop.
 
 For each event and every deployed rule exactly one `FiringRecord` is produced:
 
@@ -17,8 +17,8 @@ Failure policy (the monitor never raises for perception problems):
 * stage-1 perception raises or returns a ``perception_failed`` trace: every remaining rule is dropped at stage 1
   with the reason as the message.
 * stage-2 (strong) perception fails: the rules keep their stage-1 decision (the calibrated one, whose false-alarm
-  bound is the one proved); the message says so and an ``error`` event is emitted. The spec's wording is
-  "dropped"; falling back instead of dropping avoids silently losing a borderline true positive.
+  bound is the one proved); the message says so and an ``error`` event is emitted. Falling back instead of dropping
+  avoids silently losing a borderline true positive.
 * ``on_event`` / ``on_firing`` callbacks that raise are logged and ignored.
 
 ``perceive_fast`` / ``perceive_strong`` may return a `Trace` or a `PerceptionResult` (anything with ``.trace``

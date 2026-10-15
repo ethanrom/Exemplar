@@ -1,7 +1,7 @@
 /**
  * Shared Ring webhook handler (used by /api/ring/webhook and the sample's legacy /api/webhook POST).
  *
- * Flow (PLAN.md 2.7, notifications.md):
+ * Flow (see the Ring notifications documentation):
  *   raw body -> verify X-Signature (HMAC-SHA256, constant time) -> parse -> dedupe meta.request_id
  *   -> respond 200 immediately -> forward the ORIGINAL body fire-and-forget to the engine
  *   (and broadcast to the sample dashboard's SSE feed).

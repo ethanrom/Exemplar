@@ -1,4 +1,4 @@
-"""Contract tests (PLAN.md §4 Phase 0). These pin the frozen contracts; streams must keep them green."""
+"""Contract tests: these pin the stable interfaces (DSL AST and grammar, trace, labels, schema, API spec)."""
 from __future__ import annotations
 
 import hashlib

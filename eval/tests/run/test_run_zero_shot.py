@@ -60,7 +60,7 @@ def test_request_shape_uses_the_strong_model_recipe_and_the_same_frames():
     assert "temperature" not in kw and "temperature" not in kw["inferenceConfig"]
     texts = [b["text"] for b in kw["messages"][0]["content"] if "text" in b]
     images = [b for b in kw["messages"][0]["content"] if "image" in b]
-    assert len(images) == 16 and texts[1] == "Frame 0 (t=0.5s)" and texts[16] == "Frame 15 (t=15.5s)"     # B's caption format
+    assert len(images) == 16 and texts[1] == "Frame 0 (t=0.5s)" and texts[16] == "Frame 15 (t=15.5s)"     # perception's caption format
     assert DESC in texts[-1] and zs.TOOL_NAME in texts[-1]
     assert (r.match, r.confidence, r.status, r.attempts) == (True, 0.8, "ok", 1)
     assert r.usd == pytest.approx(usd("strong", 5000, 100)) and r.model_alias == "alias"

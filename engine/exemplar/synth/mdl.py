@@ -1,4 +1,4 @@
-"""Minimum-description-length score used to rank candidate rules (PLAN.md section 2.3)."""
+"""Minimum-description-length score used to rank candidate rules."""
 from __future__ import annotations
 
 import math

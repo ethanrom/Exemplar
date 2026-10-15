@@ -5,16 +5,26 @@
 /token
 *.token
 
-# hackathon briefing material (not ours to redistribute)
+# third-party event briefing material (not ours to redistribute)
 challange.txt
 rules.txt
 updates.txt
 
-# local data, downloads, caches
+# local data, downloads, caches, generated output
 /data/
+.devdata/
 *.mp4
 *.avi
 .cache/
+apps/web/mock/.cache/
+eval/diagnostics/
+*.log
+*.tmp
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
 
 # python
 .venv/
@@ -22,6 +32,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .hypothesis/
+.mypy_cache/
 *.egg-info/
 .ruff_cache/
 
@@ -30,6 +41,10 @@ node_modules/
 .next/
 out/
 *.tsbuildinfo
+
+# tool-local state
+.playwright-mcp/
+.claude/settings.local.json
 
 # os / editor
 .DS_Store
