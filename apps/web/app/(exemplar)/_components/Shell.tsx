@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { AppProvider, useApp } from '../_lib/app'
 import { fmtCountdown } from '../_lib/format'
 import { useNow } from '../_lib/hooks'
+import { Icon } from './Icon'
 import { StatusDot, cx, type Tone } from './ui'
 
 const LINKS = [
@@ -13,7 +14,7 @@ const LINKS = [
   { href: '/teach', label: 'Teach' },
   { href: '/rule', label: 'Rule' },
   { href: '/live', label: 'Live' },
-  { href: '/eval', label: 'Eval' },
+  { href: '/eval', label: 'Evidence' },
 ]
 
 /** The product mark: three staggered bars, a miniature witness timeline. */
@@ -127,6 +128,19 @@ function Nav() {
   )
 }
 
+function EngineBanner() {
+  const { engineOk } = useApp()
+  if (engineOk !== false) return null
+  return (
+    <div role="alert" className="border-b border-ex-neg-line bg-ex-neg-soft">
+      <p className="mx-auto flex max-w-[1240px] items-center gap-2.5 px-4 py-2 text-sm text-ex-ink sm:px-6">
+        <Icon name="warning" className="h-4 w-4 shrink-0 text-ex-neg" />
+        <span>The Exemplar engine is not reachable, so nothing new will load. Start it, then reload this page.</span>
+      </p>
+    </div>
+  )
+}
+
 export function Shell({ children }: { children: ReactNode }) {
   return (
     <AppProvider>
@@ -137,6 +151,7 @@ export function Shell({ children }: { children: ReactNode }) {
         Skip to main content
       </a>
       <Nav />
+      <EngineBanner />
       <main id="main" tabIndex={-1} className="mx-auto min-h-[calc(100vh-10rem)] max-w-[1240px] px-4 pb-20 pt-10 focus:outline-none sm:px-6">
         {children}
       </main>

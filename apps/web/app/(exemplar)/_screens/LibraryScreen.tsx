@@ -494,7 +494,7 @@ export default function LibraryScreen() {
           : 'Cut into windows from footage you uploaded.',
       }
     }
-    if (key === 'meva') return { title: 'MEVA', note: 'Real outdoor surveillance footage (CC BY 4.0) used for the evaluation.' }
+    if (key === 'meva') return { title: 'MEVA', note: 'Real outdoor surveillance footage (CC BY 4.0) used for the evaluation runs.' }
     return { title: 'Fixtures', note: 'Built-in examples without a picture, drawn from what the model read in them: entities as rows, facts as ticks over time.' }
   }
 
@@ -653,7 +653,7 @@ export default function LibraryScreen() {
             </div>
           ))}
         </div>
-      ) : shown.length === 0 ? (
+      ) : shown.length === 0 && error ? null : shown.length === 0 ? (
         <div className="mt-10">
           <Empty
             title="No clips match these filters"

@@ -133,21 +133,21 @@ await step('live: wait for firings', async () => {
   await shot('06b-live-later')
 })
 
-// ---- eval
+// ---- evidence (route /eval)
 await go('/eval')
 await page.waitForTimeout(500)
-await shot('07a-eval')
+await shot('07a-evidence')
 await step('eval: tables', async () => {
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: /Show as table/ }).first().click()
+  await page.getByRole('button', { name: /Show as table/ }).first().click()
   await page.waitForTimeout(300)
-  await shot('07b-eval-tables')
+  await shot('07b-evidence-table')
 })
 
 // ---- phone: screenshots + horizontal overflow check
 await page.setViewportSize({ width: 390, height: 844 })
 for (const [name, path] of [
   ['08a-mobile-home', '/'], ['08b-mobile-connect', '/connect'], ['08c-mobile-library', '/library'], ['08d-mobile-teach', '/teach'],
-  ['08e-mobile-rule', '/rule'], ['08f-mobile-live', '/live'], ['08g-mobile-eval', '/eval'],
+  ['08e-mobile-rule', '/rule'], ['08f-mobile-live', '/live'], ['08g-mobile-evidence', '/eval'],
 ]) {
   await go(path)
   await page.waitForTimeout(1200)

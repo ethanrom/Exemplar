@@ -43,14 +43,14 @@ export function TraceStrip({ trace, compact = false }: { trace: Trace; compact?:
       </div>
     )
   }
+  // Entity ids are drawn with CSS (data-id) so they are not DOM text: these strips sit inside labelled buttons (WCAG 2.5.3).
   return (
     <div aria-hidden="true" className={cx('flex h-full w-full flex-col justify-center bg-ex-raised', compact ? 'gap-[3px] px-2' : 'gap-2 px-3.5')}>
       {ents.map((e) => (
         <div key={e.id} className="flex items-center gap-2">
           {!compact && (
-            <span className="flex w-9 shrink-0 items-center gap-1.5 font-mono text-[10px] leading-none text-ex-ink3">
+            <span data-id={e.id} className="flex w-9 shrink-0 items-center gap-1.5 font-mono text-[10px] leading-none text-ex-ink3 after:content-[attr(data-id)]">
               <span className={cx('h-1.5 w-1.5 rounded-full', ENTITY_DOT[e.type] ?? 'bg-ex-ink3')} />
-              {e.id}
             </span>
           )}
           <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="w-full" style={{ height: rowH }}>

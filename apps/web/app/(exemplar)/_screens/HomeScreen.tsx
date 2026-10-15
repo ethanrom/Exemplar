@@ -149,7 +149,7 @@ export default function HomeScreen() {
             <Link href={started ? '/library' : '/connect'} className="btn btn-primary btn-lg">
               Get started <Icon name="arrow-right" />
             </Link>
-            <Link href="/eval" className="btn btn-lg">See the evaluation</Link>
+            <Link href="/eval" className="btn btn-lg">See the evidence</Link>
           </div>
         </div>
         <div className="relative"><HomeExample /></div>
