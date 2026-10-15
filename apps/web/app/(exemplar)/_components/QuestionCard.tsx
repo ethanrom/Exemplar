@@ -23,22 +23,22 @@ export function QuestionCard({
   const yes = Math.round(q.p * 100)
   return (
     <section aria-labelledby="q-h" className="overflow-hidden rounded-xl border border-ex-accent-line bg-ex-panel">
-      <div className="grid md:grid-cols-[minmax(0,4fr)_minmax(0,7fr)]">
-        <div className="relative bg-ex-bg">
-          {ev ? (
-            <button type="button" onClick={onOpen} className="group block h-full w-full overflow-hidden rounded-none" aria-label={`View clip: ${ev.summary ?? q.clip_id}`}>
-              <EventThumb event={ev} className="aspect-video h-full w-full md:min-h-[220px] transition-opacity group-hover:opacity-90" />
-            </button>
-          ) : (
-            <div className="grid aspect-video place-items-center text-sm text-ex-ink3">Clip {q.clip_id}</div>
-          )}
-        </div>
+      <div className="grid gap-5 p-5 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:p-6 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+        {ev ? (
+          <button type="button" onClick={onOpen} className="group block aspect-video w-full self-start overflow-hidden rounded-lg" aria-label={`View clip: ${ev.summary ?? q.clip_id}`}>
+            <EventThumb event={ev} className="h-full w-full transition-transform duration-200 group-hover:scale-[1.03]" />
+          </button>
+        ) : (
+          <div className="grid aspect-video place-items-center rounded-lg bg-ex-bg text-sm text-ex-ink3">Clip {q.clip_id}</div>
+        )}
 
-        <div className="flex min-w-0 flex-col p-5 sm:p-6">
-          <p className="flex items-center gap-1.5 text-xs font-medium text-ex-accent-ink"><Icon name="question" className="h-3.5 w-3.5" /> {step != null && <span aria-hidden="true">{step} ·</span>} One question for you</p>
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-ex-accent-ink">
+            <Icon name="question" className="h-3.5 w-3.5" /> {step != null && <span aria-hidden="true">{step} ·</span>} One question for you
+          </p>
           <h3 id="q-h" className="mt-2 text-lg font-semibold leading-snug tracking-tight text-ex-ink">Should this one count?</h3>
           {ev && (
-            <p className="mt-2 text-sm text-ex-ink2">
+            <p className="mt-1.5 line-clamp-3 text-sm text-ex-ink2">
               {ev.summary ?? q.clip_id}
               <span className="ml-2 inline-block align-middle"><SourceBadge source={ev.source} /></span>
             </p>
@@ -60,20 +60,20 @@ export function QuestionCard({
               <p className="mt-1 text-xs text-ex-ink3">Of {q.committee_size.toLocaleString()} rule variants that fit your examples ({fmtPct(q.p)} match).</p>
             ) : null}
           </div>
-
-          <div className="mt-auto pt-6">
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Answer the question">
-              <button type="button" className="btn hover:!border-ex-pos-line hover:!bg-ex-pos-soft" disabled={busy} onClick={() => onAnswer('pos')}>
-                <Icon name="check" className="h-4 w-4 text-ex-pos" /> Yes, this counts
-              </button>
-              <button type="button" className="btn hover:!border-ex-neg-line hover:!bg-ex-neg-soft" disabled={busy} onClick={() => onAnswer('neg')}>
-                <Icon name="cross" className="h-4 w-4 text-ex-neg" /> No, it doesn’t
-              </button>
-              <button type="button" className="btn-ghost" disabled={busy} onClick={onSkip}>Skip for now</button>
-            </div>
-            <p className="mt-3 text-xs text-ex-ink3">Your answer is used for learning only. It never feeds the false-alarm calibration.</p>
-          </div>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-ex-line bg-ex-bg/40 px-5 py-4 sm:px-6">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Answer the question">
+          <button type="button" className="btn hover:!border-ex-pos-line hover:!bg-ex-pos-soft" disabled={busy} onClick={() => onAnswer('pos')}>
+            <Icon name="check" className="h-4 w-4 text-ex-pos" /> Yes, this counts
+          </button>
+          <button type="button" className="btn hover:!border-ex-neg-line hover:!bg-ex-neg-soft" disabled={busy} onClick={() => onAnswer('neg')}>
+            <Icon name="cross" className="h-4 w-4 text-ex-neg" /> No, it doesn’t
+          </button>
+          <button type="button" className="btn-ghost" disabled={busy} onClick={onSkip}>Skip for now</button>
+        </div>
+        <p className="max-w-sm text-xs text-ex-ink3">Your answer is used for learning only. It never feeds the false-alarm calibration.</p>
       </div>
     </section>
   )

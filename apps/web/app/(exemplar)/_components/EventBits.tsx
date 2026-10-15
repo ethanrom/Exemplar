@@ -35,7 +35,7 @@ export function TraceStrip({ trace, compact = false }: { trace: Trace; compact?:
   const dur = Math.max(1, trace.duration_ms || trace.frames[trace.frames.length - 1]?.t_ms || 1)
   const frames = trace.frames
   const ents = trace.entities.slice(0, compact ? 3 : 4)
-  const rowH = compact ? 5 : 8
+  const rowH = compact ? 5 : 10
   if (ents.length === 0) {
     return (
       <div aria-hidden="true" className="flex h-full w-full items-center justify-center gap-1.5 bg-ex-raised text-xs text-ex-ink3">

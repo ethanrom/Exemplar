@@ -184,10 +184,9 @@ function BacktestTable({
           <button type="button" className="btn" onClick={() => { setLimit(limit + 40); requestAnimationFrame(() => document.getElementById('bt-h')?.focus()) }}>Show {Math.min(40, rows.length - limit)} more ({rows.length - limit} remaining)</button>
         </div>
       )}
-      <p className="mt-3 flex flex-wrap items-center gap-x-2 text-xs text-ex-ink3">
-        <span aria-hidden="true" className="inline-block h-3 w-0.5 rounded-full bg-ex-ink" />
+      <p className="mt-3 text-xs text-ex-ink3">
         The white tick on each bar is τ = {fmtNum(tau)}{bt.calibration.guarantee ? '' : ' (no guarantee yet: the rule fires on any score above 0)'}. Bars grow from 0 (centre); blue means the clip fires.
-        <span className="font-mono">{rule.id}</span>
+        {' '}<span className="font-mono">{rule.id}</span>
       </p>
     </section>
   )
