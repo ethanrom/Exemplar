@@ -5,4 +5,4 @@ from .dsl_ast import (Always, And, Atom, Bound, Ctx, DeviceEq, Eventually, Hole,
 from .labels import Label, for_calibration, for_synthesis
 from .trace import Entity, Fact, Frame, PerceptionMeta, Trace, TraceContext, trace_errors
 
-CONTRACTS_VERSION = "1.0.1"
+CONTRACTS_VERSION = "1.1.0"

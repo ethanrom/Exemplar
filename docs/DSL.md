@@ -23,7 +23,7 @@ The margin variable is bounded `0 ≤ m ≤ C`. With the plan's empty-window con
 | `active` | yes | no (actively chosen, so not exchangeable with deployment events) |
 | `random` | **no** | yes |
 
-`random` labels are also kept **out of synthesis**. The conformal bound `P(false alarm) ≤ α` needs calibration scores from negatives the rule was not fitted on. If they were used for fitting, τ_α would be biased low and the guarantee would not hold. (PLAN.md §2.5 only says active labels never calibrate; this is the other half.)
+`random` labels are also kept **out of synthesis**. The engine accepts provenance `random` only for clips that `POST /concepts/{id}/random-sample` actually drew (table `random_samples`) and rejects any other with 400 `INVALID_PROVENANCE`. Without that check, a user could hand-pick "random" clips. The conformal bound `P(false alarm) ≤ α` needs calibration scores from negatives the rule was not fitted on. If they were used for fitting, τ_α would be biased low and the guarantee would not hold. (PLAN.md §2.5 only says active labels never calibrate; this is the other half.)
 
 ## Hole placement: temporal slack (decided 2026-10-15, replaces "prefer tighter windows")
 Spike 6: with "prefer tighter windows" as the third objective, positives with gaps of 6 s and 7 s solve to exactly `[6, 7]`, and a rule taught from one clip matches only that exact timing. Instead, after minimising violations and maximising `m`, each hole is moved away from the edges of its feasible interval `[lo_h, hi_h]` (computed by Z3 min/max with the satisfied set and `m*` fixed):

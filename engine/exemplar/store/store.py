@@ -5,11 +5,8 @@ workers, the teach thread and the event loop all touch it). Statements are tiny,
 microseconds; that also keeps `:memory:` databases (tests) working, which a connection-per-thread design
 would not. WAL + foreign keys + a busy timeout are enabled for file databases.
 
-Two additions beside the frozen schema, both created here with `IF NOT EXISTS` (see EXTENSIONS_SQL; they are
-reported to the integrator as schema gaps):
-  * `rule_actions`   - the actions enabled per rule (`rules` has no column for them);
-  * `random_samples` - which clips `/random-sample` handed out per concept, so provenance `random` can be
-                       restricted to uniformly drawn clips (the conformal guarantee depends on it).
+`rule_actions`, `random_samples` and the `v_primary_trace` view live in contracts/schema.sql since
+contracts 1.1.0; EXTENSIONS_SQL is kept, empty, for compatibility.
 and the view `v_primary_trace` (one trace per clip: an `ok` one beats a failed one, then manual > fast >
 fixture > strong).
 """
@@ -26,27 +23,7 @@ from .repos import (AuthRepo, ClipsRepo, ConceptsRepo, CostRepo, EventsRepo, Fir
 
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "contracts" / "schema.sql"
 
-EXTENSIONS_SQL = """
-CREATE TABLE IF NOT EXISTS rule_actions (
-    rule_id         TEXT NOT NULL REFERENCES rules (id) ON DELETE CASCADE,
-    action          TEXT NOT NULL CHECK (action IN ('ui', 'webhook_out', 'slack', 'chime')),
-    PRIMARY KEY (rule_id, action)
-);
-CREATE TABLE IF NOT EXISTS random_samples (
-    concept_id      TEXT NOT NULL REFERENCES concepts (id) ON DELETE CASCADE,
-    clip_id         TEXT NOT NULL REFERENCES clips (id) ON DELETE CASCADE,
-    drawn_at_ms     INTEGER NOT NULL,
-    PRIMARY KEY (concept_id, clip_id)
-);
-CREATE VIEW IF NOT EXISTS v_primary_trace AS
-SELECT clip_id, mode, status, trace_json, cache_key, tokens_in, tokens_out, latency_ms, created_at_ms
-FROM (SELECT t.*, ROW_NUMBER() OVER (
-          PARTITION BY clip_id
-          ORDER BY CASE status WHEN 'ok' THEN 0 ELSE 1 END,
-                   CASE mode WHEN 'manual' THEN 0 WHEN 'fast' THEN 1 WHEN 'fixture' THEN 2 ELSE 3 END) AS rn
-      FROM traces t)
-WHERE rn = 1;
-"""
+EXTENSIONS_SQL = ""  # folded into contracts/schema.sql (contracts 1.1.0)
 
 
 __all__ = ["Store", "now_ms", "SCHEMA_PATH", "EXTENSIONS_SQL"]

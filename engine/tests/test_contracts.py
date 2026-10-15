@@ -158,7 +158,7 @@ def test_schema_sql_applies_idempotently():
     db.executescript(sql)
     tables = {r[0] for r in db.execute("select name from sqlite_master where type='table'")}
     assert {"events", "clips", "traces", "concepts", "labels", "runs", "run_events", "rules", "firings",
-            "actions_log", "webhook_deliveries", "cost_ledger", "ring_auth"} <= tables
+            "actions_log", "webhook_deliveries", "cost_ledger", "ring_auth", "rule_actions", "random_samples"} <= tables
     db.execute("PRAGMA foreign_keys = ON")
     with pytest.raises(sqlite3.IntegrityError):
         db.execute("insert into clips (id, event_id, created_at_ms) values ('c1', 'missing', 0)")
