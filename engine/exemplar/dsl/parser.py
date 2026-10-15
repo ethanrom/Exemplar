@@ -126,17 +126,9 @@ class _ToAST(Transformer):
         return DeviceEq(value=str(items[0]))
 
 
-def _retype_keyword(tok: Token) -> Token:
-    """The contract grammar lexes ``not (`` / ``not(`` as a PRED (PRED.2 has a "followed by '('" lookahead
-    and beats the keyword). Re-tag it as the NOT keyword. See docs/friction/C-dsl.md."""
-    if tok.value == "not":
-        return Token.new_borrow_pos("NOT", tok.value, tok)
-    return tok
-
-
 @lru_cache(maxsize=1)
 def _parser() -> Lark:
-    return Lark(GRAMMAR, parser="lalr", lexer_callbacks={"PRED": _retype_keyword})
+    return Lark(GRAMMAR, parser="lalr")
 
 
 def _accepted(exc: UnexpectedToken) -> set[str]:

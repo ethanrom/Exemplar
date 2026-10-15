@@ -101,6 +101,13 @@ def test_grammar_parses_examples(text):
     Lark(GRAMMAR, parser="lalr").parse(text)
 
 
+@pytest.mark.parametrize("text", ["exists p: Person: not (present(p) or rings_bell(p))",
+                                  "exists p: Person: not(present(p))",
+                                  "exists p: Person: nothing_pred(p)"])
+def test_grammar_not_keyword_vs_predicate(text):
+    Lark(GRAMMAR, parser="lalr").parse(text)
+
+
 def test_grammar_lets_unknown_predicates_through_to_typechecker():
     Lark(GRAMMAR, parser="lalr").parse("exists p: Person: rings_doorbell(p)")
 

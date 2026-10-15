@@ -212,9 +212,10 @@ ctx: "hour" "in" "[" bound "," bound "]"   -> hour_in
 ?bound: NUMBER | HOLE
 HOLE: "?" /[a-z][a-z0-9_]*/
 VARTYPE: "Entity" | "Person" | "Vehicle" | "Package" | "Animal" | "Object" | "Carryable"
-PRED.2: /[a-z][a-z0-9_]*(?=\s*\()/
-// PRED is any name followed by "(": unknown predicates parse and are rejected by the typechecker
-// with a readable message (the LLM sketch loop feeds that message back).
+PRED.2: /(?!not(?![a-z0-9_]))[a-z][a-z0-9_]*(?=\s*\()/
+// PRED is any name followed by "(" except the keyword `not` (so `not (a or b)` parses): unknown
+// predicates parse and are rejected by the typechecker with a readable message (the LLM sketch
+// loop feeds that message back).
 ARG: /[a-z][a-z0-9_]*/
 DEVICE: /[A-Za-z0-9._-]+/
 NAME: /[a-z][a-z0-9_]*/
