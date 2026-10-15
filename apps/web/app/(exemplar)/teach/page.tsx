@@ -1,11 +1,12 @@
 import { Suspense } from 'react'
+import { PageFallback } from '../_components/ui'
 import TeachScreen from '../_screens/TeachScreen'
 
 export const metadata = { title: 'Teach' }
 
 export default function Page() {
   return (
-    <Suspense fallback={<p className="text-sm text-ex-ink2">Loading…</p>}>
+    <Suspense fallback={<PageFallback />}>
       <TeachScreen />
     </Suspense>
   )

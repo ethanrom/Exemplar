@@ -86,5 +86,16 @@ await why.focus()
 await page.keyboard.press('Enter')
 check('Enter expands the witness (aria-expanded)', (await why.getAttribute('aria-expanded')) === 'true')
 
+// 7. evidence screen: the rules slider moves with the arrow keys and the readout follows
+await page.goto(base + '/eval', { waitUntil: 'networkidle' })
+const slider = page.getByRole('slider', { name: /Rules deployed/ })
+await slider.waitFor()
+await slider.focus()
+const v0 = await slider.inputValue()
+await page.keyboard.press('ArrowRight')
+const v1 = await slider.inputValue()
+check('ArrowRight moves the rules slider', Number(v1) === Number(v0) + 1, `${v0} -> ${v1}`)
+check('the readout follows the slider', (await page.getByRole('status').filter({ hasText: /per event and Exemplar/ }).first().innerText()).includes(`${v1}`))
+
 await browser.close()
 process.exit(failed ? 1 : 0)

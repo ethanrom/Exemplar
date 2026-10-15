@@ -48,12 +48,12 @@ await step('reset', async () => { await fetch(`${new URL(base).origin}/api/engin
 await go('/')
 await shot('01-home')
 
-// ---- connect: a 3 minute token shows the warning state, a fresh one the calm state
-await go('/connect')
+// ---- connect: a 3 minute token shows the warning state, a fresh one the calm state.
+// The token goes straight to the mock engine (PUT /ring/auth through the proxy): the web server's own
+// /api/ring/token route validates tokens and rejects the demo strings.
 const paste = async (value) => {
-  await page.getByLabel('Playground access token').fill(value)
-  await page.getByRole('button', { name: /Save token|Replace token/ }).click()
-  await page.getByText(/Token saved/).waitFor()
+  await fetch(`${new URL(base).origin}/api/engine/ring/auth`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ access_token: value }) })
+  await go('/connect')
   await page.waitForTimeout(500)
 }
 await step('connect: expiring', async () => { await paste('short-lived-demo-token'); await shot('02a-connect-expiring') })
@@ -133,21 +133,21 @@ await step('live: wait for firings', async () => {
   await shot('06b-live-later')
 })
 
-// ---- eval
+// ---- evidence (route /eval)
 await go('/eval')
 await page.waitForTimeout(500)
-await shot('07a-eval')
+await shot('07a-evidence')
 await step('eval: tables', async () => {
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: /Show as table/ }).first().click()
+  await page.getByRole('button', { name: /Show as table/ }).first().click()
   await page.waitForTimeout(300)
-  await shot('07b-eval-tables')
+  await shot('07b-evidence-table')
 })
 
 // ---- phone: screenshots + horizontal overflow check
 await page.setViewportSize({ width: 390, height: 844 })
 for (const [name, path] of [
   ['08a-mobile-home', '/'], ['08b-mobile-connect', '/connect'], ['08c-mobile-library', '/library'], ['08d-mobile-teach', '/teach'],
-  ['08e-mobile-rule', '/rule'], ['08f-mobile-live', '/live'], ['08g-mobile-eval', '/eval'],
+  ['08e-mobile-rule', '/rule'], ['08f-mobile-live', '/live'], ['08g-mobile-evidence', '/eval'],
 ]) {
   await go(path)
   await page.waitForTimeout(1200)

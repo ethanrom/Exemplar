@@ -4,6 +4,7 @@ export type IconName =
   | 'check' | 'cross' | 'plus' | 'minus' | 'question' | 'warning' | 'info' | 'play' | 'stop' | 'clock'
   | 'chevron' | 'chevron-right' | 'spark' | 'link' | 'camera' | 'bolt' | 'shuffle' | 'upload' | 'refresh'
   | 'shield' | 'pause' | 'film' | 'eye' | 'flag' | 'external' | 'dot' | 'diamond'
+  | 'arrow-right' | 'search' | 'circle' | 'trace' | 'sliders' | 'gauge' | 'pulse' | 'image' | 'layers' | 'bell' | 'scale' | 'table'
 
 const PATHS: Record<IconName, ReactNode> = {
   check: <path d="M3 8.5l3.2 3.2L13 4.8" />,
@@ -89,6 +90,64 @@ const PATHS: Record<IconName, ReactNode> = {
   external: <path d="M9 2.5h4.5V7M13.5 2.5L7.5 8.5M6.5 3.5H3a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 .5.5h8.5a.5.5 0 0 0 .5-.5V9.5" />,
   dot: <circle cx="8" cy="8" r="3" fill="currentColor" />,
   diamond: <path d="M8 2.5l5 5.5-5 5.5L3 8z" fill="currentColor" />,
+  'arrow-right': <path d="M3 8h10M9 4l4 4-4 4" />,
+  search: (
+    <>
+      <circle cx="7" cy="7" r="4.3" />
+      <path d="M10.3 10.3L14 14" />
+    </>
+  ),
+  circle: <circle cx="8" cy="8" r="5.5" />,
+  trace: (
+    <>
+      <path d="M2.5 4.5h4.5M5 8h7M3.5 11.5h5" />
+    </>
+  ),
+  sliders: (
+    <>
+      <path d="M2.5 4.5h6M11.5 4.5h2M2.5 11.5h2M7.5 11.5h6" />
+      <circle cx="10" cy="4.5" r="1.5" />
+      <circle cx="6" cy="11.5" r="1.5" />
+    </>
+  ),
+  gauge: (
+    <>
+      <path d="M2.5 11.5a5.5 5.5 0 1 1 11 0" />
+      <path d="M8 11.5l2.4-3.4" />
+    </>
+  ),
+  pulse: <path d="M1.5 8h3l1.8-4.5 3.4 9L11.5 8h3" />,
+  image: (
+    <>
+      <rect x="2" y="3" width="12" height="10" rx="1.6" />
+      <circle cx="5.8" cy="6.6" r="1.1" />
+      <path d="M2.5 12l3.6-3.4 2.6 2.3 2-1.8 3.3 2.9" />
+    </>
+  ),
+  layers: (
+    <>
+      <path d="M8 2.2l6 3.2-6 3.2-6-3.2z" />
+      <path d="M2 8.2l6 3.2 6-3.2M2 10.9l6 3.2 6-3.2" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M4 11V7.5a4 4 0 0 1 8 0V11l1 1.3H3z" />
+      <path d="M6.7 14h2.6" />
+    </>
+  ),
+  table: (
+    <>
+      <rect x="2" y="3" width="12" height="10" rx="1.6" />
+      <path d="M2 6.5h12M2 9.8h12M6.2 3v10" />
+    </>
+  ),
+  scale: (
+    <>
+      <path d="M8 2.5v11M4 13.5h8M3 4.5h10" />
+      <path d="M3 4.5l-1.5 4a2 2 0 0 0 3 0zM13 4.5l-1.5 4a2 2 0 0 0 3 0z" />
+    </>
+  ),
 }
 
 export function Icon({ name, className = 'h-4 w-4', title }: { name: IconName; className?: string; title?: string }) {

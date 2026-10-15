@@ -1,4 +1,4 @@
-// Mock Exemplar engine (stream F). Implements every path in engine/exemplar/contracts/api.yaml with
+// Mock Exemplar engine. Implements every path in engine/exemplar/contracts/api.yaml with
 // realistic in-memory data so the UI can be built and reviewed without the real engine.
 //
 //   node mock/server.mjs            # http://127.0.0.1:8787  (PORT / HOST override)
@@ -343,7 +343,7 @@ export async function createApp({ validate = process.env.MOCK_VALIDATE !== '0' }
   route('GET', '/ring/devices', ({ res, r }) => {
     if (!authView().connected) return sendErr(res, r, 401, 'Ring token missing or expired', 'TOKEN_EXPIRED')
     sendJson(res, r, 200, [{
-      id: DEVICE_ID, name: 'Playground Device', online: true, image_url: null, codecs: ['h264'], snapshot: true, chime: false,
+      id: DEVICE_ID, name: 'Playground Device', online: true, image_url: 'https://app-content.ring.com/shared/images/devices/square_device_images/DoorbellPro/rvdp_3x.png', codecs: ['h264'], snapshot: true, chime: false,
     }])
   })
   route('POST', '/ring/sync', ({ res, r }) => {

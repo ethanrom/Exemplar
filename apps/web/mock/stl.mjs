@@ -1,9 +1,9 @@
-// Mini STL evaluator + witness extractor for the mock engine (PLAN.md section 2.2 semantics).
+// Mini STL evaluator + witness extractor for the mock engine (semantics as in docs/DSL.md).
 //
 // Only what the mock needs: robustness of a closed Rule AST on a Trace, on the discrete sample grid,
 // with the clamp C = 0.5 and integer-ms offsets computed as (t_j - t_i) / 1000. The scores and
 // witnesses the mock serves are therefore consistent with the fixture traces; they are NOT the
-// reference implementation (that is stream C's evaluator).
+// reference implementation (that is the engine's evaluator).
 
 export const C = 0.5
 export const THRESHOLD = 0.5
@@ -20,7 +20,7 @@ const VAR_TYPES = {
   Carryable: ['package', 'object'],
 }
 
-/** s_pred(args)(t_i) for every frame (PLAN 2.1.5). */
+/** s_pred(args)(t_i) for every frame (docs/DSL.md, Signals). */
 export function signal(trace, pred, args) {
   const n = trace.frames.length
   const s = new Array(n).fill(ABSENT)

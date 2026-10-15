@@ -23,7 +23,9 @@ async function parseError(res: Response): Promise<ApiError> {
     /* not JSON */
   }
   const fallback = res.status === 502 ? 'The engine is not reachable.' : `Request failed (${res.status})`
-  return new ApiError(res.status, body?.error || fallback, body?.code ?? null)
+  // The proxy reports "Engine unreachable at <url> (<socket error>)": say it in plain words instead.
+  const unreachable = body?.code === 'ENGINE_UNREACHABLE'
+  return new ApiError(res.status, unreachable ? 'The Exemplar engine is not running or not reachable. Start it, then try again.' : body?.error || fallback, body?.code ?? null)
 }
 
 export async function api<T = unknown>(

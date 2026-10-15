@@ -1,12 +1,13 @@
 import { Suspense } from 'react'
-import EvalScreen from '../_screens/EvalScreen'
+import { PageFallback } from '../_components/ui'
+import EvidenceScreen from '../_screens/EvidenceScreen'
 
-export const metadata = { title: 'Eval' }
+export const metadata = { title: 'Evidence' }
 
 export default function Page() {
   return (
-    <Suspense fallback={<p className="text-sm text-ex-ink2">Loading…</p>}>
-      <EvalScreen />
+    <Suspense fallback={<PageFallback />}>
+      <EvidenceScreen />
     </Suspense>
   )
 }

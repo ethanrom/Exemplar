@@ -55,7 +55,8 @@ await scan('rule', '/rule?rule=r_unatt_steps24', async () => {
   await page.getByRole('button', { name: /^Why/ }).first().click()
 })
 await scan('live', '/live', async () => { await page.waitForTimeout(9000) })
-await scan('eval', '/eval')
+await scan('evidence', '/eval')
+await scan('evidence as a table', '/eval', async () => { await page.getByRole('button', { name: /Show as table/ }).click() })
 
 await browser.close()
 process.exit(failures ? 1 : 0)
