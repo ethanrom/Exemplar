@@ -46,6 +46,11 @@ out/
 .playwright-mcp/
 .claude/settings.local.json
 
+# internal notes and tool config (kept locally, not published)
+/internal/
+/CLAUDE.md
+/.mcp.json
+
 # os / editor
 .DS_Store
 Thumbs.db
