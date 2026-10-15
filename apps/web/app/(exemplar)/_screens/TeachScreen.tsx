@@ -332,7 +332,7 @@ export default function TeachScreen() {
                     <Icon name={question.data && skipped.includes(question.data.clip_id) ? 'question' : 'check'} className="h-4 w-4 text-ex-ink3" />
                     <span><span className="mr-1.5 text-ex-ink3">3 ·</span>{question.data && skipped.includes(question.data.clip_id)
                       ? 'You skipped the question.'
-                      : 'Nothing left to ask: your rules agree on every clip in the library.'}</span>
+                      : "Your rules agree on every unlabelled clip, so there's nothing to ask right now."}</span>
                   </p>
                   {question.data && skipped.includes(question.data.clip_id) && (
                     <button type="button" className="btn btn-sm" onClick={() => setSkipped([])}>Ask again</button>

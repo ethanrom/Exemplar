@@ -18,6 +18,9 @@ a weighted sample of closed rules from the union of those regions:
    plain exp(-MDL)), spread evenly over the candidate's accepted points, then normalised with a stable
    softmax (max subtracted, so MDL values of any size neither overflow nor underflow to a zero sum).
    MDL gaps of a few bits already make the best candidate dominate; raise T to keep the others alive.
+   The API layer passes T = 8 (`ApiConfig.committee_mdl_temperature`, the MDL cost of one hole): on the
+   "package theft" concept T = 1 gave the top candidate weight 1.000 and no clip split the committee, T = 8
+   gives it 0.76 and one clip splits it 15/85.
 
 Everything is deterministic for a given ``seed`` (each candidate draws from its own child stream, so adding a
 candidate does not change the samples of the others).

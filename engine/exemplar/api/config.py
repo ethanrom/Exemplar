@@ -46,6 +46,7 @@ class ApiConfig:
     cegis_k: int = 6
     cegis_rounds: int = 4
     committee_samples: int = 200
+    committee_mdl_temperature: float = 8.0      # weights ~ exp(-MDL/T); 8 = the MDL cost of one hole (T=1 collapses onto the best candidate)
     # --- live / uploads
     max_frame_bytes: int = 8 * 1024 * 1024
     max_upload_bytes: int = 2 * 1024 * 1024 * 1024

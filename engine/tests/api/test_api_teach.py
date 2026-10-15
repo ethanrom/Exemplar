@@ -357,6 +357,7 @@ def test_question_is_the_committee_disagreement_clip(tenv):
     call = tenv.active.committee_calls[-1]
     assert [c.dsl_text for c in call["candidates"]] == [to_text(parse(H.THEFT_DSL)), to_text(parse(H.SITTING_DSL))]
     assert {e.clip_id for e in call["examples"]} == {"theft_a", "delivery_a"}
+    assert call["mdl_temperature"] == 8.0                                               # gentler than exp(-MDL): keeps real disagreement visible
     assert tenv.active.query_kwargs[-1] == {"labelled": ["delivery_a", "theft_a"], "exclude": []}     # diversity reference set
     n_calls = len(tenv.active.committee_calls)
     assert tenv.client.get(f"/concepts/{cid}/question").json() == body
@@ -385,6 +386,20 @@ def test_question_204_when_nothing_is_informative_or_no_rules(tenv):
     tenv.state.question_cache.clear()
     assert tenv.client.get(f"/concepts/{cid}/question").status_code == 204
     assert tenv.client.get("/concepts/cn_nope/question").status_code == 404
+
+
+@pytest.mark.parametrize("p, expect", [(0.0, 204), (1.0, 204), (0.04, 204), (0.96, 204), (0.05, 200), (0.95, 200), (0.3, 200)])
+def test_question_204_when_the_committee_is_unanimous(tenv, p, expect):
+    """select_query still returns its closest-to-0.5 clip when everyone agrees; the endpoint must not call that a question."""
+    cid = tenv.cid
+    tenv.label(cid, "theft_a", "pos")
+    run_teach(tenv, cid)
+    tenv.active.p = p
+    tenv.state.question_cache.clear()
+    r = tenv.client.get(f"/concepts/{cid}/question")
+    assert r.status_code == expect
+    if expect == 200:
+        assert r.json()["p"] == p
 
 
 def test_question_ready_event_only_when_there_is_a_question(tenv):

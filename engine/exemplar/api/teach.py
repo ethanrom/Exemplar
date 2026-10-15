@@ -151,6 +151,13 @@ def _worker(state: "AppState", run: RunRow, concept: ConceptRow, run_cegis: Any,
 
 
 # ====================================================================================== question
+# A question needs real disagreement: `select_query` always returns the clip closest to p = 0.5, even when the
+# whole committee is unanimous (p = 0 or 1) and a question would be meaningless. Below min(p, 1 - p) = 0.05 (the
+# same 5-point band `active.query` treats as a tie, i.e. fewer than 1 in 20 of the committee's weight dissents)
+# there is nothing worth asking and the endpoint answers 204.
+MIN_DISAGREEMENT = 0.05
+
+
 def candidate_objects(state: "AppState", concept_id: str) -> list[Any]:
     """Stored rules -> `Candidate`s (what `build_committee` expects)."""
     Candidate = state.services.candidate_cls
@@ -186,7 +193,8 @@ def compute_question(state: "AppState", concept_id: str) -> dict[str, Any] | Non
     if key in state.question_cache:
         return state.question_cache[key]
     committee = build_committee(candidate_objects(state, concept_id), examples,
-                                n_samples=state.config.committee_samples)
+                                n_samples=state.config.committee_samples,
+                                mdl_temperature=state.config.committee_mdl_temperature)
     extra: dict[str, Any] = {}
     accepted = inspect.signature(select_query).parameters
     if "labelled" in accepted:                      # E: already-labelled clips are the diversity reference set
@@ -195,7 +203,7 @@ def compute_question(state: "AppState", concept_id: str) -> dict[str, Any] | Non
         extra["exclude"] = sorted(drawn)
     qs = list(select_query(committee, [tr for _, tr in pool], k=1, **extra) or [])
     result = None
-    if qs:
+    if qs and min(qs[0].p, 1.0 - qs[0].p) >= MIN_DISAGREEMENT:
         q = qs[0]
         view = store.events.view_by_clip(q.clip_id, concept_id)
         result = jsonable(q.to_api(concept_id=concept_id, event=event_summary(view) if view else None))

@@ -444,10 +444,13 @@ class FakeActive:
         self.query_calls: list[list[str]] = []
         self.query_kwargs: list[dict[str, Any]] = []
         self.none = False
+        self.p = 0.5                      # the committee's split on the clip it asks about
 
     def build_committee(self, candidates: list[Candidate], examples: list[Example], *, box_fn: Any = None,
-                        n_samples: int = 200, seed: int = 0) -> FakeCommittee:
-        self.committee_calls.append({"candidates": candidates, "examples": examples, "n_samples": n_samples})
+                        n_samples: int = 200, seed: int = 0,
+                        mdl_temperature: float = 1.0) -> FakeCommittee:
+        self.committee_calls.append({"candidates": candidates, "examples": examples, "n_samples": n_samples,
+                                     "mdl_temperature": mdl_temperature})
         return FakeCommittee(len(candidates))
 
     def select_query(self, committee: FakeCommittee, unlabelled: list[Trace], *, k: int = 1,
@@ -459,7 +462,7 @@ class FakeActive:
             return []
         best = max(unlabelled, key=lambda t: (sum(1 for f in t.frames for fa in f.facts if fa.pred == "picks_up"),
                                               t.clip_id))
-        return [Question(best.clip_id, 0.5, len(committee.members))][:k]
+        return [Question(best.clip_id, self.p, len(committee.members))][:k]
 
 
 # ------------------------------------------------------------------------------------------ shared flows
