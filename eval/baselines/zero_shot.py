@@ -5,9 +5,10 @@
 
 * Input: the concept's NL description (`eval/data/concepts.yaml`) and the frames from `sample_window(path, 16)`, i.e. the frames
   the fast perception sees (640 px, same timestamps).  Output by tool use: `{"match": bool, "confidence": 0..1}` where
-  `confidence` is the model's probability that the described event occurs.  Strong model: `toolChoice: auto` + explicit
+  `confidence` is asked to be the model's probability that the described event occurs (`ZeroShotResult.score` repairs the ~9 % of
+  answers that give confidence in a `false` answer instead).  Strong model: `toolChoice: auto` + explicit
   instruction + `thinking: between_tools`, never `temperature`; validated, one retry.
-* Run on the calib and test windows of every concept.  The score is `confidence`; the calibrated operating point sets tau on the
+* Run on the calib and test windows of every concept.  The score is `ZeroShotResult.score`; the calibrated operating point sets tau on the
   calib negatives at the same alpha as Exemplar (conformal, section 2.5), so both methods get the same false-alarm target.
   The native point (`match == true`) is reported alongside.
 * Results are cached per window in `$EXEMPLAR_DATA_DIR/eval/zero_shot/<id>.json` (re-runs are free); every paid call goes to the
@@ -112,7 +113,14 @@ class ZeroShotResult:
 
     @property
     def score(self) -> float:
-        return self.confidence
+        """The model's probability that the event occurs, with the sign fixed by `match`.
+
+        The tool asks for the probability of the event, but in about 9 % of calls the model answered `match=false` together with a high
+        confidence (its confidence in the *answer*, "90 % sure nothing happens").  Read literally that would score a confident rejection
+        as a near-certain event.  So `match` decides the direction and `confidence` the magnitude: consistent pairs keep `confidence`,
+        inconsistent ones are read as confidence in the answer (`1 - confidence`).  `score > 0.5` iff `match`.
+        """
+        return self.confidence if self.match == (self.confidence >= 0.5) else 1.0 - self.confidence
 
 
 def classify(client: Any, *, model_id: str, alias: str, window: Window, frames: Sequence[Any], window_ms: int,

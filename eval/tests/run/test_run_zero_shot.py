@@ -203,7 +203,7 @@ def test_build_row_calibrates_on_calib_negatives_and_scores_test():
     test = [window(f"tp{i}", "pos", "test", "c") for i in range(4)] + [window(f"tn{i}", "neg", "test", "c") for i in range(6)]
     res = {}
     for i, w in enumerate(w for w in calib if not w.positive):          # 17 at 0.1, 3 at 0.6 -> k=19 -> tau = 0.6
-        res[w.id] = result(w, False, 0.1 if i < 17 else 0.6)
+        res[w.id] = result(w, i >= 17, 0.1 if i < 17 else 0.6)
     for w in (w for w in calib if w.positive):
         res[w.id] = result(w, True, 0.9)
     for i, w in enumerate(w for w in test if w.positive):               # confidences 0.9 0.9 0.7 0.5 -> fire iff > 0.6: 3 of 4
@@ -232,3 +232,13 @@ def test_build_row_without_enough_negatives_flags_no_guarantee_and_uses_the_nati
 
 def test_build_row_is_none_without_test_results():
     assert zs.build_row("c", {}, [window("tp", "pos", "test", "c")], alpha=0.1) is None
+
+
+@pytest.mark.parametrize("match,conf,score", [
+    (True, 0.9, 0.9), (False, 0.04, 0.04),                  # consistent: confidence is the event probability
+    (False, 0.96, 0.04), (True, 0.2, 0.8),                  # confidence in the answer: flipped so that match fixes the direction
+    (True, 0.5, 0.5), (False, 0.5, 0.5), (True, 1.0, 1.0), (False, 0.0, 0.0)])
+def test_score_is_the_event_probability_with_the_sign_fixed_by_match(match, conf, score):
+    r = result(window("w", "pos", "test", "c"), match, conf)
+    assert r.score == pytest.approx(score)
+    assert (r.score > 0.5) == (match and conf != 0.5) or conf == 0.5
