@@ -47,3 +47,18 @@ def fake_time() -> FakeTime:
 
 def load_fixture(name: str) -> dict:
     return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+
+
+def make_jwt(iat: int | None = None, exp: int | None = None, **extra: object) -> str:
+    """An unsigned-looking JWT with the given claims (seconds). The signature segment is junk."""
+    import base64
+
+    def b64(d: dict) -> str:
+        return base64.urlsafe_b64encode(json.dumps(d).encode()).rstrip(b"=").decode()
+
+    claims: dict = dict(extra)
+    if iat is not None:
+        claims["iat"] = iat
+    if exp is not None:
+        claims["exp"] = exp
+    return f"{b64({'alg': 'none', 'typ': 'JWT'})}.{b64(claims)}.c2ln"
