@@ -239,3 +239,10 @@ Plus example tests: the three concept rules above on all 12 fixtures, hand-compu
 - Sampled frames sit at the midpoints of equal sub-windows, so the first frame is at `t > 0` and the last is before the clip end. `holds_for` and window edges are evaluated on these sampled frames only.
 - `context.sub_type` must be filled at ingest (`human`, `vehicle`, `package_delivery`, `other_motion`, or the extras `motion`, `ding`, `on_demand`). `subtype = S` is strict equality, and a missing value makes the atom false.
 - `exists` ranges only over entities that appear in the trace, so "nobody is around" isn't expressible as such. Write the positive form instead, e.g. `exists k: Package: holds_for >= 20 in_zone(k, steps)`.
+
+## Calibration details (integrator, from stream E)
+- The conformal rank `k = ⌈(n+1)(1−α)⌉` uses exact `Fraction` arithmetic (float `ceil` is wrong for e.g. α = 0.18, n = 149). Firing is strict: `score > τ`.
+- `τ = max(τ_α, 0)`. A rule never fires where it doesn't hold (score ≤ 0), even when the raw quantile τ_α is negative, which is common with ties on the −C plateau. Flooring only makes firing stricter, so `P(false alarm) ≤ α` still holds. The raw quantile is kept as `Calibration.tau_alpha`.
+- The guarantee covers the **stage-1** decision on fast-perception scores against random-labelled negatives. Stage-2 escalation re-decides only events inside `|score − τ| ≤ δ`. If strong perception fails, the stage-1 decision stands and an `error` event is emitted.
+- `δ = clamp(IQR(neg scores)/2, 0.05, 0.2)`, and `0.1` when there are fewer than 8 random negatives.
+

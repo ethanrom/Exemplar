@@ -35,7 +35,8 @@ def render_trace_text(trace: Trace) -> str: ...      # compact rendering shown t
 @dataclass(frozen=True)
 class Candidate:
     sketch_text: str; dsl_text: str; english: str     # english/dsl_text come from exemplar.dsl printers
-    rule: Rule; holes: dict[str, float]; margin: float; mdl: float
+    rule: Rule                 # CLOSED (holes filled, after slack placement); sketch_text is the sketch with holes
+    holes: dict[str, float]; margin: float; mdl: float
     violated_clip_ids: tuple[str, ...]
     def to_api(self, *, id: str, concept_id: str, status: str = "candidate") -> dict: ...   # RuleSummary
 
