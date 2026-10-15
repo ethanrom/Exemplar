@@ -31,56 +31,43 @@ Entry for the Amazon Developer Hackathon 2026: **Ring** track, **AWS Builder** m
 ## Architecture
 
 ```mermaid
-flowchart LR
-    subgraph RING["Ring (api.amazonvision.com)"]
-        direction TB
+flowchart TB
+    subgraph RING["Ring: api.amazonvision.com"]
+        direction LR
         R1["Developer Playground or Ring device"]
-        R2["History + event-scoped media download"]
+        R2["History and event-scoped media"]
         R3["WHEP live view"]
         R4["Signed webhooks"]
+        R1 --- R2
+        R1 --- R3
+        R1 --- R4
     end
 
-    subgraph WEB["apps/web: Next.js 15, all Ring calls server-side"]
-        direction TB
+    subgraph WEB["apps/web: Next.js 15, every Ring call server-side"]
+        direction LR
         W1["UI: connect, library, teach, rule, live, evidence"]
-        W2["/api/ring: token, WHEP proxy, webhook with HMAC and dedupe"]
-        W3["/api/engine: proxy + SSE"]
+        W2["API routes: token, WHEP proxy, webhook with HMAC and dedupe"]
+        W1 --- W2
     end
 
     subgraph ENG["engine: FastAPI, Python"]
-        direction TB
-        E1["ring: client, token providers, webhook verify"]
-        E2["perception: frame sampling, Claude via Converse"]
-        E3[("store: SQLite traces, labels, rules")]
-        E4["dsl: parser, typechecker, English printer, evaluators"]
-        E5["agent + synth: Strands CEGIS agent, Z3 MaxSMT"]
-        E6["active + calibrate: rule committee, conformal threshold"]
-        E7["monitor: funnel, witnesses, actions"]
+        direction LR
+        E1["ring client"] --> E2["perception"]
+        E2 --> E3[("trace store, SQLite")]
+        E3 --> E4["dsl: parse, type, evaluate, explain"]
+        E4 --> E5["agent + synth: Strands, Z3 MaxSMT"]
+        E5 --> E6["active + calibrate"]
+        E6 --> E7["monitor: funnel, witnesses, actions"]
     end
 
-    BR["Amazon Bedrock: Claude fast + strong"]
-    S3["AWS Open Data: MEVA on S3"]
+    BR["Amazon Bedrock: Claude fast and strong models"]
+    OD["AWS Open Data: MEVA on S3"]
 
-    R1 --- R2
-    R1 --- R3
-    R2 -- "history, clips, snapshots" --> E1
-    R4 -- "X-Signature" --> W2
-    R3 -- "WebRTC" --> W2
-    W2 -- "verified events, frames" --> E1
-    W1 <--> W3
-    W3 <--> ENG
-    E1 --> E2
-    E2 <-- "16 frames per clip, forced tool use" --> BR
-    E2 --> E3
-    E3 --> E4
-    E4 --> E5
-    E5 <-- "sketch proposals" --> BR
-    E3 --> E6
-    E4 --> E6
-    E3 --> E7
-    E6 --> E7
-    E7 -- "escalate borderline events" --> BR
-    S3 -. "evaluation clips" .-> E2
+    RING -- "history and clips, polled" --> ENG
+    RING -- "live view, webhooks" --> WEB
+    WEB <-- "REST + SSE" --> ENG
+    ENG <-- "Converse: perception, sketches, escalation" --> BR
+    OD -. "evaluation clips" .-> ENG
 ```
 
 **Key principle:** perception runs once per clip and its output (the trace) is cached. Synthesis, backtesting, active learning, calibration and live scoring all work on traces only, which makes them fast, cheap, repeatable and testable without a model.
