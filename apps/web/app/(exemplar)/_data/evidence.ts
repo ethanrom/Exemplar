@@ -33,15 +33,15 @@ export interface Verified {
 /** Rigor of the synthesis and calibration code. Counts are from the engine's test suites and simulations. */
 export const VERIFIED: Verified[] = [
   {
-    value: '6,100+',
+    value: '3,850',
     label: 'property-test cases',
-    detail: 'The Z3 encoder checked against an independent NumPy evaluator: 0 mismatches.',
+    detail: 'The Z3 encoder and solver checked against an independent NumPy evaluator and an exhaustive search: 0 mismatches.',
     clean: true,
   },
   {
     value: '7 of 7',
-    label: 'injected bugs caught',
-    detail: 'Encoder bugs we planted on purpose; the differential check failed loudly on every one.',
+    label: 'planted bugs caught',
+    detail: 'Encoder bugs planted on purpose in a test; the differential check failed on every one.',
     clean: true,
   },
   {

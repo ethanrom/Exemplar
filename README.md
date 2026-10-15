@@ -183,10 +183,23 @@ cd apps/web && node --test lib/ring/*.test.mjs         # webhook verification an
 cd apps/web && npm run mock:validate                   # exercises every operation of the engine API contract against a mock
 ```
 
+The heavier checks behind the claims below are opt-in:
+
+```bash
+# Z3 encoder vs NumPy evaluator and solver vs exhaustive search, ten times the default number of random cases
+# (3,850 generated cases in total, about 7 minutes; the default scale runs 385)
+SYNTH_PROP_SCALE=10 uv run --project engine pytest engine/tests/synth/test_synth_encoding.py engine/tests/synth/test_synth_solve.py
+
+# plants 7 encoder bugs one at a time and checks that the differential test fails on each (about 15 s)
+uv run --project engine pytest engine/tests/synth/test_synth_mutations.py
+
+# axe-core scan of every screen against the mock engine (setup notes in the script header)
+cd apps/web && npm run dev:mock   # in one terminal, then in another: node mock/a11y.mjs
+```
+
 Tests that call Bedrock or Ring are skipped unless credentials are present. What the suites establish:
 
-<!-- Sources: the Z3-vs-NumPy case count, the injected-bug result, the 207 eval tests and the axe-core result are from our verification runs on 2026-10-15; the rest is in the named test files. -->
-- **The solver encoding is checked against an independent evaluator.** About 6,100 randomly generated cases compare the Z3 encoding with a NumPy evaluator, with no mismatches; 7 of 7 deliberately injected encoder bugs were caught. A third, literal reference implementation of the semantics cross-checks the vectorised evaluator bit for bit (`engine/tests/dsl/`, `engine/tests/synth/`).
+- **The solver encoding is checked against an independent evaluator.** At `SYNTH_PROP_SCALE=10`, 2,000 randomly generated sketches compare the Z3 encoding with a NumPy evaluator and 1,850 more compare the solver with an exhaustive search, with no mismatches. 7 of 7 deliberately planted encoder bugs are caught by that comparison (`engine/tests/synth/test_synth_mutations.py`). A third, literal reference implementation of the semantics cross-checks the vectorised evaluator bit for bit (`engine/tests/dsl/`, `engine/tests/synth/`).
 - **The logic obeys its laws.** Property tests (Hypothesis) state that the sign of robustness agrees with the boolean result, that negation is an exact duality, and that widening `eventually` and `then` windows never decreases robustness ([`docs/DSL.md`](docs/DSL.md)).
 - **The false-alarm bound holds.** `engine/tests/calibrate/test_calibrate_validity.py` checks it exactly on a small discrete distribution and by a 100,000-draw simulation with heavy ties, and shows that a deliberately wrong quantile fails the same check. The conformal rank uses exact rational arithmetic because floating-point `ceil((n+1)(1-alpha))` is off by one for some alpha.
 - **Webhooks are verified like production.** Signed, tampered, re-serialised, unsigned and duplicate payloads are tested in both Python and Node against the same fixtures.
