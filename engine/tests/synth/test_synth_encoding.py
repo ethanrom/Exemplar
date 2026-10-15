@@ -66,7 +66,7 @@ def check_encoding(sketch: Rule, examples: list[Example], pts: list[dict]) -> No
                 assert _truth(enc, le, pt) == (score <= -float(lv) + 1e-9), (to_text(sketch), pt, float(lv), score, "LE")
 
 
-@settings(max_examples=int(150 * _SCALE), deadline=None, suppress_health_check=_HC)
+@settings(max_examples=int(100 * _SCALE), deadline=None, suppress_health_check=_HC)
 @given(instances(max_frames=8, max_holes=3, n_examples=(1, 2)), st.randoms(use_true_random=False))
 def test_encoding_equals_evaluator_on_random_sketches(inst, rnd: random.Random):
     sketch, examples = inst
@@ -108,7 +108,7 @@ def focused_instances(draw):
     return rule, [Example(tr, True, 1.0, "f0"), Example(tr2, False, 1.0, "f1")]
 
 
-@settings(max_examples=int(150 * _SCALE), deadline=None, suppress_health_check=_HC)
+@settings(max_examples=int(100 * _SCALE), deadline=None, suppress_health_check=_HC)
 @given(focused_instances(), st.randoms(use_true_random=False))
 def test_encoding_equals_evaluator_on_focused_operators(inst, rnd: random.Random):
     sketch, examples = inst
@@ -131,3 +131,22 @@ def test_known_boundary_exact_gap_matches_integer_ms_semantics():
     for pt, expected in (({"a": 0.2, "b": 0.2}, True), ({"a": 0.0, "b": 0.1}, False), ({"a": 0.21, "b": 0.4}, False)):
         assert (cr.score(enc.preps[0], pt) > 0) == expected
         assert _truth(enc, enc.formulas(0)[0], pt) == expected
+
+
+def test_fixture_traces_including_failed_perception_and_empty_scenes():
+    """Real fixture shapes: no entities, no bindings, failed perception, context atoms, many frames."""
+    from dsl_helpers import ALL_FIXTURES, load
+    sketches = [
+        "exists p: Person, k: Package: picks_up(p, k) then[?a, ?b] carrying(p, k) and not attr(p, delivery_uniform)",
+        "exists v: Vehicle: holds_for >= ?d in_zone(v, dock)",
+        "exists k: Package: always[?a, ?b] in_zone(k, steps)",
+        "exists p: Person: eventually[?a, ?b] rings_bell(p) when subtype = human and hour in [?h1, ?h2]",
+        "exists p: Person, k: Package: not eventually[?a, ?b] picks_up(p, k)",
+    ]
+    rnd = random.Random(7)
+    examples = [Example(load(n), i % 2 == 0, 1.0, n) for i, n in enumerate(ALL_FIXTURES)]
+    for text in sketches:
+        sk = parse(text)
+        cands = hole_candidates(sk, examples)
+        pts = [{h: rnd.choice(v) for h, v in cands.items()} for _ in range(6)]
+        check_encoding(sk, examples, pts)

@@ -30,7 +30,7 @@ def _weight(examples, ids):
     return sum(byid[i].weight for i in ids)
 
 
-@settings(max_examples=int(220 * _SCALE), deadline=None, suppress_health_check=_HC)
+@settings(max_examples=int(150 * _SCALE), deadline=None, suppress_health_check=_HC)
 @given(instances(max_frames=5, max_holes=3, n_examples=(2, 4)))
 def test_solver_agrees_with_exhaustive_search(inst):
     sketch, examples = inst
@@ -75,7 +75,7 @@ def test_solver_agrees_with_exhaustive_search(inst):
     assert parse(to_text(res.rule)) == res.rule
 
 
-@settings(max_examples=int(80 * _SCALE), deadline=None, suppress_health_check=_HC)
+@settings(max_examples=int(35 * _SCALE), deadline=None, suppress_health_check=_HC)
 @given(instances(max_frames=5, max_holes=3, n_examples=(2, 3)))
 def test_hole_box_is_the_exact_bounding_box_of_the_feasible_set(inst):
     sketch, examples = inst

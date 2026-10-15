@@ -77,7 +77,8 @@ so the rule matches the POSITIVE clips and not the NEGATIVE ones, with the large
 How to work
 1. Read the labelled traces. Find facts that positives share and negatives lack (or a temporal order between facts).
 2. Propose up to {k} DIFFERENT sketches, simplest first (a handful of nodes; 1-3 holes). Vary the structure (different predicates, then vs
-   eventually vs holds_for) so that at least some of them fit. Use ?names for every time constant; never invent predicates, zones or labels.
+   eventually vs holds_for) so that at least some of them fit. Use ?names for time constants, but if the user's description states a number ("for over 10 seconds") use that number as a constant;
+   never invent predicates, zones or labels (a hole is only allowed where a number is, never in place of a zone or label).
 3. You may call `typecheck` and `solve_sketch` to try a sketch yourself, and `evaluate` to see how a closed rule scores on a clip.
    `fetch_counterexamples` shows the traces your current best sketches get wrong. Solving is cheap (<1 s); typecheck first.
 4. Be economical: every tool call re-sends the whole conversation. Try at most 2-3 sketches by hand per round, then submit.
