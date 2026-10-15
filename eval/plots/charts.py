@@ -68,12 +68,10 @@ def nice_ticks(vmax: float, n: int = 4) -> list[float]:
     raw = vmax / n
     mag = 10 ** math.floor(math.log10(raw))
     step = next(m * mag for m in (1, 2, 2.5, 5, 10) if m * mag >= raw)
-    out, v = [], 0.0
-    while v <= vmax + step * 0.999:
-        out.append(round(v, 10))
+    out, v = [0.0], 0.0
+    while v < vmax - 1e-12 and len(out) < 12:                     # stop at the first tick that covers vmax
         v += step
-        if len(out) > 12:
-            break
+        out.append(round(v, 10))
     return out
 
 
@@ -145,8 +143,8 @@ def f1_chart(rows: Sequence[Row], *, alpha: float = 0.1) -> str:
             if hi > lo:
                 svg.line(cx[i], y1 - hi * plot_h, cx[i], y1 - lo * plot_h, f"span l{meta['var'][-1]}")
             svg.marker(meta["shape"], cx[i], y1 - m * plot_h, meta["var"])
-            if i == groups[g][-1]:                                                # label the last point of each group
-                svg.text(cx[i], y1 - m * plot_h - 11, f"{m:.2f}", anchor="middle", cls="ink")
+            if i == groups[g][-1]:                                                # label the last point of each group, above its spread
+                svg.text(cx[i], y1 - (hi if hi > lo else m) * plot_h - (8 if hi > lo else 11), f"{m:.2f}", anchor="middle", cls="ink")
         for g, idx in groups.items():
             gx = (cx[idx[0]] + cx[idx[-1]]) / 2
             svg.text(gx, y1 + 34, g, anchor="middle", cls="ink")
