@@ -2,7 +2,7 @@
 .env
 .env.*
 !.env.example
-token
+/token
 *.token
 
 # hackathon briefing material (not ours to redistribute)
@@ -11,7 +11,7 @@ rules.txt
 updates.txt
 
 # local data, downloads, caches
-data/
+/data/
 *.mp4
 *.avi
 .cache/
