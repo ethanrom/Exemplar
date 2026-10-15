@@ -11,6 +11,11 @@ function niceStep(domainS: number): number {
 
 const depth = (path: string) => Math.max(0, path.split('.').length - 1)
 
+const interval = (s: WitnessSpan) =>
+  s.t_start_ms === s.t_end_ms
+    ? `${(s.t_start_ms / 1000).toFixed(1)} s`
+    : `${(s.t_start_ms / 1000).toFixed(1)}–${(s.t_end_ms / 1000).toFixed(1)} s`
+
 function Bar({ span, domain }: { span: WitnessSpan; domain: number }) {
   const left = (span.t_start_ms / domain) * 100
   const width = Math.max(0, ((span.t_end_ms - span.t_start_ms) / domain) * 100)
@@ -89,15 +94,15 @@ export function WitnessTimeline({
       {witness.english && !compact && <p className="mt-2 text-sm text-ex-ink2">{witness.english}</p>}
 
       <div className="relative mt-3 overflow-x-auto" tabIndex={0} role="region" aria-label="Witness timeline (scrolls sideways on narrow screens)">
-        <table className="w-full min-w-[520px] table-fixed border-separate border-spacing-0 text-sm">
+        <table className={`w-full table-fixed border-separate border-spacing-0 text-sm ${compact ? 'min-w-[340px]' : 'min-w-[520px]'}`}>
           <caption className="sr-only">
             Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each row is a subformula with the interval the monitor chose and its robustness ρ.
           </caption>
           <colgroup>
-            <col className="w-[34%]" />
+            <col className={compact ? 'w-[40%]' : 'w-[34%]'} />
             <col />
-            <col className="w-[92px]" />
-            <col className="w-[84px]" />
+            {!compact && <col className="w-[92px]" />}
+            <col className="w-[72px]" />
           </colgroup>
           <thead>
             <tr className="text-left text-xs text-ex-ink3">
@@ -116,7 +121,7 @@ export function WitnessTimeline({
                   ))}
                 </span>
               </th>
-              <th scope="col" className="pb-1 pl-2 font-medium">Interval</th>
+              {!compact && <th scope="col" className="pb-1 pl-2 font-medium">Interval</th>}
               <th scope="col" className="pb-1 pl-2 text-right font-medium">ρ</th>
             </tr>
           </thead>
@@ -128,7 +133,10 @@ export function WitnessTimeline({
                   <th scope="row" className="border-t border-ex-line py-1.5 pr-2 text-left font-normal">
                     <span style={{ paddingLeft: `${depth(s.path) * 14}px` }} className="flex items-start gap-1.5">
                       <span className="mt-0.5 rounded bg-ex-bg px-1 font-mono text-[11px] text-ex-ink3">{s.op}</span>
-                      <code className="break-words font-mono text-[12.5px] text-cyan-100">{s.text ?? s.path}</code>
+                      <span className="min-w-0">
+                        <code className="break-words font-mono text-[12.5px] text-cyan-100">{s.text ?? s.path}</code>
+                        {compact && <span className="block font-mono text-[11px] tabular-nums text-ex-ink3">{interval(s)}</span>}
+                      </span>
                     </span>
                   </th>
                   <td className="border-t border-ex-line py-1.5">
@@ -139,11 +147,9 @@ export function WitnessTimeline({
                       <Bar span={s} domain={domain} />
                     </span>
                   </td>
-                  <td className="border-t border-ex-line py-1.5 pl-2 font-mono text-xs tabular-nums text-ex-ink2">
-                    {s.t_start_ms === s.t_end_ms
-                      ? `${(s.t_start_ms / 1000).toFixed(1)} s`
-                      : `${(s.t_start_ms / 1000).toFixed(1)}–${(s.t_end_ms / 1000).toFixed(1)} s`}
-                  </td>
+                  {!compact && (
+                    <td className="border-t border-ex-line py-1.5 pl-2 font-mono text-xs tabular-nums text-ex-ink2">{interval(s)}</td>
+                  )}
                   <td className="border-t border-ex-line py-1.5 pl-2 text-right">
                     <span className={`inline-flex items-center gap-1 font-mono text-xs tabular-nums ${pos ? 'text-green-300' : 'text-red-300'}`}>
                       <Icon name={pos ? 'check' : 'cross'} className="h-3.5 w-3.5" />
