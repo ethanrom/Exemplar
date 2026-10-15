@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="cvr" role="img" aria-labelledby="t d" viewBox="0 0 800 478" width="800" height="478">
+<title id="t">Cost per event stays flat as you add rules</title><desc id="d">Line chart, 1 to 10 deployed rules on the x axis and model cost in US dollars per event on the y axis. Exemplar is flat at $0.00179 per event because it perceives each event once and scores every rule on the cached trace. Zero-shot prompting costs $0.0133 per rule per event, rising in a straight line to $0.1330 at 10 rules, about 74 times more. Circle markers are Exemplar, square markers are zero-shot prompting. A table with every value is in cost_vs_rules.md.</desc>
+<style>
+svg.cvr { --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+          --s1:#2a78d6; --s2:#eb6834; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+@media (prefers-color-scheme: dark) { svg.cvr { --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781;
+          --grid:#2c2c2a; --axis:#383835; --s1:#3987e5; --s2:#d95926; } }
+svg.cvr .bg { fill:var(--surface); }
+svg.cvr text { fill:var(--ink2); font-size:12px; }
+svg.cvr text.title { fill:var(--ink); font-size:17px; font-weight:600; }
+svg.cvr text.ink { fill:var(--ink); }
+svg.cvr text.strong { fill:var(--ink); font-weight:600; }
+svg.cvr text.muted { fill:var(--muted); font-size:11px; }
+svg.cvr .grid { stroke:var(--grid); stroke-width:1; fill:none; }
+svg.cvr .axis { stroke:var(--axis); stroke-width:1; fill:none; }
+svg.cvr .line { stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+svg.cvr .l1 { stroke:var(--s1); } svg.cvr .l2 { stroke:var(--s2); }
+svg.cvr .m1 { fill:var(--s1); stroke:var(--surface); stroke-width:2; }
+svg.cvr .m2 { fill:var(--s2); stroke:var(--surface); stroke-width:2; }
+</style>
+<rect class="bg" x="0" y="0" width="800" height="478"/>
+<text class="title" x="74" y="30">Cost per event stays flat as you add rules</text>
+<text x="74" y="52">Model spend per event, US dollars, for 1 to 10 deployed rules. Exemplar perceives an event once; prompting calls a model per rule.</text>
+<line class="line l1" x1="74" y1="80" x2="102" y2="80"/><circle class="m1" cx="88" cy="80" r="5"/>
+<text class="ink" x="112" y="84">Exemplar (perceive once, score every rule)</text>
+<line class="line l2" x1="404" y1="80" x2="432" y2="80"/><rect class="m2" x="413" y="75" width="10" height="10"/>
+<text class="ink" x="442" y="84">Zero-shot prompting (one call per rule)</text>
+<line class="axis" x1="74" y1="386" x2="586" y2="386"/>
+<text x="64" y="390" text-anchor="end">$0.00</text>
+<line class="grid" x1="74" y1="346.9" x2="586" y2="346.9"/>
+<text x="64" y="350.9" text-anchor="end">$0.02</text>
+<line class="grid" x1="74" y1="307.7" x2="586" y2="307.7"/>
+<text x="64" y="311.7" text-anchor="end">$0.04</text>
+<line class="grid" x1="74" y1="268.6" x2="586" y2="268.6"/>
+<text x="64" y="272.6" text-anchor="end">$0.06</text>
+<line class="grid" x1="74" y1="229.4" x2="586" y2="229.4"/>
+<text x="64" y="233.4" text-anchor="end">$0.08</text>
+<line class="grid" x1="74" y1="190.3" x2="586" y2="190.3"/>
+<text x="64" y="194.3" text-anchor="end">$0.10</text>
+<line class="grid" x1="74" y1="151.1" x2="586" y2="151.1"/>
+<text x="64" y="155.1" text-anchor="end">$0.12</text>
+<line class="grid" x1="74" y1="112" x2="586" y2="112"/>
+<text x="64" y="116" text-anchor="end">$0.14</text>
+<text x="74" y="406" text-anchor="middle">1</text>
+<text x="130.9" y="406" text-anchor="middle">2</text>
+<text x="187.8" y="406" text-anchor="middle">3</text>
+<text x="244.7" y="406" text-anchor="middle">4</text>
+<text x="301.6" y="406" text-anchor="middle">5</text>
+<text x="358.4" y="406" text-anchor="middle">6</text>
+<text x="415.3" y="406" text-anchor="middle">7</text>
+<text x="472.2" y="406" text-anchor="middle">8</text>
+<text x="529.1" y="406" text-anchor="middle">9</text>
+<text x="586" y="406" text-anchor="middle">10</text>
+<text x="330.0" y="430" text-anchor="middle" class="ink">Rules deployed on the camera</text>
+<text x="18" y="249.0" text-anchor="middle" class="ink" transform="rotate(-90 18 249.0)">US dollars per event</text>
+<polyline class="line l2" points="74,360 130.9,333.9 187.8,307.9 244.7,281.9 301.6,255.8 358.4,229.8 415.3,203.8 472.2,177.8 529.1,151.7 586,125.7"/>
+<polyline class="line l1" points="74,382.5 130.9,382.5 187.8,382.5 244.7,382.5 301.6,382.5 358.4,382.5 415.3,382.5 472.2,382.5 529.1,382.5 586,382.5"/>
+<rect class="m2" x="69" y="355" width="10" height="10"><title>1 rule: zero-shot prompting $0.0133 per event, Exemplar $0.00179 per event (7x)</title></rect>
+<circle class="m1" cx="74" cy="382.5" r="5"><title>1 rule: zero-shot prompting $0.0133 per event, Exemplar $0.00179 per event (7x)</title></circle>
+<rect class="m2" x="125.9" y="328.9" width="10" height="10"><title>2 rules: zero-shot prompting $0.0266 per event, Exemplar $0.00179 per event (15x)</title></rect>
+<circle class="m1" cx="130.9" cy="382.5" r="5"><title>2 rules: zero-shot prompting $0.0266 per event, Exemplar $0.00179 per event (15x)</title></circle>
+<rect class="m2" x="182.8" y="302.9" width="10" height="10"><title>3 rules: zero-shot prompting $0.0399 per event, Exemplar $0.00179 per event (22x)</title></rect>
+<circle class="m1" cx="187.8" cy="382.5" r="5"><title>3 rules: zero-shot prompting $0.0399 per event, Exemplar $0.00179 per event (22x)</title></circle>
+<rect class="m2" x="239.7" y="276.9" width="10" height="10"><title>4 rules: zero-shot prompting $0.0532 per event, Exemplar $0.00179 per event (30x)</title></rect>
+<circle class="m1" cx="244.7" cy="382.5" r="5"><title>4 rules: zero-shot prompting $0.0532 per event, Exemplar $0.00179 per event (30x)</title></circle>
+<rect class="m2" x="296.6" y="250.8" width="10" height="10"><title>5 rules: zero-shot prompting $0.0665 per event, Exemplar $0.00179 per event (37x)</title></rect>
+<circle class="m1" cx="301.6" cy="382.5" r="5"><title>5 rules: zero-shot prompting $0.0665 per event, Exemplar $0.00179 per event (37x)</title></circle>
+<rect class="m2" x="353.4" y="224.8" width="10" height="10"><title>6 rules: zero-shot prompting $0.0798 per event, Exemplar $0.00179 per event (45x)</title></rect>
+<circle class="m1" cx="358.4" cy="382.5" r="5"><title>6 rules: zero-shot prompting $0.0798 per event, Exemplar $0.00179 per event (45x)</title></circle>
+<rect class="m2" x="410.3" y="198.8" width="10" height="10"><title>7 rules: zero-shot prompting $0.0931 per event, Exemplar $0.00179 per event (52x)</title></rect>
+<circle class="m1" cx="415.3" cy="382.5" r="5"><title>7 rules: zero-shot prompting $0.0931 per event, Exemplar $0.00179 per event (52x)</title></circle>
+<rect class="m2" x="467.2" y="172.8" width="10" height="10"><title>8 rules: zero-shot prompting $0.1064 per event, Exemplar $0.00179 per event (59x)</title></rect>
+<circle class="m1" cx="472.2" cy="382.5" r="5"><title>8 rules: zero-shot prompting $0.1064 per event, Exemplar $0.00179 per event (59x)</title></circle>
+<rect class="m2" x="524.1" y="146.7" width="10" height="10"><title>9 rules: zero-shot prompting $0.1197 per event, Exemplar $0.00179 per event (67x)</title></rect>
+<circle class="m1" cx="529.1" cy="382.5" r="5"><title>9 rules: zero-shot prompting $0.1197 per event, Exemplar $0.00179 per event (67x)</title></circle>
+<rect class="m2" x="581" y="120.7" width="10" height="10"><title>10 rules: zero-shot prompting $0.1330 per event, Exemplar $0.00179 per event (74x)</title></rect>
+<circle class="m1" cx="586" cy="382.5" r="5"><title>10 rules: zero-shot prompting $0.1330 per event, Exemplar $0.00179 per event (74x)</title></circle>
+<text class="strong" x="602" y="119.7">Zero-shot prompting</text>
+<text x="602" y="135.7">$0.1330 at 10 rules</text>
+<text x="602" y="151.7">($0.0133 per rule)</text>
+<text class="strong" x="602" y="171.7">about 74x the cost of Exemplar</text>
+<text class="strong" x="602" y="360.5">Exemplar</text>
+<text x="602" y="376.5">$0.00179, any number of rules</text>
+<text class="muted" x="74" y="454">Measured, not modelled. Exemplar: mean fast-model perception cost over 1,005 clips (16 frames each). Zero-shot:</text>
+<text class="muted" x="74" y="469">median cost of 527 strong-model calls on the same frames. Teaching a rule is a one-time cost and is not included.</text>
+</svg>
