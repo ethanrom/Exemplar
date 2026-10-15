@@ -326,3 +326,35 @@ def test_prepared_trace_is_reusable_and_robust_to_identity_reuse():
     # the pairwise offsets come from integer ms with one division
     assert p.D[1, 3] == (tr.frames[3].t_ms - tr.frames[1].t_ms) / 1000
     assert np.array_equal(p.t_ms, tr.t_ms)
+
+
+# ------------------------------------------------------------------ agreement with the Phase 0 spike evaluator
+def test_then_agrees_with_the_phase0_spike_evaluator():
+    """scripts/spikes/z3_then.py::rho_then is the NumPy evaluator that agreed with Z3 in spike 6."""
+    import importlib.util
+    import random
+    from pathlib import Path
+
+    path = Path(__file__).parents[3] / "scripts" / "spikes" / "z3_then.py"
+    if not path.exists():
+        pytest.skip("spike script not present")
+    spec = importlib.util.spec_from_file_location("z3_then_spike", path)
+    spike = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(spike)
+    from exemplar.contracts.dsl_ast import Then
+    rnd = random.Random(7)
+    for _ in range(60):
+        n = rnd.randint(1, 20)
+        ts = sorted(rnd.sample(range(0, 30000, 100), n))
+        frames = [(t, [x for x in [("picks_up", ("p1", "k1"), rnd.choice(["low", "med", "high"])) if rnd.random() < .3 else None,
+                                   ("leaves", ("p1", "porch"), rnd.choice(["low", "med", "high"])) if rnd.random() < .3 else None]
+                       if x]) for t in ts]
+        tr = mk(frames)
+        a = rnd.choice([0, 0.5, 1, 2.5, 4]); b = a + rnd.choice([0, 1, 3.3, 8, 40])
+        phi = np.array(rho(Atom(pred="picks_up", args=("p", "k")), tr, {"p": "p1", "k": "k1"}))
+        psi = np.array(rho(Atom(pred="leaves", args=("p", "porch")), tr, {"p": "p1", "k": "k1"}))
+        want = spike.rho_then(phi, psi, tr.t_ms, a, b)
+        node = Then(a=float(a), b=float(b), left=Atom(pred="picks_up", args=("p", "k")),
+                    right=Atom(pred="leaves", args=("p", "porch")))
+        got = rho(node, tr, {"p": "p1", "k": "k1"})
+        assert np.array_equal(got, want), (ts, a, b)

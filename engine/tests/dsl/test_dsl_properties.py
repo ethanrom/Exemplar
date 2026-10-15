@@ -1,6 +1,8 @@
 """Property tests (PLAN.md §2.2.3 + extras). Strategies live in dsl_strategies.py."""
 from __future__ import annotations
 
+import os
+
 import numpy as np
 from hypothesis import HealthCheck, assume, given, settings
 from hypothesis import strategies as st
@@ -12,14 +14,16 @@ from exemplar.contracts.ontology import CLAMP
 from exemplar.dsl import (compile_rule, evaluate, evaluate_bool, parse, prepare, rho, robustness, to_english, to_text,
                           truth_series, typecheck, witness)
 
-SETTINGS = settings(max_examples=150, deadline=None,
-                    suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large,
-                                           HealthCheck.filter_too_much])
+# DSL_PROP_SCALE=10 runs ten times as many examples (use it before changing the evaluator).
+_SCALE = float(os.environ.get("DSL_PROP_SCALE", "1"))
+_HC = [HealthCheck.too_slow, HealthCheck.data_too_large, HealthCheck.filter_too_much]
+KEY = settings(max_examples=int(150 * _SCALE), deadline=None, suppress_health_check=_HC)    # the four required properties
+SETTINGS = settings(max_examples=int(60 * _SCALE), deadline=None, suppress_health_check=_HC)
 C = CLAMP
 
 
 # ------------------------------------------------------------------ the four required properties
-@SETTINGS
+@KEY
 @given(rule_and_trace())
 def test_sign_of_robustness_agrees_with_boolean(rt):
     rule, tr = rt
@@ -29,7 +33,7 @@ def test_sign_of_robustness_agrees_with_boolean(rt):
         assert (r > 0) == evaluate_bool(rule, tr), (to_text(rule), r)
 
 
-@SETTINGS
+@KEY
 @given(formula_and_trace())
 def test_sign_agrees_pointwise_for_every_subformula(ft):
     phi, tr, binding = ft
@@ -41,7 +45,7 @@ def test_sign_agrees_pointwise_for_every_subformula(ft):
             assert (ri > 0) == bi
 
 
-@SETTINGS
+@KEY
 @given(formula_and_trace())
 def test_negation_duality(ft):
     phi, tr, binding = ft
@@ -59,7 +63,7 @@ widen = st.tuples(st.sampled_from([0.0, 0.5, 1.0, 2.5, 4.0]), st.sampled_from([0
                   st.sampled_from([0.0, 0.5, 2.0, 5.0]), st.sampled_from([0.0, 1.0, 4.0, 30.0])).map(_widen)
 
 
-@SETTINGS
+@KEY
 @given(formula_and_trace(), widen)
 def test_widening_eventually_never_decreases_rho(ft, w):
     phi, tr, binding = ft
@@ -70,7 +74,7 @@ def test_widening_eventually_never_decreases_rho(ft, w):
     assert (wide >= narrow).all()
 
 
-@SETTINGS
+@KEY
 @given(formula_and_trace(), widen)
 def test_widening_always_never_increases_rho(ft, w):
     phi, tr, binding = ft
@@ -130,7 +134,7 @@ def test_english_is_total_and_deterministic(rule):
 
 
 # ------------------------------------------------------------------ evaluator cross-checks
-@SETTINGS
+@KEY
 @given(formula_and_trace())
 def test_vectorised_rho_equals_reference_semantics(ft):
     phi, tr, binding = ft
