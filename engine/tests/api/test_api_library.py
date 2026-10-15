@@ -88,7 +88,15 @@ def test_event_detail_has_trace_and_fallback_trace_text(lib):
     d = lib.client.get(f"/events/fx_theft_a?concept_id={lib.cid}").json()
     assert d["trace"]["clip_id"] == "theft_a" and d["strong_trace"] is None
     assert d["label"]["value"] == "pos"
-    assert "picks_up(p1,k1)@high" in d["trace_text"] and "entities: p1:person[hoodie] k1:package[box]" in d["trace_text"]
+    try:                                            # stream D's renderer is used once it is installed
+        from exemplar.synth import render_trace_text
+    except ImportError:
+        render_trace_text = None
+    if render_trace_text is None:
+        assert "picks_up(p1,k1)@high" in d["trace_text"] and "entities: p1:person[hoodie] k1:package[box]" in d["trace_text"]
+    else:
+        from exemplar.contracts.trace import Trace
+        assert d["trace_text"] == render_trace_text(Trace.model_validate(d["trace"]))
 
 
 def test_event_detail_uses_ds_renderer_when_available(env):
