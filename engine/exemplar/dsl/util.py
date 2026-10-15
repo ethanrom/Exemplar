@@ -6,7 +6,7 @@ from typing import Mapping, Optional
 
 from pydantic import BaseModel
 
-from ..contracts.dsl_ast import (Always, And, Atom, Eventually, HoldsFor, Hole, Not, Or, Rule, Then, fill_holes,
+from ..contracts.dsl_ast import (Always, And, Eventually, HoldsFor, Hole, Not, Or, Rule, Then, fill_holes,
                                  holes as _holes)
 from .errors import UnboundHoleError
 
