@@ -11,7 +11,7 @@
   (farthest-point rule). Without any reference clip the closest-to-0.5 clip wins. Remaining ties go to
   the smaller |p - 0.5|, then the clip id, so the choice is deterministic.
 * A labelled clip is never returned: ``labelled`` traces and ``exclude`` ids are removed first.
-* Members whose weight is below `MIN_WEIGHT` are not evaluated (together they move p by less than 1e-7 per 1000 members).
+* Members whose weight is below `MIN_WEIGHT` are not evaluated (each is below 1e-7, so M of them move p by under M * 1e-7).
 * p of exactly 0 or 1 means the committee is unanimous on every clip; the caller decides whether that is
   worth a question.
 """
