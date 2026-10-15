@@ -16,7 +16,7 @@ from exemplar.contracts.ontology import ENTITY_TYPES, PREDICATES, ZONES
 
 from .sampling import SampledFrame
 
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 TOOL_NAME = "emit_trace"
 
 # Display names for argument kinds (the ontology's "Carryable" is spelled out for the model).
@@ -24,13 +24,19 @@ _KIND_TEXT = {"Carryable": "Package|Object"}
 
 # Hand-written semantics.  The key set must equal ontology.PREDICATES (tested).
 PREDICATE_HINTS: dict[str, str] = {
-    "present": "the entity is visible in this frame (assert it for every visible entity in every frame it is seen).",
+    "present": "the entity is visible in this frame. It is IMPLIED by any other fact that names the entity in the same "
+               "frame, so assert present(e) only for a visible entity that has no other fact in that frame (this keeps "
+               "the output short).",
     "in_zone": "the entity is located in that zone in this frame (a package lying on the steps: in_zone(k1, steps)). "
-               "Use the most specific zone; two zones only when clearly overlapping.",
+               "Give every visible person, vehicle and package a zone in every frame in which one of the zones "
+               "plausibly fits (cars parked in a lot or on a driveway: driveway; cars on a road: street). Use the "
+               "most specific zone; two zones only when clearly overlapping.",
     "near": "the two entities are within about arm's reach / two body-widths of each other in the scene. "
             "Symmetric: assert it once per pair.",
     "carrying": "the person holds or carries the item (in hands or arms) in this frame. Assert it in EVERY frame "
-                "in which the item is held, including the frame in which it is picked up.",
+                "in which the item is held, including the frame in which it is picked up. Once a person has picked an item up "
+                "and has not set it down, keep asserting carrying (conf low if the item is hard to see) in every "
+                "frame in which that person is visible.",
     "picks_up": "the transition frame in which the person's hands take the item off a surface (ground, steps, porch, "
                 "car) and lift it, OR the first frame in which the person holds an item that lay on a surface in "
                 "earlier frames. Assert it ONLY in that transition frame(s), not while the item is merely held. "
@@ -39,7 +45,8 @@ PREDICATE_HINTS: dict[str, str] = {
                  "in which an item that was being carried now rests on a surface. Only in that frame(s).",
     "rings_bell": "the person is pressing the doorbell button (finger on the bell) in this frame.",
     "enters": "the first frame in which the entity is inside that zone after not being there (arrived from outside "
-              "the zone or from outside the view). Not asserted for entities already in the zone in frame 0.",
+              "the zone or from outside the view, e.g. a car driving into the lot or a person walking onto the steps). "
+              "Not asserted for entities already in the zone in frame 0.",
     "leaves": "the last frame in which the entity is still inside that zone when it is gone from the zone in the "
               "following frames (walking/driving out of it or out of view). You see all frames at once, so look "
               "ahead to decide.",
@@ -54,9 +61,9 @@ ZONE_HINTS: dict[str, str] = {
     "porch": "the landing or covered area at the door",
     "steps": "stairs or stoop leading up to the door",
     "yard": "lawn, garden or open ground around the house",
-    "driveway": "the driveway or parking pad",
+    "driveway": "the driveway, parking pad or parking lot",
     "sidewalk": "the public footpath",
-    "street": "the road",
+    "street": "the road (also a road seen in the distance)",
     "dock": "a loading dock / bay or parking-lot loading area",
 }
 
@@ -98,9 +105,9 @@ RULES
 - `summary` is ONE plain sentence about what happens in the clip.
 
 EXAMPLE (abbreviated, for the format of action facts): a person walks up to a box lying on the steps, lifts it and walks away.
-frame 3: present(p1) present(k1) in_zone(p1, steps) in_zone(k1, steps) near(p1, k1)
-frame 4: present(p1) present(k1) in_zone(p1, steps) picks_up(p1, k1) carrying(p1, k1)
-frame 5: present(p1) present(k1) carrying(p1, k1) leaves(p1, steps)"""
+frame 3: in_zone(p1, steps) in_zone(k1, steps) near(p1, k1)
+frame 4: in_zone(p1, steps) in_zone(k1, steps) picks_up(p1, k1) carrying(p1, k1)
+frame 5: in_zone(p1, steps) carrying(p1, k1) leaves(p1, steps)"""
 
 
 def emit_trace_schema() -> dict[str, Any]:

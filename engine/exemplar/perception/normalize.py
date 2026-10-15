@@ -5,7 +5,7 @@ Two kinds of problems, handled differently (PLAN.md §2.1.7):
 * **Harmless** — repaired silently and *counted* (`Normalized.dropped`): ids/zones/labels/types in the wrong
   case, `medium` for `med`, duplicate facts or entities, frames the model skipped or numbered out of range,
   facts that mention an entity id that was never declared (dropped), entities that no fact mentions (dropped),
-  `near(a, a)` (dropped).  `near` is symmetric, so the mirrored fact is added: a rule written `near(k, p)` and one
+  `near(a, a)` (dropped), a minority of frame indices left out (they become empty frames).  `near` is symmetric, so the mirrored fact is added: a rule written `near(k, p)` and one
   written `near(p, k)` then both see the observation.
 * **Everything else** — unknown predicates, wrong arity, wrong argument types, unknown zone names, bad `conf`
   values — is reported as an error string; the caller sends the list back to the model for one retry.
@@ -92,11 +92,13 @@ def normalize(obj: Any, times_ms: Sequence[int]) -> Normalized:
     n = len(times_ms)
     by_frame: dict[int, dict[tuple[str, tuple[str, ...]], str]] = {i: {} for i in range(n)}
     rank = {"low": 0, "med": 1, "high": 2}
+    listed: set[int] = set()
     for fr in obj["frames"]:
         idx = fr.get("i") if isinstance(fr, dict) else None
         if isinstance(idx, bool) or not isinstance(idx, int) or not 0 <= idx < n:
             out.dropped["frame_bad_index"] += 1
             continue
+        listed.add(idx)
         for f in _as_list(fr.get("facts")):
             if not isinstance(f, dict) or not isinstance(f.get("pred"), str) or not isinstance(f.get("args"), list):
                 out.dropped["fact_malformed"] += 1
@@ -137,6 +139,12 @@ def normalize(obj: Any, times_ms: Sequence[int]) -> Normalized:
                 if prev is not None and j == 0:
                     out.dropped["fact_duplicate"] += 1
                 by_frame[idx][key] = conf if prev is None or rank[conf] > rank[prev] else prev
+
+    # A few skipped frames are harmless (they become empty frames), but a model that skipped most of them did not do
+    # the task, and an all-empty trace would silently read as "nothing happened" -> make it retry.
+    if len(listed) * 2 < n:
+        out.errors.append(f"`frames` must list every frame index 0..{n - 1} (with an empty `facts` list when nothing "
+                          f"is visible); you listed {len(listed)} of {n}")
 
     # ---- entities no fact mentions are dead weight (they would only add useless bindings)
     mentioned = {a for d in by_frame.values() for (_, args) in d for a in args}

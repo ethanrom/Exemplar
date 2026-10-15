@@ -36,7 +36,7 @@ def format_summary(res: PerceptionResult, window_s: Optional[float] = None) -> s
         return "\n".join(lines)
     lines.append("entities: " + (" | ".join(f"{e.id}:{e.type}[{','.join(e.attrs)}]" for e in tr.entities) or "(none)"))
     for fr in tr.frames:
-        present = [f.args[0] for f in fr.facts if f.pred == "present"]
+        present = list(dict.fromkeys(a for f in fr.facts for a in f.args if tr.entity(a)))   # explicit or implied
         others = [f"{f.pred}({','.join(f.args)}){'' if f.conf == 'high' else '/' + f.conf}" for f in fr.facts
                   if f.pred != "present"]
         lines.append(f"  t={fr.t_ms / 1000:5.1f}s  present: {','.join(present) or '-'}  " + " ".join(others))

@@ -34,7 +34,8 @@ def test_clean_payload_roundtrips():
 def test_zone_names_lowercased_and_ids_sanitised():
     obj = payload(entities=[{"id": "P1", "type": "Person", "attrs": ["Delivery Uniform"]}, {"id": " K-1 ", "type": "PACKAGE", "attrs": []}],
                   frames=[{"i": 0, "facts": [{"pred": "in_zone", "args": ["P1", "Steps"], "conf": "HIGH"},
-                                             {"pred": "carrying", "args": ["p1", "k_1"], "conf": "Medium"}]}])
+                                             {"pred": "carrying", "args": ["p1", "k_1"], "conf": "Medium"}]},
+                         {"i": 1, "facts": []}, {"i": 2, "facts": []}])
     n, (tr, errs) = build(obj)
     assert errs == [], errs
     assert [e.id for e in tr.entities] == ["p1", "k_1"] and tr.entities[0].attrs == ("delivery_uniform",)
@@ -52,8 +53,15 @@ def test_facts_with_unknown_entity_ids_are_dropped_and_counted():
     assert [f.args for f in tr.frames[0].facts] == [("p1",)]
 
 
+def test_model_that_skipped_most_frames_must_retry():
+    n, (tr, errs) = build(payload(frames=[{"i": 1, "facts": [{"pred": "present", "args": ["p1"], "conf": "low"}]}]))
+    assert tr is None and any("must list every frame index" in e for e in errs)
+    n, (tr, errs) = build(payload(frames=[]))
+    assert tr is None and errs
+
+
 def test_missing_frames_become_empty_and_bad_indices_are_dropped():
-    obj = payload(frames=[{"i": 1, "facts": [{"pred": "present", "args": ["p1"], "conf": "low"}]},
+    obj = payload(frames=[{"i": 0, "facts": []}, {"i": 1, "facts": [{"pred": "present", "args": ["p1"], "conf": "low"}]},
                           {"i": 7, "facts": []}, {"i": -1, "facts": []}, {"i": "x", "facts": []}])
     n, (tr, errs) = build(obj)
     assert errs == [] and n.dropped["frame_bad_index"] == 3
@@ -64,7 +72,8 @@ def test_missing_frames_become_empty_and_bad_indices_are_dropped():
 
 def test_duplicate_facts_keep_max_confidence():
     obj = payload(frames=[{"i": 0, "facts": [{"pred": "present", "args": ["p1"], "conf": "low"},
-                                             {"pred": "present", "args": ["p1"], "conf": "high"}]}])
+                                             {"pred": "present", "args": ["p1"], "conf": "high"}]},
+                         {"i": 1, "facts": []}, {"i": 2, "facts": []}])
     n, (tr, errs) = build(obj)
     assert errs == [] and n.dropped["fact_duplicate"] == 1
     assert [(f.args, f.conf) for f in tr.frames[0].facts] == [(("p1",), "high")]
@@ -78,7 +87,8 @@ def test_duplicate_entities_dropped():
 
 def test_near_is_made_symmetric_and_self_near_dropped():
     obj = payload(frames=[{"i": 0, "facts": [{"pred": "near", "args": ["k1", "p1"], "conf": "med"},
-                                             {"pred": "near", "args": ["p1", "p1"], "conf": "med"}]}])
+                                             {"pred": "near", "args": ["p1", "p1"], "conf": "med"}]},
+                         {"i": 1, "facts": []}, {"i": 2, "facts": []}])
     n, (tr, errs) = build(obj)
     assert errs == [] and n.dropped["fact_self_near"] == 1
     assert {f.args for f in tr.frames[0].facts} == {("k1", "p1"), ("p1", "k1")}
