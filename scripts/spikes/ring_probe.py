@@ -1,10 +1,11 @@
-"""Phase 0 spike: probe the Ring Developer Playground (PLAN.md §5, questions 1, 2, 4).
+"""Exploratory probe used while integrating with the Ring Developer Playground: lists devices, watches the
+event history for simulated events and downloads their media, and tries chime playback.
 
-Throwaway tooling — the real client is stream A's `engine/exemplar/ring/`.
+Not used at runtime: the production client is `engine/exemplar/ring/`.
 
-    engine/.venv/Scripts/python scripts/spikes/ring_probe.py info
-    engine/.venv/Scripts/python scripts/spikes/ring_probe.py watch --minutes 20
-    engine/.venv/Scripts/python scripts/spikes/ring_probe.py chime
+    uv run --project engine python scripts/spikes/ring_probe.py info
+    uv run --project engine python scripts/spikes/ring_probe.py watch --minutes 20
+    uv run --project engine python scripts/spikes/ring_probe.py chime
 
 Token: $RING_PLAYGROUND_TOKEN, else the file given by --token-file (default: <repo>/token).
 Everything (status codes, headers, bodies, media) is written under data/spike/ring/.
@@ -78,7 +79,7 @@ class Ring:
 
 
 def media_with_backoff(ring: Ring, kind: str, device: str, body: dict, dest: Path, budget_s: float = 150) -> int:
-    """Retry 416/425/5xx with exponential backoff (PLAN.md §2.7: ~2 min)."""
+    """Retry 416/425/5xx with exponential backoff (~2 min)."""
     delay, t0 = 2.0, time.time()
     while True:
         status, _ = ring.media(kind, device, body, dest)
@@ -133,7 +134,7 @@ def cmd_watch(ring: Ring, tok: str, minutes: float, poll_s: float) -> None:
                 continue
             a = s["attributes"]
             end_ms = a.get("end") or a["start"] + 30_000
-            if time.time() * 1000 < end_ms + 5_000:  # PLAN.md §2.7: wait clip end + 5 s
+            if time.time() * 1000 < end_ms + 5_000:  # wait until clip end + 5 s
                 continue
             s["fetched"] = True
             d = OUT / eid[-16:]
@@ -153,7 +154,7 @@ def cmd_chime(ring: Ring) -> None:
     slots = []
     try:
         slots = conf.json()["data"]["attributes"].get("audio", {}).get("customizable_slots", [])
-    except Exception:  # noqa: BLE001 — spike: shape unknown, log and carry on
+    except Exception:  # noqa: BLE001 — probe: shape unknown, log and carry on
         pass
     ref = (slots[0].get("audio_ref") if slots else None) or "spike-probe"
     r = ring.c.post(f"/v1/devices/{dev}/media/audio/playback",

@@ -1,9 +1,10 @@
-"""Phase 0 spike (PLAN.md §5 Q6): solve the holes of a toy `then[?a,?b]` sketch with Z3,
-then differentially check the solution against an independent NumPy robustness evaluator.
+"""Exploratory probe used while designing the Z3 encoding: solve the holes of a toy `then[?a,?b]` sketch with
+Z3, then differentially check the solution against an independent NumPy robustness evaluator.
 
 Sketch:  exists p:Person, k:Package:  picks_up(p,k) then[?a,?b] leaves(p, porch)
 
-Throwaway — stream D owns the real encoder (`engine/exemplar/synth/z3enc.py`).
+Not used at runtime: the production encoder is `engine/exemplar/synth/z3enc.py`. Its `rho_then` is also
+used by a test as an independent reference (engine/tests/dsl/test_dsl_eval.py).
 
     uv run --project engine python scripts/spikes/z3_then.py
 """
@@ -60,7 +61,7 @@ def score(tr, a, b) -> float:
     return float(best)
 
 
-# ---------------------------------------------------------------- Z3 encoding (PLAN.md §2.3)
+# ---------------------------------------------------------------- Z3 encoding (see docs/DSL.md)
 def encode(tr, A, B, m):
     T = len(tr["t_ms"])
     secs = [z3.RealVal(Fraction(int(x), 1000)) for x in tr["t_ms"]]

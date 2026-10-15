@@ -1,5 +1,7 @@
-"""Phase 0 spike (PLAN.md §5 Q8): minimal Strands agent with one tool on BedrockModel,
-using the application-inference-profile ARN from .env.
+"""Exploratory probe used while integrating with Amazon Bedrock: a minimal Strands agent with one tool on
+BedrockModel, using the application inference profile configured in .env.
+
+Not used at runtime: the production agent is `engine/exemplar/agent/`.
 
     uv run --project engine python scripts/spikes/strands_hello.py [--fast]
 """

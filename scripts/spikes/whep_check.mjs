@@ -1,5 +1,5 @@
-// Phase 0 spike (PLAN.md §5 Q3): drive the forked sample's live view in installed Google Chrome
-// and report whether the WHEP stream decodes, plus the negotiated codec.
+// Exploratory probe used while integrating with the Ring Developer Playground: drive the web app's live view
+// in an installed Google Chrome and report whether the WHEP stream decodes, plus the negotiated codec.
 //
 //   NODE_PATH=<dir with playwright-core>/node_modules node scripts/spikes/whep_check.mjs [http://localhost:3000]
 import { createRequire } from 'node:module'
