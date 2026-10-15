@@ -25,8 +25,13 @@ The margin variable is bounded `0 ≤ m ≤ C`. With the plan's empty-window con
 
 `random` labels are also kept **out of synthesis**. The conformal bound `P(false alarm) ≤ α` needs calibration scores from negatives the rule was not fitted on. If they were used for fitting, τ_α would be biased low and the guarantee would not hold. (PLAN.md §2.5 only says active labels never calibrate; this is the other half.)
 
-## Open decision: window tiebreak (spike 6)
-PLAN.md §2.3's third objective, "prefer tighter windows", solves `picks_up then[?a,?b] leaves` on positives with gaps 6 s and 7 s to exactly `[6, 7]`. A rule taught from one clip then only matches that clip's exact timing. Proposed replacement: maximise **temporal slack**, the distance from each positive's witness gap to the window edges and from each negative's gaps to the window. Clamp at `a ≥ 0`, then snap to a 0.5 s grid and re-verify. Pending the integrator's decision before stream D starts.
+## Hole placement: temporal slack (decided 2026-10-15, replaces "prefer tighter windows")
+Spike 6: with "prefer tighter windows" as the third objective, positives with gaps of 6 s and 7 s solve to exactly `[6, 7]`, and a rule taught from one clip matches only that exact timing. Instead, after minimising violations and maximising `m`, each hole is moved away from the edges of its feasible interval `[lo_h, hi_h]` (computed by Z3 min/max with the satisfied set and `m*` fixed):
+- lower window bounds `a`: `0` if feasible, else the centre of the interval;
+- all other holes (`b`, `d`, `h1`, `h2`): the centre of the interval;
+- snap to a 0.5 s grid (hours: integers), then re-verify with the NumPy evaluator. If that fails, step back from the Z3 model point towards the snapped point until it passes.
+
+Example: one positive with gap 7 s in a 24 s clip gives `then[0, 15.5]`, not `then[7, 7]`. Owned by stream D (`synth/`), and tested there.
 
 ## To be written by stream C
 Full robustness semantics per operator (PLAN §2.2), boolean semantics, the English printer's templates, worked examples on the fixtures, and the property-test list.

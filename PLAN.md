@@ -153,7 +153,8 @@ a,b,d,h1,h2 := number | hole '?name'
   - `exists` is an OR over bindings for GE and an AND for LE.
   - The top level is an OR over t for GE and an AND over t for LE.
   - Positive example i gets the soft constraint `GE(top)`, and negative example i gets `LE(top)`. The weight is 1, or 3 for user-confirmed labels.
-  - **Lexicographic objective (`z3.Optimize`):** first minimise the weight of violated soft constraints, then maximise `m`, then prefer tighter windows as a tiebreak. Set a 10 s timeout per sketch.
+  - **Lexicographic objective (`z3.Optimize`):** first minimise the weight of violated soft constraints, then maximise `m`. Set a 10 s timeout per sketch.
+  - **Temporal-slack placement (replaces "prefer tighter windows", decided after spike 6).** With the satisfied set and `m*` fixed, compute each hole's feasible interval `[lo_h, hi_h]` by Z3 min/max (the same box §2.4 uses). Then place each hole: lower window bounds (`a`) take `0` when feasible, otherwise the interval centre; every other hole (`b`, `d`, hours) takes the interval centre. Snap to a 0.5 s grid (integers for hours) and re-verify with the NumPy evaluator (labels agree, ρ ≥ m* − ε). If the point fails, step back along the segment from the Z3 model point towards it until it passes. This keeps rules taught from one clip from matching only that clip's exact timing.
   - **Return:**
     - `sat` or `unsat`
     - the hole values
