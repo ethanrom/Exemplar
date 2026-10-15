@@ -5,8 +5,8 @@ import { fmtDateTime, fmtDuration } from '../_lib/format'
 import { useApi } from '../_lib/hooks'
 import type { EventDetail } from '../_lib/types'
 import { Icon } from './Icon'
-import { clipUrl, KindBadges, snapshotUrl, SourceBadge, TraceStatusBadge } from './EventBits'
-import { Alert, Spinner } from './ui'
+import { clipUrl, KindBadges, snapshotUrl, SourceBadge, TraceStatusBadge, TraceStrip } from './EventBits'
+import { Alert, IconButton, Skeleton } from './ui'
 
 /** Modal (native <dialog>: focus trap, Esc to close, inert background) with the clip and its perceived facts. */
 export function EventDialog({ eventId, onClose }: { eventId: string | null; onClose: () => void }) {
@@ -29,23 +29,29 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
       aria-labelledby="event-dialog-title"
       onClose={onClose}
       onClick={(e) => { if (e.target === ref.current) ref.current?.close() }}
-      className="m-auto w-[min(920px,94vw)] max-h-[92vh] overflow-hidden rounded-xl border border-ex-line bg-ex-panel p-0 text-ex-ink backdrop:bg-black/70"
+      className="m-auto w-[min(960px,94vw)] max-h-[92vh] overflow-hidden rounded-xl border border-ex-line2 bg-ex-panel p-0 text-ex-ink shadow-2xl shadow-black/60"
     >
       {eventId && (
         <div className="flex max-h-[92vh] flex-col">
-          <div className="flex items-center justify-between gap-3 border-b border-ex-line px-4 py-3">
-            <h2 id="event-dialog-title" className="min-w-0 truncate text-base font-semibold">
-              {ev?.summary || 'Event details'}
-            </h2>
-            <button type="button" className="btn" onClick={() => ref.current?.close()}>
-              <Icon name="cross" /> Close
-            </button>
+          <div className="flex items-start justify-between gap-4 border-b border-ex-line px-5 py-4">
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-ex-ink3">Clip details</p>
+              <h2 id="event-dialog-title" className="mt-0.5 line-clamp-2 text-md font-semibold leading-6 tracking-tight">
+                {ev?.summary || 'Event details'}
+              </h2>
+            </div>
+            <IconButton icon="cross" label="Close" onClick={() => ref.current?.close()} />
           </div>
-          <div className="overflow-y-auto p-4">
-            {detail.loading && !ev && <Spinner label="Loading event" />}
-            {detail.error && <Alert tone="neg" title="Could not load this event">{detail.error.message}</Alert>}
+          <div className="overflow-y-auto p-5">
+            {detail.loading && !ev && (
+              <div role="status" aria-label="Loading event" className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="aspect-video" />
+                <div className="grid content-start gap-3"><Skeleton className="h-4 w-2/3" /><Skeleton className="h-4 w-full" /><Skeleton className="h-16" /></div>
+              </div>
+            )}
+            {detail.error && <Alert tone="neg" title="Could not load this clip">{detail.error.message}</Alert>}
             {ev && (
-              <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                 <div>
                   {ev.clip_status === 'ready' && !clipError ? (
                     <video
@@ -63,50 +69,65 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
                     <div>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={snapshotUrl(ev.id)} alt={ev.summary ?? 'Event snapshot'} className="aspect-video w-full rounded-lg bg-black object-cover" />
-                      <p className="mt-1 text-xs text-ex-ink3">The clip is not available{ev.clip_status !== 'ready' ? ` yet (${ev.clip_status})` : ''}; showing the snapshot.</p>
+                      <p className="mt-1.5 text-xs text-ex-ink3">The clip is not available{ev.clip_status !== 'ready' ? ` yet (${ev.clip_status})` : ''}; showing the snapshot.</p>
                     </div>
+                  ) : ev.trace?.status === 'ok' ? (
+                    <div className="aspect-video overflow-hidden rounded-lg"><TraceStrip trace={ev.trace} /></div>
                   ) : (
                     <Alert tone="warn" title="No clip or snapshot for this event" />
                   )}
-                  <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+                  <dl className="mt-5 grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-2 text-sm">
                     <dt className="text-ex-ink3">Source</dt>
-                    <dd className="flex flex-wrap items-center gap-1.5"><SourceBadge source={ev.source} /><KindBadges event={ev} /><TraceStatusBadge event={ev} /></dd>
+                    <dd className="flex flex-wrap items-center gap-x-2 gap-y-1"><SourceBadge source={ev.source} /><KindBadges event={ev} /><TraceStatusBadge event={ev} /></dd>
                     <dt className="text-ex-ink3">When</dt>
-                    <dd>{fmtDateTime(ev.start_ms)} · {fmtDuration(ev.duration_ms)}</dd>
+                    <dd className="text-ex-ink2">{ev.source === 'fixture' ? 'Fixture' : fmtDateTime(ev.start_ms)} · <span className="tabular-nums">{fmtDuration(ev.duration_ms)}</span></dd>
                     {ev.attribution && (
                       <>
                         <dt className="text-ex-ink3">Credit</dt>
-                        <dd>{ev.attribution}</dd>
+                        <dd className="text-ex-ink2">{ev.attribution}</dd>
                       </>
                     )}
                     {ev.trace?.perception && (
                       <>
                         <dt className="text-ex-ink3">Perception</dt>
-                        <dd>
-                          {ev.trace.perception.mode} model · {ev.trace.perception.n_frames} frames · {ev.trace.perception.tokens_in.toLocaleString()} in / {ev.trace.perception.tokens_out.toLocaleString()} out tokens
+                        <dd className="text-ex-ink2">
+                          {ev.trace.perception.mode} model · {ev.trace.perception.n_frames} frames · <span className="tabular-nums">{ev.trace.perception.tokens_in.toLocaleString()}</span> in / <span className="tabular-nums">{ev.trace.perception.tokens_out.toLocaleString()}</span> out tokens
                         </dd>
                       </>
                     )}
                   </dl>
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold">What the model saw</h3>
+                  <h3 className="text-sm font-semibold text-ex-ink">What the model saw</h3>
                   {ev.trace && ev.trace.status === 'ok' ? (
                     <>
-                      <p className="mt-1 text-sm text-ex-ink2">{ev.trace.summary}</p>
-                      <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Entities">
+                      <p className="mt-1.5 text-sm text-ex-ink2">{ev.trace.summary}</p>
+                      <ul className="mt-4 divide-y divide-ex-line rounded-lg border border-ex-line" aria-label="Entities">
                         {ev.trace.entities.map((e) => (
-                          <li key={e.id} className="chip"><span className="font-mono text-ex-ink">{e.id}</span> {e.type}{e.attrs?.length ? `: ${e.attrs.join(', ')}` : ''}</li>
+                          <li key={e.id} className="flex items-baseline gap-3 px-3 py-2 text-sm">
+                            <span className="w-8 shrink-0 font-mono text-xs text-ex-ink">{e.id}</span>
+                            <span className="text-ex-ink2">{e.type}</span>
+                            {e.attrs?.length ? <span className="min-w-0 truncate text-xs text-ex-ink3">{e.attrs.join(', ')}</span> : null}
+                          </li>
                         ))}
-                        {ev.trace.entities.length === 0 && <li className="text-sm text-ex-ink3">No entities detected.</li>}
+                        {ev.trace.entities.length === 0 && <li className="px-3 py-2 text-sm text-ex-ink3">No entities detected.</li>}
                       </ul>
-                      <details className="mt-3">
-                        <summary className="cursor-pointer rounded text-sm font-medium text-ex-info">Symbolic trace ({ev.trace.frames.length} frames)</summary>
-                        <pre className="code mt-2 max-h-72 overflow-auto text-xs">{ev.trace_text}</pre>
+                      {ev.trace.entities.length > 0 && (
+                        <div className="mt-3">
+                          <p className="mb-1.5 text-xs text-ex-ink3">Facts over {fmtDuration(ev.trace.duration_ms)}</p>
+                          <div className="h-[84px] overflow-hidden rounded-lg"><TraceStrip trace={ev.trace} /></div>
+                        </div>
+                      )}
+                      <details className="group mt-4">
+                        <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded text-sm font-medium text-ex-accent-ink [&::-webkit-details-marker]:hidden">
+                          <Icon name="chevron-right" className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+                          Symbolic trace ({ev.trace.frames.length} frames)
+                        </summary>
+                        <pre className="code mt-2 max-h-72 overflow-auto text-xs leading-5">{ev.trace_text}</pre>
                       </details>
                     </>
                   ) : (
-                    <p className="mt-1 text-sm text-ex-ink2">
+                    <p className="mt-1.5 text-sm text-ex-ink2">
                       {ev.trace_status === 'perception_failed' ? ev.trace?.error || 'Perception failed for this clip, so it is excluded from learning and backtests.' : 'No trace yet.'}
                     </p>
                   )}

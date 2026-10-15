@@ -3,10 +3,10 @@
 import { useApp } from '../_lib/app'
 
 /** Labelled concept picker shared by Library, Teach and Rule. */
-export function ConceptSelect({ id = 'concept-select', label = 'Concept' }: { id?: string; label?: string }) {
+export function ConceptSelect({ id = 'concept-select', label = 'Concept', className = 'min-w-[200px]' }: { id?: string; label?: string; className?: string }) {
   const { concepts, conceptId, setConceptId, conceptsLoading } = useApp()
   return (
-    <div className="min-w-[220px]">
+    <div className={className}>
       <label htmlFor={id} className="field-label">{label}</label>
       <select
         id={id}
