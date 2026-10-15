@@ -138,7 +138,7 @@ export default function HomeScreen() {
           <p className="inline-flex items-center gap-2 rounded-full border border-ex-line2 px-3 py-1 text-xs text-ex-ink2">
             <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-ex-accent-ink" /> Ring track · Amazon Developer Hackathon 2026
           </p>
-          <h1 className="mt-6 text-3xl font-semibold tracking-tight text-ex-ink sm:text-4xl">
+          <h1 className="mt-6 text-balance text-3xl font-semibold tracking-tight text-ex-ink sm:text-4xl">
             Teach your Ring camera
             <span className="block text-ex-ink3">new detectors by example.</span>
           </h1>
@@ -163,7 +163,7 @@ export default function HomeScreen() {
           {STORY.map((s) => (
             <li key={s.n} className="group relative px-0 py-8 md:px-8 md:first:pl-0 md:last:pr-0">
               <p className="font-mono text-xs text-ex-ink3">{s.n}</p>
-              <p className="mt-3 text-lg font-semibold leading-snug tracking-tight text-ex-ink">{s.title}</p>
+              <p className="mt-3 text-lg font-semibold leading-snug tracking-tight text-ex-ink md:min-h-[3.5rem]">{s.title}</p>
               <p className="mt-2 text-base text-ex-ink2">{s.text}</p>
               <Link href={s.href} className="mt-5 inline-flex items-center gap-1 rounded text-sm font-medium text-ex-accent-ink hover:text-ex-ink">
                 {s.link} <Icon name="arrow-right" className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />

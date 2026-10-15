@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useApp } from '../_lib/app'
 import { errorMessage, patch } from '../_lib/api'
-import { fmtInt, fmtNum, fmtScore, fmtUsd } from '../_lib/format'
+import { fmtInt, fmtNum, fmtScore, fmtUsd, keepUnits } from '../_lib/format'
 import { useApi, type ApiState } from '../_lib/hooks'
 import type { Backtest, BacktestRow, CostSummary, RuleAction, RuleSummary } from '../_lib/types'
 import { CalibrationPanel, GuaranteeBadge } from '../_components/CalibrationPanel'
@@ -43,7 +43,7 @@ function ScoreBar({ score, tau }: { score: number; tau: number }) {
   const pos = score >= 0
   const fires = score > tau
   return (
-    <span aria-hidden="true" className="relative block h-5 w-32 shrink-0">
+    <span aria-hidden="true" className="relative hidden h-5 w-32 shrink-0 sm:block">
       <span className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-white/[0.08]" />
       <span className="absolute inset-y-[5px] left-1/2 w-px bg-ex-ink3" />
       <span
@@ -100,7 +100,7 @@ function BacktestTable({
       </div>
 
       <div className="relative overflow-x-auto rounded-xl border border-ex-line bg-ex-panel">
-        <table className="w-full min-w-[680px] border-separate border-spacing-0 text-sm">
+        <table className="w-full border-separate border-spacing-0 text-sm sm:min-w-[680px]">
           <caption className="sr-only">Backtest results, one row per clip. Press the Why button on a matching row to see its witness timeline.</caption>
           <thead>
             <tr>
@@ -111,7 +111,7 @@ function BacktestTable({
                   <span className="sr-only">, press to sort {asc ? 'high to low' : 'low to high'}</span>
                 </button>
               </th>
-              <th scope="col" className={th}>Outcome</th>
+              <th scope="col" className={cx(th, 'hidden sm:table-cell')}>Outcome</th>
               <th scope="col" className={cx(th, 'w-24')}><span className="sr-only">Witness</span></th>
             </tr>
           </thead>
@@ -137,6 +137,7 @@ function BacktestTable({
                           <span className="mt-0.5 block text-xs">
                             {r.label ? <LabelIndicator label={r.label} showProvenance={false} /> : <span className="text-ex-ink3">No label</span>}
                           </span>
+                          <span className={cx('mt-1 inline-flex items-center gap-1.5 text-xs sm:hidden', TONE_TEXT[o.tone])}><Icon name={o.icon} className="h-3 w-3" />{o.label}</span>
                         </div>
                       </div>
                     </td>
@@ -146,7 +147,7 @@ function BacktestTable({
                         <span className="w-12 font-mono text-xs tabular-nums text-ex-ink">{fmtScore(r.score)}</span>
                       </div>
                     </td>
-                    <td className={cell}>
+                    <td className={cx(cell, 'hidden sm:table-cell')}>
                       <span className={cx('inline-flex items-center gap-1.5 whitespace-nowrap text-sm', TONE_TEXT[o.tone])}>
                         <Icon name={o.icon} className="h-3.5 w-3.5" />{o.label}
                       </span>
@@ -357,7 +358,7 @@ export default function RuleScreen() {
                 <p className="text-xs font-medium text-ex-ink3">Rule</p>
                 <span className="font-mono text-xs text-ex-ink3">{current.id}</span>
               </div>
-              <p className="mt-3 text-xl font-semibold leading-snug tracking-tight text-ex-ink sm:text-2xl">{current.english}</p>
+              <p className="mt-3 text-pretty text-xl font-semibold leading-snug tracking-tight text-ex-ink sm:text-2xl">{keepUnits(current.english)}</p>
               <DslBlock text={current.dsl_text} size="lg" className="mt-5" />
               <div className="mt-5"><RuleMetrics rule={current} /></div>
               <SuspectList rule={current} events={events} onInspect={setOpenId} />
@@ -373,7 +374,7 @@ export default function RuleScreen() {
                 <StatStrip cols="grid-cols-2 sm:grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,2fr)]" label="Backtest summary">
                   <Stat label="Matches" value={c.tp ?? 0} icon="check" hint="correct" />
                   <Stat label="False alarms" value={c.fp ?? 0} tone={(c.fp ?? 0) > 0 ? 'neg' : undefined} icon="cross" hint="matched a − clip" />
-                  <Stat label="Missed" value={c.fn ?? 0} tone={(c.fn ?? 0) > 0 ? 'warn' : undefined} icon="warning" hint="a + clip, no match" />
+                  <Stat label="Missed" value={c.fn ?? 0} tone={(c.fn ?? 0) > 0 ? 'warn' : undefined} icon="warning" hint="skipped a + clip" />
                   <Stat label="Rejects" value={c.tn ?? 0} icon="minus" hint="correct" />
                   <div className="col-span-2 min-w-0 bg-ex-panel px-4 py-3.5 sm:col-span-1">
                     <dt className="flex items-center gap-1.5 text-xs text-ex-ink3"><Icon name="shield" className="h-3.5 w-3.5" />False-alarm guarantee</dt>

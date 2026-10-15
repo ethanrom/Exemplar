@@ -187,7 +187,7 @@ function OAuthOption() {
       {(justLinked || linked) && (
         <div className="mt-5"><Alert tone="info" title="Ring account linked">Devices and history now come from the linked account.</Alert></div>
       )}
-      <div className="mt-auto pt-8">
+      <div className="pt-8">
         {/* A plain navigation: the engine answers with a redirect to Ring's account-link page. */}
         <a className="btn" href="/api/engine/ring/oauth/start">
           <Icon name="link" /> Connect a Ring account

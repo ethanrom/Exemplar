@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useApp } from '../_lib/app'
+import { keepUnits } from '../_lib/format'
 import { useApi } from '../_lib/hooks'
 import type { Firing, RuleSummary } from '../_lib/types'
 import { GuaranteeBadge } from './CalibrationPanel'
@@ -29,7 +30,7 @@ export function HomeExample() {
         {fired > 0 && <p className="text-xs text-ex-ink3"><span className="tabular-nums text-ex-ink2">{fired}</span> alert{fired === 1 ? '' : 's'} so far</p>}
       </div>
       <div className="px-5 pb-5 pt-4">
-        <p className="text-lg font-medium leading-snug tracking-tight text-ex-ink">{r.english}</p>
+        <p className="text-pretty text-lg font-medium leading-snug tracking-tight text-ex-ink">{keepUnits(r.english)}</p>
         <p className="mt-4 rounded-lg border border-ex-line bg-ex-bg px-3.5 py-3 font-mono text-[13px] leading-6" aria-label="Rule in the Exemplar logic language">
           <Dsl text={r.dsl_text} />
         </p>

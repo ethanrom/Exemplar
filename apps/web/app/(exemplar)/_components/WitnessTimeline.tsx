@@ -31,7 +31,7 @@ function Lane({ span, domain, minor }: { span: WitnessSpan; domain: number; mino
       {point ? (
         <span
           className={cx('absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[2px] border-2 border-ex-bg', pos ? 'bg-ex-accent-ink' : 'bg-ex-neg')}
-          style={{ left: `${left}%` }}
+          style={{ left: `max(7px, ${left}%)` }}
         />
       ) : (
         <span
@@ -47,7 +47,7 @@ function Lane({ span, domain, minor }: { span: WitnessSpan; domain: number; mino
       {!inside && (
         <span
           className="absolute top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-xs tabular-nums text-ex-ink2"
-          style={beforeBar ? { right: `${100 - left + 1.2}%` } : { left: `${left + (point ? 2 : width + 1.2)}%` }}
+          style={beforeBar ? { right: `${100 - left + 1.2}%` } : { left: `${left + (point ? 3 : width + 1.2)}%` }}
         >
           {label}
         </span>

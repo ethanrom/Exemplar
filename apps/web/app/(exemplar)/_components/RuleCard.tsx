@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type { EventSummary, RuleSummary } from '../_lib/types'
-import { fmtNum } from '../_lib/format'
+import { fmtNum, keepUnits } from '../_lib/format'
 import { Dsl, DslBlock } from './Dsl'
 import { EventThumb } from './EventBits'
 import { Icon } from './Icon'
@@ -16,7 +16,7 @@ export function RuleHeadline({ rule, size = 'md' }: { rule: RuleSummary; size?: 
   const cls = { sm: 'text-base', md: 'text-md', lg: 'text-lg', xl: 'text-xl sm:text-2xl' }[size]
   return (
     <>
-      <p className={cx(cls, 'font-medium leading-snug tracking-tight text-ex-ink')}>{rule.english}</p>
+      <p className={cx(cls, 'text-pretty font-medium leading-snug tracking-tight text-ex-ink')}>{keepUnits(rule.english)}</p>
       <DslBlock text={rule.dsl_text} size={size === 'sm' ? 'sm' : size === 'md' ? 'md' : 'lg'} className="mt-3" />
     </>
   )
@@ -52,13 +52,13 @@ export function SuspectList({
       <p className="mt-1 text-sm text-ex-ink2">
         This rule disagrees with {ids.length} of your labelled example{ids.length === 1 ? '' : 's'}. The label may be right and the model may have missed a fact: check the clip{ids.length === 1 ? '' : 's'}.
       </p>
-      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+      <ul className={cx('mt-3 grid gap-2', ids.length > 1 && 'sm:grid-cols-2')}>
         {ids.map((id) => {
           const ev = events.get(id)
           return (
             <li key={id} className="flex items-center gap-2.5 rounded-md bg-ex-bg/60 p-1.5">
               {ev && <EventThumb event={ev} compact className="h-9 w-16 shrink-0 rounded" />}
-              <span className="min-w-0 flex-1 truncate text-xs text-ex-ink2">{ev?.summary ?? id}</span>
+              <span className="min-w-0 flex-1 line-clamp-2 text-xs text-ex-ink2">{ev?.summary ?? id}</span>
               {ev && (
                 <button type="button" className="btn btn-sm" onClick={() => onInspect(ev.id)}>
                   Inspect<span className="sr-only">: {ev.summary ?? id}</span>
@@ -78,11 +78,11 @@ export function HeroRuleCard({
 }: { rule: RuleSummary; events: Map<string, EventSummary>; onInspect: (eventId: string) => void }) {
   return (
     <article className="rounded-xl border border-ex-line2 bg-ex-panel p-6" aria-label="Top candidate rule">
-      <p className="flex items-center gap-1.5 text-xs font-medium text-ex-accent-ink">
-        <Icon name="spark" className="h-3.5 w-3.5" /> Top candidate
-        <span className="font-normal text-ex-ink3">· simplest rule that fits every example</span>
+      <p className="text-xs font-medium text-ex-accent-ink">
+        <Icon name="spark" className="mr-1.5 inline h-3.5 w-3.5 align-[-2px]" />Top candidate
+        <span className="font-normal text-ex-ink3"> · simplest rule that fits every example</span>
       </p>
-      <p className="mt-3 text-lg font-medium leading-snug tracking-tight text-ex-ink sm:text-xl">{rule.english}</p>
+      <p className="mt-3 text-pretty text-lg font-medium leading-snug tracking-tight text-ex-ink sm:text-xl">{keepUnits(rule.english)}</p>
       <DslBlock text={rule.dsl_text} size="lg" className="mt-4" />
       <div className="mt-4"><RuleMetrics rule={rule} /></div>
       <SuspectList rule={rule} events={events} onInspect={onInspect} />
@@ -104,7 +104,7 @@ export function CandidateRow({
     <li className="group grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3 gap-y-2 py-4 sm:grid-cols-[1.5rem_minmax(0,1fr)_auto]" aria-label={`Candidate rule ${rank}`}>
       <span className="pt-0.5 text-sm font-medium tabular-nums text-ex-ink3" aria-hidden="true">{rank}</span>
       <div className="min-w-0">
-        <p className="text-base font-medium leading-snug text-ex-ink">{rule.english}</p>
+        <p className="text-pretty text-base font-medium leading-snug text-ex-ink">{keepUnits(rule.english)}</p>
         <p className="mt-1.5 break-words font-mono text-xs leading-5"><Dsl text={rule.dsl_text} /></p>
         <div className="mt-2"><RuleMetrics rule={rule} showStatus={false} /></div>
         <SuspectList rule={rule} events={events} onInspect={onInspect} />

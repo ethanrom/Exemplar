@@ -74,3 +74,6 @@ export const SUBTYPE_LABEL: Record<string, string> = {
 
 /** Minimum number of random negatives for a conformal guarantee at level alpha: ceil(1/alpha) - 1. */
 export const negativesNeeded = (alpha: number) => Math.max(0, Math.ceil(1 / alpha - 1e-9) - 1)
+
+/** Typography only: keep a number and its unit ("24 s") on one line. The wording itself is never changed. */
+export const keepUnits = (t: string) => t.replace(/(\d) (s|ms|min)\b/g, '$1\u00a0$2')

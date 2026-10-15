@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { COST, PLAYGROUND, VERIFIED, fmtCost } from '../_data/evidence'
 import { useApi } from '../_lib/hooks'
 import type { EventDetail, Firing, RuleSummary } from '../_lib/types'
@@ -26,13 +26,29 @@ const ratio = (rules: number) => zeroShotCost(rules) / COST.exemplarPerEventUsd
 
 // ---------------------------------------------------------------------------------------------
 function CostChart({ rules, onRules }: { rules: number; onRules: (n: number) => void }) {
-  const W = 760, H = 340
-  const m = { l: 62, r: 138, t: 22, b: 50 }
+  // The drawing is as wide as its container (one SVG unit = one pixel), so labels keep their size on a phone.
+  const wrap = useRef<HTMLDivElement>(null)
+  const [width, setWidth] = useState(760)
+  useEffect(() => {
+    const el = wrap.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const measure = () => setWidth(Math.round(el.clientWidth))
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const W = Math.max(300, width)
+  const compact = W < 560
+  const H = compact ? 300 : 340
+  const m = compact ? { l: 58, r: 16, t: 24, b: 50 } : { l: 76, r: 138, t: 22, b: 50 }
   const pw = W - m.l - m.r
   const ph = H - m.t - m.b
   const YMAX = 0.15
-  const xs = Array.from({ length: COST.maxRules }, (_, i) => i + 1)
-  const x = (n: number) => m.l + ((n - 1) / (COST.maxRules - 1)) * pw
+  const maxR = COST.maxRules
+  const xs = Array.from({ length: maxR }, (_, i) => i + 1)
+  const x = (n: number) => m.l + ((n - 1) / (maxR - 1)) * pw
   const y = (v: number) => m.t + ph - (v / YMAX) * ph
   const yTicks = [0, 0.05, 0.1, 0.15]
   const zs = (n: number) => zeroShotCost(n)
@@ -41,56 +57,58 @@ function CostChart({ rules, onRules }: { rules: number; onRules: (n: number) => 
   function onPointer(e: React.PointerEvent<SVGSVGElement>) {
     const r = e.currentTarget.getBoundingClientRect()
     const vx = ((e.clientX - r.left) / r.width) * W
-    const n = Math.round(((vx - m.l) / pw) * (COST.maxRules - 1)) + 1
-    if (n >= 1 && n <= COST.maxRules) onRules(n)
+    const n = Math.round(((vx - m.l) / pw) * (maxR - 1)) + 1
+    if (n >= 1 && n <= maxR) onRules(n)
   }
   const halo = { stroke: SURFACE, strokeWidth: 4, paintOrder: 'stroke' as const }
 
   return (
-    <div className="relative overflow-x-auto">
-      <div className="min-w-[620px]">
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="block w-full cursor-crosshair touch-pan-y"
-          role="group"
-          aria-label="Line chart of model cost per event against the number of rules deployed. Zero-shot prompting grows with every rule; Exemplar stays flat. Use the table view or the slider below for exact values."
-          onPointerMove={onPointer}
-          onPointerDown={onPointer}
-        >
-          {yTicks.map((t) => (
-            <g key={t}>
-              <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} stroke={t === 0 ? AXIS : GRID} strokeWidth="1" />
-              <text x={m.l - 10} y={y(t) + 4} textAnchor="end" fontSize="12" fill={MUTED}>{t === 0 ? '$0' : `$${t.toFixed(2)}`}</text>
-            </g>
-          ))}
-          {xs.map((n) => (
-            <text key={n} x={x(n)} y={H - m.b + 20} textAnchor="middle" fontSize="12" fill={n === rules ? INK : MUTED} fontWeight={n === rules ? 600 : 400}>{n}</text>
-          ))}
-          <text x={m.l + pw / 2} y={H - 8} textAnchor="middle" fontSize="12" fill={MUTED}>rules deployed</text>
-          <text x={14} y={m.t + ph / 2} textAnchor="middle" fontSize="12" fill={MUTED} transform={`rotate(-90 14 ${m.t + ph / 2})`}>model cost per event (USD)</text>
-
-          {/* the selected number of rules */}
-          <line x1={x(rules)} x2={x(rules)} y1={m.t} y2={m.t + ph} stroke={MUTED} strokeWidth="1" strokeDasharray="4 4" />
-
-          {/* lines: 2 px, round caps */}
-          <line x1={x(1)} y1={y(zs(1))} x2={x(COST.maxRules)} y2={y(zs(COST.maxRules))} stroke={ZERO_SHOT.color} strokeWidth="2.5" strokeLinecap="round" />
-          <line x1={x(1)} y1={y(ex)} x2={x(COST.maxRules)} y2={y(ex)} stroke={EXEMPLAR.color} strokeWidth="2.5" strokeLinecap="round" />
-
-          {/* direct labels at the line ends */}
-          <g>
-            <text x={x(COST.maxRules) + 14} y={y(zs(COST.maxRules)) - 2} fontSize="12" fill={INK2}>{ZERO_SHOT.label}</text>
-            <text x={x(COST.maxRules) + 14} y={y(zs(COST.maxRules)) + 15} fontSize="13" fontWeight="600" fill={INK}>{fmtCost(zs(COST.maxRules))}</text>
-            <text x={x(COST.maxRules) + 14} y={y(ex) - 18} fontSize="12" fill={INK2}>{EXEMPLAR.label}</text>
-            <text x={x(COST.maxRules) + 14} y={y(ex) - 3} fontSize="13" fontWeight="600" fill={INK}>{fmtCost(ex)}</text>
+    <div ref={wrap} className="w-full">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width={W}
+        height={H}
+        className="block max-w-full cursor-crosshair touch-pan-y"
+        role="group"
+        aria-label="Line chart of model cost per event against the number of rules deployed. Zero-shot prompting grows with every rule; Exemplar stays flat. Use the table view or the slider below for exact values."
+        onPointerMove={onPointer}
+        onPointerDown={onPointer}
+      >
+        {yTicks.map((t) => (
+          <g key={t}>
+            <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} stroke={t === 0 ? AXIS : GRID} strokeWidth="1" />
+            <text x={m.l - 10} y={y(t) + 4} textAnchor="end" fontSize="12" fill={MUTED}>{t === 0 ? '$0' : `$${t.toFixed(2)}`}</text>
           </g>
+        ))}
+        {xs.map((n) => (
+          <text key={n} x={x(n)} y={H - m.b + 20} textAnchor="middle" fontSize="12" fill={n === rules ? INK : MUTED} fontWeight={n === rules ? 600 : 400}>{n}</text>
+        ))}
+        <text x={m.l + pw / 2} y={H - 8} textAnchor="middle" fontSize="12" fill={MUTED}>rules deployed</text>
+        <text x={12} y={m.t + ph / 2} textAnchor="middle" fontSize="12" fill={MUTED} transform={`rotate(-90 12 ${m.t + ph / 2})`}>model cost per event (USD)</text>
 
-          {/* markers on the selected x: 10 px with a surface ring */}
-          <circle cx={x(rules)} cy={y(zs(rules))} r="5" fill={ZERO_SHOT.color} stroke={SURFACE} strokeWidth="2" />
-          <circle cx={x(rules)} cy={y(ex)} r="5" fill={EXEMPLAR.color} stroke={SURFACE} strokeWidth="2" />
-          <text x={x(rules) - 12} y={y(zs(rules)) - 10} textAnchor={rules === 1 ? 'start' : 'end'} fontSize="13" fontWeight="600" fill={INK} {...halo}>{fmtCost(zs(rules))}</text>
-          <text x={x(rules)} y={y(ex) - 12} textAnchor="middle" fontSize="13" fontWeight="600" fill={INK} {...halo}>{fmtCost(ex)}</text>
-        </svg>
-      </div>
+        {/* the selected number of rules */}
+        <line x1={x(rules)} x2={x(rules)} y1={m.t} y2={m.t + ph} stroke={MUTED} strokeWidth="1" strokeDasharray="4 4" />
+
+        {/* lines: 2.5 px, round caps */}
+        <line x1={x(1)} y1={y(zs(1))} x2={x(maxR)} y2={y(zs(maxR))} stroke={ZERO_SHOT.color} strokeWidth="2.5" strokeLinecap="round" />
+        <line x1={x(1)} y1={y(ex)} x2={x(maxR)} y2={y(ex)} stroke={EXEMPLAR.color} strokeWidth="2.5" strokeLinecap="round" />
+
+        {/* direct labels at the line ends (on a phone the legend carries the names) */}
+        {!compact && (
+          <g>
+            <text x={x(maxR) + 14} y={y(zs(maxR)) - 2} fontSize="12" fill={INK2}>{ZERO_SHOT.label}</text>
+            <text x={x(maxR) + 14} y={y(zs(maxR)) + 15} fontSize="13" fontWeight="600" fill={INK}>{fmtCost(zs(maxR))}</text>
+            <text x={x(maxR) + 14} y={y(ex) - 18} fontSize="12" fill={INK2}>{EXEMPLAR.label}</text>
+            <text x={x(maxR) + 14} y={y(ex) - 3} fontSize="13" fontWeight="600" fill={INK}>{fmtCost(ex)}</text>
+          </g>
+        )}
+
+        {/* markers on the selected x: 10 px with a surface ring */}
+        <circle cx={x(rules)} cy={y(zs(rules))} r="5" fill={ZERO_SHOT.color} stroke={SURFACE} strokeWidth="2" />
+        <circle cx={x(rules)} cy={y(ex)} r="5" fill={EXEMPLAR.color} stroke={SURFACE} strokeWidth="2" />
+        <text x={x(rules) + (rules === 1 ? 12 : -12)} y={y(zs(rules)) - 10} textAnchor={rules === 1 ? 'start' : 'end'} fontSize="13" fontWeight="600" fill={INK} {...halo}>{fmtCost(zs(rules))}</text>
+        <text x={x(rules)} y={y(ex) - 12} textAnchor={compact && rules >= maxR - 1 ? 'end' : 'middle'} fontSize="13" fontWeight="600" fill={INK} {...halo}>{fmtCost(ex)}</text>
+      </svg>
     </div>
   )
 }
@@ -221,7 +239,7 @@ function LatestAlert() {
   if (!f || !f.witness) return null
   return (
     <div className="mt-8">
-      <h3 className="text-sm font-semibold text-ex-ink">An alert and its explanation</h3>
+      <h3 className="text-md font-semibold tracking-tight text-ex-ink">An alert and its explanation</h3>
       <p className="mt-0.5 text-sm text-ex-ink2">The latest alert on this install: what fired, and the facts and times that satisfied the rule.</p>
       <div className="mt-4 flex items-start gap-4">
         {ev.data ? <EventThumb event={ev.data} compact className="h-[54px] w-24 shrink-0 rounded-md" /> : <Skeleton className="h-[54px] w-24 shrink-0" />}
@@ -245,16 +263,16 @@ function Playground() {
       </p>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12">
-        <div className="min-w-0 overflow-x-auto rounded-xl border border-ex-line bg-ex-panel">
-          <table className="w-full min-w-[460px] border-separate border-spacing-0 text-sm">
+        <div className="min-w-0 rounded-xl border border-ex-line bg-ex-panel">
+          <table className="w-full border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Which rule fired on which simulated Playground event.</caption>
             <thead>
               <tr>
-                <th scope="col" className="border-b border-ex-line px-5 py-3 text-left text-xs font-medium text-ex-ink3">Event sent in</th>
+                <th scope="col" className="border-b border-ex-line px-3 py-3 text-left text-xs font-medium text-ex-ink3 sm:px-5">Event sent in</th>
                 {rules.map((r) => (
-                  <th key={r.key} scope="col" className="border-b border-ex-line px-5 py-3 text-left text-xs font-medium text-ex-ink3">
+                  <th key={r.key} scope="col" className="border-b border-ex-line px-3 py-3 text-left text-xs font-medium text-ex-ink2 sm:px-5">
                     {r.name}
-                    <span className="block font-normal">taught as “{r.taught}”</span>
+                    <span className="hidden font-normal text-ex-ink3 sm:block">taught as “{r.taught}”</span>
                   </th>
                 ))}
               </tr>
@@ -262,15 +280,15 @@ function Playground() {
             <tbody>
               {runs.map((run, i) => (
                 <tr key={run.event}>
-                  <th scope="row" className={cx('px-5 py-4 text-left font-medium text-ex-ink', i < runs.length - 1 && 'border-b border-ex-line')}>{run.event}</th>
+                  <th scope="row" className={cx('px-3 py-4 text-left font-medium text-ex-ink sm:px-5', i < runs.length - 1 && 'border-b border-ex-line')}>{run.event}</th>
                   {rules.map((r) => {
                     const fired = run.fired[r.key]
                     return (
-                      <td key={r.key} className={cx('px-5 py-4', i < runs.length - 1 && 'border-b border-ex-line')}>
+                      <td key={r.key} className={cx('px-3 py-4 sm:px-5', i < runs.length - 1 && 'border-b border-ex-line')}>
                         {fired ? (
                           <span className="inline-flex items-center gap-1.5 font-medium text-ex-pos"><Icon name="bolt" className="h-4 w-4" /> Fired</span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-ex-ink3"><Icon name="minus" className="h-4 w-4" /> Did not fire</span>
+                          <span className="inline-flex items-center gap-1.5 text-ex-ink3"><Icon name="minus" className="h-4 w-4" /><span aria-hidden="true" className="sm:hidden">No</span><span className="sr-only sm:not-sr-only">Did not fire</span></span>
                         )}
                       </td>
                     )
@@ -281,16 +299,16 @@ function Playground() {
           </table>
         </div>
 
-        <dl className="grid content-start gap-5 sm:grid-cols-3 lg:grid-cols-1">
-          <div>
+        <dl className="grid content-start divide-y divide-ex-line rounded-xl border border-ex-line bg-ex-panel">
+          <div className="px-5 py-4">
             <dt className="text-xs text-ex-ink3">Model cost per event</dt>
             <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-ex-ink">~${usdPerEvent}</dd>
           </div>
-          <div>
+          <div className="px-5 py-4">
             <dt className="text-xs text-ex-ink3">Time to teach a rule</dt>
             <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-ex-ink">{taughtInSeconds[0]}–{taughtInSeconds[1]} s</dd>
           </div>
-          <div>
+          <div className="px-5 py-4">
             <dt className="text-xs text-ex-ink3">Strong-model re-checks needed</dt>
             <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-ex-ink">{strongRechecks}</dd>
           </div>

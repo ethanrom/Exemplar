@@ -8,7 +8,7 @@ import '@/lib/video-processors' // registers the built-in processors (and the Ex
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
 import { useApp } from '../_lib/app'
 import { errorMessage, get, post } from '../_lib/api'
-import { fmtClock, fmtInt, fmtNum, fmtUsd } from '../_lib/format'
+import { fmtClock, fmtInt, fmtNum, fmtUsd, keepUnits } from '../_lib/format'
 import { useApi, useEventStream, useNow } from '../_lib/hooks'
 import type { CostSummary, Device, EventDetail, Firing, LiveFact, MonitorEvent, MonitorEventType, RuleSummary } from '../_lib/types'
 import { Dsl, DslBlock } from '../_components/Dsl'
@@ -21,6 +21,12 @@ const MONITOR_TYPES: MonitorEventType[] = [
   'event_ingested', 'clip_ready', 'trace_ready', 'live_facts', 'rule_fired', 'rule_dropped',
   'escalated', 'action_result', 'cost_update', 'auth_expiring', 'error',
 ]
+const ACTION_TEXT: Record<string, string> = {
+  ui: 'Notification shown in Exemplar',
+  webhook_out: 'Webhook sent',
+  slack: 'Posted to Slack',
+  chime: 'Chime played on the camera',
+}
 const FRAME_GRAB_ID = 'exemplar-frame-grab'
 const FRESH_MS = 8000
 const FEED_MAX = 8
@@ -89,7 +95,7 @@ function MonitorCard({ rule, state, now }: { rule: RuleSummary | undefined; stat
               </span>
             )}
           </div>
-          <p className="mt-3 text-base font-medium leading-snug text-ex-ink">{rule.english}</p>
+          <p className="mt-3 text-pretty text-base font-medium leading-snug text-ex-ink">{keepUnits(rule.english)}</p>
           <DslBlock text={rule.dsl_text} size="sm" className="mt-3" />
           {state?.kind === 'fired' && state.firing.witness && (
             <div className="mt-4"><WitnessTimeline witness={state.firing.witness} compact /></div>
@@ -320,6 +326,7 @@ export default function LiveScreen() {
     try { await post(`/__mock/trigger?kind=${mockKind}`); setMockMsg(`Simulated a ${mockKind} event.`) } catch (e) { setMockMsg(errorMessage(e)) }
   }
 
+  const tokenExpired = auth?.expires_at_ms != null && auth.expires_at_ms <= now
   const monitorTone = streamStatus === 'open' ? 'pos' : streamStatus === 'reconnecting' ? 'warn' : 'neutral'
 
   return (
@@ -339,11 +346,11 @@ export default function LiveScreen() {
       {(expiring || (auth?.expires_at_ms != null && auth.expires_at_ms - now < 5 * 60_000)) && (
         <div className="mb-6">
           <Alert
-            tone="warn"
-            title="The Playground token is about to expire"
+            tone={tokenExpired ? 'neg' : 'warn'}
+            title={tokenExpired ? 'The Playground token has expired' : 'The Playground token is about to expire'}
             action={<Link href="/connect" className="btn btn-sm">Paste a fresh token</Link>}
           >
-            {expiring ?? 'Live events stop arriving when it does.'}
+            {tokenExpired ? 'New events stopped arriving. Paste a fresh token to start watching again.' : (expiring ?? 'Live events stop arriving when it does.')}
           </Alert>
         </div>
       )}
@@ -440,9 +447,31 @@ export default function LiveScreen() {
               </ol>
             </div>
           </section>
+
+          <section aria-labelledby="log-h">
+            <h2 id="log-h" className="text-md font-semibold tracking-tight text-ex-ink">Action log</h2>
+            <div role="log" aria-live="polite" aria-relevant="additions" aria-label="Action log" className="mt-2 max-h-56 overflow-y-auto" tabIndex={0}>
+              {log.length === 0 ? (
+                <p className="text-sm text-ex-ink3">Nothing has fired yet.</p>
+              ) : (
+                <ol className="divide-y divide-ex-line border-y border-ex-line">
+                  {log.map((r) => (
+                    <li key={r.key} className="flex items-center gap-3 py-2.5 text-sm">
+                      <Badge tone={r.status === 'ok' ? 'pos' : r.status === 'failed' ? 'neg' : 'neutral'} icon={r.status === 'ok' ? 'check' : r.status === 'failed' ? 'cross' : 'minus'}>{r.status}</Badge>
+                      <span className="min-w-0 flex-1 truncate">
+                        <span className="text-ex-ink">{ACTION_TEXT[r.action] ?? r.action}</span>
+                        {r.detail && <span className="text-ex-ink2"> · {r.detail}</span>}
+                      </span>
+                      <span className="font-mono text-xs tabular-nums text-ex-ink3">{fmtClock(r.at)}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          </section>
         </div>
 
-        {/* ----------------------------------------------------------- monitors, feed, log */}
+        {/* ----------------------------------------------------------- monitors, feed */}
         <div className="grid min-w-0 grid-cols-1 content-start gap-10">
           <section aria-labelledby="mon-h">
             <h2 id="mon-h" className="mb-3 text-md font-semibold tracking-tight text-ex-ink">Deployed rules</h2>
@@ -460,34 +489,12 @@ export default function LiveScreen() {
           <section aria-labelledby="feed-h">
             <h2 id="feed-h" className="text-md font-semibold tracking-tight text-ex-ink">Event feed</h2>
             <p className="mt-0.5 text-sm text-ex-ink2">Each event is ingested, read once, then scored by every deployed rule.</p>
-            <div className="mt-2 max-h-[34rem] overflow-y-auto" role="log" aria-live="polite" aria-relevant="additions" aria-label="Event feed" tabIndex={0}>
+            <div className="mt-2" role="log" aria-live="polite" aria-relevant="additions" aria-label="Event feed">
               {feed.length === 0 ? (
                 <p className="rounded-xl border border-ex-line bg-ex-panel px-4 py-5 text-sm text-ex-ink3">No events yet. New ones appear here as they land in Ring history.</p>
               ) : (
                 <ol className="divide-y divide-ex-line border-y border-ex-line">
                   {feed.map((f) => <FeedRow key={f.event_id} item={f} rules={ruleMap} deployed={deployedIds} />)}
-                </ol>
-              )}
-            </div>
-          </section>
-
-          <section aria-labelledby="log-h">
-            <h2 id="log-h" className="text-md font-semibold tracking-tight text-ex-ink">Action log</h2>
-            <div role="log" aria-live="polite" aria-relevant="additions" aria-label="Action log" className="mt-2 max-h-56 overflow-y-auto" tabIndex={0}>
-              {log.length === 0 ? (
-                <p className="text-sm text-ex-ink3">Nothing has fired yet.</p>
-              ) : (
-                <ol className="divide-y divide-ex-line border-y border-ex-line">
-                  {log.map((r) => (
-                    <li key={r.key} className="flex items-center gap-3 py-2.5 text-sm">
-                      <Badge tone={r.status === 'ok' ? 'pos' : r.status === 'failed' ? 'neg' : 'neutral'} icon={r.status === 'ok' ? 'check' : r.status === 'failed' ? 'cross' : 'minus'}>{r.status}</Badge>
-                      <span className="min-w-0 flex-1 truncate">
-                        <span className="font-mono text-xs text-ex-ink">{r.action}</span>
-                        {r.detail && <span className="text-ex-ink2"> · {r.detail}</span>}
-                      </span>
-                      <span className="font-mono text-xs tabular-nums text-ex-ink3">{fmtClock(r.at)}</span>
-                    </li>
-                  ))}
                 </ol>
               )}
             </div>

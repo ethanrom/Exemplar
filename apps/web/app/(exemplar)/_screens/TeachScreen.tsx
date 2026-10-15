@@ -11,6 +11,7 @@ import { EventDialog } from '../_components/EventDialog'
 import { EventThumb, LabelControl, LabelIndicator } from '../_components/EventBits'
 import { Icon } from '../_components/Icon'
 import { QuestionCard } from '../_components/QuestionCard'
+import { ScrollRegion } from '../_components/ScrollRegion'
 import { CandidateRow, HeroRuleCard } from '../_components/RuleCard'
 import { Alert, Badge, PageHeader, SectionHeader, Segmented, Spinner, cx } from '../_components/ui'
 
@@ -254,7 +255,7 @@ export default function TeachScreen() {
               </p>
             </div>
             {eventsErr && <div className="px-4 pb-3"><Alert tone="neg">{eventsErr}</Alert></div>}
-            <div tabIndex={0} role="region" aria-label="Clips to label as examples" className="max-h-[440px] overflow-y-auto border-t border-ex-line px-4">
+            <ScrollRegion label="Clips to label as examples" className="max-h-[440px] border-t border-ex-line px-4">
               {pickerTab === 'chosen' ? (
                 chosen.length === 0 ? (
                   <div className="py-8 text-center">
@@ -278,7 +279,7 @@ export default function TeachScreen() {
                   {allClips.map((ev) => <ExampleRow key={ev.id} ev={ev} concept={concept} onOpen={() => setOpenId(ev.id)} onLabel={(v) => setLabel(ev, v)} />)}
                 </ul>
               )}
-            </div>
+            </ScrollRegion>
 
             <div className="flex flex-wrap items-center gap-3 border-t border-ex-line p-4">
               {teachButton}
