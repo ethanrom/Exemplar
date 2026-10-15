@@ -3,22 +3,92 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 226, 232, 240;
-  --background-rgb: 15, 23, 42;
+  --foreground-rgb: 241, 245, 249;
+  --background-rgb: 11, 18, 32;
+  color-scheme: dark;
+}
+
+html {
+  scroll-padding-top: 4.5rem;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Scrollbar styling for dark theme */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #1e293b; }
-::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #111c2f; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 5px; }
+
+/* WCAG 2.4.7 / 2.4.11: a focus indicator that is visible on every surface we use. */
+:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Dark ring on top of the light one so it also reads on light (cyan/white) buttons. */
+.btn-primary:focus-visible,
+.chip-on:focus-visible {
+  outline-color: #ffffff;
+  box-shadow: 0 0 0 4px #0b1220;
+}
+
+/* WCAG 2.3.3 / user preference: no motion when the user asks for none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  /* A bare `grid` gets one shrinkable column, so wide children (tables, charts) scroll inside their own
+     box instead of stretching the page on phones. grid-cols-* utilities (any breakpoint) still win. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 
 @layer components {
   .card {
-    @apply bg-dash-panel rounded-xl border border-slate-700 p-4;
+    @apply bg-ex-panel rounded-xl border border-ex-line p-4;
+  }
+  .card-title {
+    @apply text-base font-semibold text-ex-ink;
+  }
+  .field-label {
+    @apply block text-sm font-medium text-ex-ink2 mb-1;
+  }
+  .field {
+    @apply w-full min-h-[36px] rounded-md border border-ex-edge bg-ex-bg px-3 py-1.5 text-sm text-ex-ink placeholder:text-ex-ink3;
+  }
+  .btn {
+    @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-2 rounded-md border border-ex-edge bg-ex-raised px-3 py-1.5 text-sm font-medium text-ex-ink transition-colors hover:bg-[#243556] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-2 rounded-md border border-transparent bg-ex-accent px-3 py-1.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-200;
+  }
+  .btn-danger {
+    @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-2 rounded-md border border-red-300 bg-red-950 px-3 py-1.5 text-sm font-medium text-red-100 transition-colors hover:bg-red-900;
+  }
+  .chip {
+    @apply inline-flex min-h-[24px] items-center gap-1 rounded-full border border-ex-line bg-ex-raised px-2 py-0.5 text-xs font-medium text-ex-ink2;
+  }
+  .chip-on {
+    @apply border-transparent bg-ex-accent text-slate-950;
+  }
+  .kbd {
+    @apply rounded border border-ex-line bg-ex-bg px-1.5 py-0.5 font-mono text-xs text-ex-ink2;
+  }
+  .code {
+    @apply rounded-md border border-ex-line bg-ex-bg px-3 py-2 font-mono text-[13px] leading-relaxed text-cyan-100 whitespace-pre-wrap break-words;
   }
 }
