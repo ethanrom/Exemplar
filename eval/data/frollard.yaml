@@ -1,0 +1,202 @@
+# Annotations of external/frollard_thief.mp4 (times in ms from the start of the clip) + windows derived from them by
+# `python -m eval.data.frollard`. Edit `events`/`window`, then rerun; the `windows` list is regenerated.
+source:
+  title: Thief stealing our package
+  author: frollard
+  license: CC BY 4.0
+  url: https://www.youtube.com/watch?v=TfTFu8lGrwk
+  attribution: '"Thief stealing our package" by frollard, CC BY 4.0, https://www.youtube.com/watch?v=TfTFu8lGrwk'
+  modified: windows are cut from the full clip and re-encoded (scaled to 1280 px wide, no audio)
+video:
+  file: frollard_thief.mp4
+  width: 1920
+  height: 1080
+  fps: 30
+  duration_ms: 102000
+annotation_method: read off 1 s and 0.5 s contact sheets of the clip; precision about +/- 0.5 s
+events:
+  box_on_steps:
+    start_ms: 0
+    end_ms: 22000
+    note: box sits on the snowy steps from the first frame until the thief lifts it at 22.0 s
+  person_at_edge:
+    start_ms: 8000
+    end_ms: 13000
+    note: a distant person, mostly out of frame, at the top-right edge (first visible about 8 s)
+  person_walks_up:
+    start_ms: 13000
+    end_ms: 20000
+    note: walks in from the right edge (13 s), crosses the back of the yard, reaches the steps at about 19.5-20 s
+  picks_up:
+    start_ms: 20500
+    end_ms: 22000
+    note: bends over the box at 20.5 s, lifts it at 22.0 s
+  leaves_with_box:
+    start_ms: 22000
+    end_ms: 24000
+    note: carries the box off to the top left, out of frame by about 23.5-24 s
+  theft:
+    start_ms: 20500
+    end_ms: 24000
+    note: picks_up + leaves_with_box; a window is positive iff this whole interval lies inside it
+  walk_by:
+    start_ms: 48300
+    end_ms: 59500
+    note: a different-looking passer-by (something under the arm) crosses the back of the yard from left (48.3 s) to the right
+      edge (53.5 s) and lingers at the edge until about 59.5 s; never touches the steps; no box remains
+window:
+  dur_ms: 15000
+  stride_ms: 5000
+windows:
+- id: frollard-000000
+  concept: package_theft
+  label: neg
+  kind: person_walks_up_no_pickup
+  start_ms: 0
+  dur_ms: 15000
+  events:
+  - box_on_steps
+  - person_at_edge
+  - person_walks_up
+- id: frollard-005000
+  concept: package_theft
+  label: neg
+  kind: person_walks_up_no_pickup
+  start_ms: 5000
+  dur_ms: 15000
+  events:
+  - box_on_steps
+  - person_at_edge
+  - person_walks_up
+- id: frollard-010000
+  concept: package_theft
+  label: pos
+  kind: theft
+  start_ms: 10000
+  dur_ms: 15000
+  events:
+  - box_on_steps
+  - leaves_with_box
+  - person_at_edge
+  - person_walks_up
+  - picks_up
+  - theft
+- id: frollard-015000
+  concept: package_theft
+  label: pos
+  kind: theft
+  start_ms: 15000
+  dur_ms: 15000
+  events:
+  - box_on_steps
+  - leaves_with_box
+  - person_walks_up
+  - picks_up
+  - theft
+- id: frollard-020000
+  concept: package_theft
+  label: pos
+  kind: theft
+  start_ms: 20000
+  dur_ms: 15000
+  events:
+  - box_on_steps
+  - leaves_with_box
+  - picks_up
+  - theft
+- id: frollard-025000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 25000
+  dur_ms: 15000
+  events: []
+- id: frollard-030000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 30000
+  dur_ms: 15000
+  events: []
+- id: frollard-035000
+  concept: package_theft
+  label: neg
+  kind: walk_by
+  start_ms: 35000
+  dur_ms: 15000
+  events:
+  - walk_by
+- id: frollard-040000
+  concept: package_theft
+  label: neg
+  kind: walk_by
+  start_ms: 40000
+  dur_ms: 15000
+  events:
+  - walk_by
+- id: frollard-045000
+  concept: package_theft
+  label: neg
+  kind: walk_by
+  start_ms: 45000
+  dur_ms: 15000
+  events:
+  - walk_by
+- id: frollard-050000
+  concept: package_theft
+  label: neg
+  kind: walk_by
+  start_ms: 50000
+  dur_ms: 15000
+  events:
+  - walk_by
+- id: frollard-055000
+  concept: package_theft
+  label: neg
+  kind: walk_by
+  start_ms: 55000
+  dur_ms: 15000
+  events:
+  - walk_by
+- id: frollard-060000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 60000
+  dur_ms: 15000
+  events: []
+- id: frollard-065000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 65000
+  dur_ms: 15000
+  events: []
+- id: frollard-070000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 70000
+  dur_ms: 15000
+  events: []
+- id: frollard-075000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 75000
+  dur_ms: 15000
+  events: []
+- id: frollard-080000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 80000
+  dur_ms: 15000
+  events: []
+- id: frollard-085000
+  concept: package_theft
+  label: neg
+  kind: empty_scene
+  start_ms: 85000
+  dur_ms: 15000
+  events: []

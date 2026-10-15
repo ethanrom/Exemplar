@@ -1,0 +1,30 @@
+# Target concepts for the MEVA benchmark (PLAN.md section 3). Each maps to 1-2 MEVA activities (2020 names).
+# `description` is the zero-shot baseline prompt and `hint` is the optional NL hint given to the teach/sketch step.
+# A window is positive for a concept iff it fully contains >= 1 instance of one of its activities; it is a negative
+# iff it overlaps no in-view instance of any of them (see windows.py). `confusers` are related activities: negatives that
+# contain one (and no target activity) are *hard* negatives.
+concepts:
+  vehicle_stop:
+    title: Vehicle stops
+    activities: [vehicle_stops]
+    description: "A vehicle that was driving comes to a stop and stays parked in view of the camera."
+    hint: "a car pulls up and stops"
+    confusers: [vehicle_starts, vehicle_turns_left, vehicle_turns_right, vehicle_reverses, vehicle_makes_u_turn, person_exits_vehicle, person_enters_vehicle]
+  person_exits_vehicle:
+    title: Person gets out of a vehicle
+    activities: [person_exits_vehicle]
+    description: "A person gets out of a parked vehicle: a door opens and the person steps out onto the ground."
+    hint: "someone climbs out of a car"
+    confusers: [person_enters_vehicle, person_opens_vehicle_door, person_closes_vehicle_door, vehicle_stops, vehicle_starts, person_loads_vehicle, person_unloads_vehicle]
+  door_crossing:
+    title: Person walks through a doorway
+    activities: [person_enters_scene_through_structure, person_exits_scene_through_structure]
+    description: "A person walks through a building doorway, either coming out of a door into the camera view or going into a door and leaving the view."
+    hint: "a person comes out of, or goes into, a building door"
+    confusers: [person_opens_facility_door, person_closes_facility_door, person_exits_vehicle, person_enters_vehicle, person_carries_heavy_object, person_picks_up_object]
+  vehicle_loading:
+    title: Loading or unloading a vehicle
+    activities: [person_loads_vehicle, person_unloads_vehicle]
+    description: "A person loads items into, or unloads items from, a vehicle, for example at an open trunk or rear door."
+    hint: "someone puts things into, or takes things out of, a car"
+    confusers: [person_opens_trunk, person_closes_trunk, person_opens_vehicle_door, person_closes_vehicle_door, person_carries_heavy_object, person_picks_up_object, person_puts_down_object, person_exits_vehicle, person_enters_vehicle, vehicle_stops]
