@@ -199,7 +199,6 @@ def build(seed: int = 0, neg_ratio: float = NEG_RATIO, hard_frac: float = HARD_F
         own = set(concept.activities)
         confusers = set(concept.confusers)
         pos_by_video: dict[str, list[Window]] = {}
-        refs: dict[tuple[str, int], list[A.Activity]] = {}
         for v in videos:
             stem = v["stem"]
             states = per_video[stem]
@@ -215,7 +214,7 @@ def build(seed: int = 0, neg_ratio: float = NEG_RATIO, hard_frac: float = HARD_F
                 stats["skipped"][cid][k] += n
         total_pos = sum(len(w) for w in pos_by_video.values())
         n_total_neg = round(neg_ratio * total_pos)
-        caps, weights, ctx = [], [], {}
+        caps, weights = [], []
         for v in videos:
             stem = v["stem"]
             vms = info[stem]["duration_ms"]
