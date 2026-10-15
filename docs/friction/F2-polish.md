@@ -1,6 +1,6 @@
-# Friction notes: stream F2 (UI polish)
+# Friction notes: UI polish pass
 
-Per-stream notes; combined into `docs/FRICTION_LOG.md` in Phase 3. Format per entry: task, steps, expected vs actual, severity, workaround, suggestion.
+Notes from the second UI pass; they feed `docs/FRICTION_LOG.md`. Format per entry: task, steps, expected vs actual, severity, workaround, suggestion.
 
 ## F2-1 Ring's watermark sits in both top corners of every snapshot, which removes the usual places for card controls
 - **Task:** a quiet thumbnail grid with a source badge, a duration, a selection checkbox and label controls on every card.

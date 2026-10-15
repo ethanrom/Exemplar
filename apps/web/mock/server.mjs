@@ -1,4 +1,4 @@
-// Mock Exemplar engine (stream F). Implements every path in engine/exemplar/contracts/api.yaml with
+// Mock Exemplar engine. Implements every path in engine/exemplar/contracts/api.yaml with
 // realistic in-memory data so the UI can be built and reviewed without the real engine.
 //
 //   node mock/server.mjs            # http://127.0.0.1:8787  (PORT / HOST override)

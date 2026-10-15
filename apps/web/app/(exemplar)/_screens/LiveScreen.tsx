@@ -172,7 +172,7 @@ export default function LiveScreen() {
     fps: 2,
   })
   const grab = processors.find((p) => p.id === FRAME_GRAB_ID)
-  // The frame grabber (stream A) needs the device id for its uploads. Discovered through the registry
+  // The frame grabber needs the device id for its uploads. Discovered through the registry
   // so this screen builds with or without that processor being present.
   useEffect(() => {
     const p = processorRegistry.get(FRAME_GRAB_ID) as ({ configure?: (o: { deviceId?: string }) => void } & object) | undefined

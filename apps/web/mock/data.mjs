@@ -121,7 +121,7 @@ export function buildEvents(now = Date.now()) {
     })
   }
 
-  // Playground simulations: each is an `on_demand` event with no sub_type (PLAN section 0).
+  // Playground simulations: each is an `on_demand` event with no sub_type (the Playground does not report one).
   const pg = [
     ['pg_package_a', 'unattended_package', 31_700, 6 * MIN],
     ['pg_vehicle_a', 'vehicle_passby', 21_500, 11 * MIN],
