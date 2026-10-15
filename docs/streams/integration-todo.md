@@ -24,8 +24,12 @@ Status on 2026-10-15 ~10:15 UTC: merged A, B, C, E, F, G-data. Running: D (synth
 9. Document the `Witness.spans[].path` format in `docs/DSL.md`.
 
 ## E2E / live (needs the user: fresh token + Playground clicks)
-- [ ] PLAN §6 end-to-end on the Playground: package and vehicle rules fire on their own events; the vehicle rule is dropped at stage 1.
-- [ ] Live view + frame grab (stream A's processor + F's toggle) against the real engine; the Ring watermark stays visible.
+- [x] **2026-10-15 11:43–11:58 UTC, PLAN §6 end-to-end on the real Playground:**
+  - Token pasted through `PUT /api/ring/token`; web and engine both connected. The poller ingested every simulation by itself (history → clip → fast perception).
+  - Rules taught with the real strong-model agent in 15–21 s: package "k is present at every moment within 0–19.5 s" (after a re-teach) and vehicle "v is in the driveway".
+  - Package event fired only the package rule (score 0.45; witness `always` over 0.99–18.84 s). Vehicle event fired only the vehicle rule. Bird events fired neither. About $0.014 per event, no escalations.
+  - **Lesson:** perception's zone label for the same box flips between `steps` and `porch` from run to run. The first rule ("on the steps ≥ 15 s") missed one package event. Adding that miss as a positive and re-teaching gave a zone-agnostic rule. For the demo, teach from at least 2 package recordings, or show this miss-then-re-teach as the story.
+- [ ] Live view + frame grab (stream A's processor + F's toggle) against the real engine; the Ring watermark stays visible. Note: our live view is its own WHEP session ("Start live view" on /live); it does not follow the Playground's player, and each session also records an `on_demand` event.
 - [ ] Stage-0 pruning shown with `scripts/send_signed_webhook.py --fresh --sub-type vehicle`.
 
 ## Eval
