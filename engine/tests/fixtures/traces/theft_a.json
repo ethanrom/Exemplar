@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "clip_id": "theft_a",
+  "source": "fixture",
+  "duration_ms": 20000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "p1",
+      "type": "person",
+      "attrs": [
+        "hoodie"
+      ]
+    },
+    {
+      "id": "k1",
+      "type": "package",
+      "attrs": [
+        "box"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 2000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "porch"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "enters",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 4000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "near",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "picks_up",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 8000,
+      "facts": [
+        {
+          "pred": "carrying",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "steps"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 10000,
+      "facts": [
+        {
+          "pred": "carrying",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "med"
+        },
+        {
+          "pred": "leaves",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 12000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "sidewalk"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 16000,
+      "facts": []
+    },
+    {
+      "t_ms": 20000,
+      "facts": []
+    }
+  ],
+  "context": {
+    "sub_type": "human",
+    "event_kind": "motion",
+    "local_hour": 14,
+    "weekday": 2,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A person in a hoodie walks up, picks up the package on the porch and leaves carrying it.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 9,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

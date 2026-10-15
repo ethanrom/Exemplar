@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "clip_id": "empty_scene",
+  "source": "fixture",
+  "duration_ms": 12000,
+  "status": "ok",
+  "entities": [],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": []
+    },
+    {
+      "t_ms": 2000,
+      "facts": []
+    },
+    {
+      "t_ms": 4000,
+      "facts": []
+    },
+    {
+      "t_ms": 6000,
+      "facts": []
+    },
+    {
+      "t_ms": 8000,
+      "facts": []
+    },
+    {
+      "t_ms": 10000,
+      "facts": []
+    },
+    {
+      "t_ms": 12000,
+      "facts": []
+    }
+  ],
+  "context": {
+    "sub_type": "other_motion",
+    "event_kind": "motion",
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "An empty porch; nothing happens.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 7,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ring-appstore-knowledge": {
+      "type": "http",
+      "url": "https://knowledge.appstore-mcp.ring.amazon.dev/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--browser", "chrome"]
+    }
+  }
+}

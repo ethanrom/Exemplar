@@ -1,0 +1,8 @@
+{
+  "expect": "reject",
+  "headers": {
+    "X-Signature": "sha256=949a9c15acdd8d955e0a4f3399b4c1ede7501c36b4379d550ace602c88f35d66",
+    "Content-Type": "application/json"
+  },
+  "body": "{\n \"meta\": {\n  \"version\": \"1.1\",\n  \"time\": \"2026-10-15T07:08:25Z\",\n  \"request_id\": \"req-0001\",\n  \"account_id\": \"ava1.ring.account.FIXTUREACCOUNT\"\n },\n \"data\": {\n  \"id\": \"evt-req-0001\",\n  \"type\": \"motion_detected\",\n  \"subType\": \"human\",\n  \"attributes\": {\n   \"source\": \"ava1.ring.device.FIXTUREDEVICE0001\",\n   \"source_type\": \"devices\",\n   \"timestamp\": 1792048059034\n  },\n  \"relationships\": {\n   \"devices\": {\n    \"links\": {\n     \"self\": \"/v1/devices/ava1.ring.device.FIXTUREDEVICE0001\"\n    }\n   }\n  }\n }\n}"
+}

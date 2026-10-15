@@ -1,0 +1,38 @@
+# secrets — never commit
+.env
+.env.*
+!.env.example
+token
+*.token
+
+# hackathon briefing material (not ours to redistribute)
+challange.txt
+rules.txt
+updates.txt
+
+# local data, downloads, caches
+data/
+*.mp4
+*.avi
+.cache/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+.ruff_cache/
+
+# node / next
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "clip_id": "theft_b",
+  "source": "fixture",
+  "duration_ms": 24000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "p1",
+      "type": "person",
+      "attrs": [
+        "dark_jacket"
+      ]
+    },
+    {
+      "id": "k1",
+      "type": "package",
+      "attrs": [
+        "box"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 3000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "enters",
+          "args": [
+            "p1",
+            "steps"
+          ],
+          "conf": "med"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 9000,
+      "facts": [
+        {
+          "pred": "near",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 12000,
+      "facts": [
+        {
+          "pred": "picks_up",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "med"
+        },
+        {
+          "pred": "facing_camera",
+          "args": [
+            "p1"
+          ],
+          "conf": "low"
+        }
+      ]
+    },
+    {
+      "t_ms": 15000,
+      "facts": [
+        {
+          "pred": "carrying",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 18000,
+      "facts": [
+        {
+          "pred": "carrying",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "leaves",
+          "args": [
+            "p1",
+            "steps"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 21000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "street"
+          ],
+          "conf": "low"
+        }
+      ]
+    },
+    {
+      "t_ms": 24000,
+      "facts": []
+    }
+  ],
+  "context": {
+    "sub_type": "human",
+    "event_kind": "motion",
+    "local_hour": 10,
+    "weekday": 5,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "Someone in a dark jacket takes the box from the steps and walks off with it.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 9,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "clip_id": {
+      "title": "Clip Id",
+      "type": "string"
+    },
+    "concept_id": {
+      "title": "Concept Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "provenance": {
+      "enum": [
+        "example",
+        "active",
+        "random"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "value": {
+      "enum": [
+        "pos",
+        "neg"
+      ],
+      "title": "Value",
+      "type": "string"
+    },
+    "weight": {
+      "default": 3.0,
+      "exclusiveMinimum": 0,
+      "title": "Weight",
+      "type": "number"
+    }
+  },
+  "required": [
+    "concept_id",
+    "clip_id",
+    "value",
+    "provenance"
+  ],
+  "title": "Label",
+  "type": "object"
+}

@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "clip_id": "vehicle_dwell_dock",
+  "source": "fixture",
+  "duration_ms": 156000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "v1",
+      "type": "vehicle",
+      "attrs": [
+        "box_truck"
+      ]
+    },
+    {
+      "id": "p1",
+      "type": "person",
+      "attrs": [
+        "hi_vis"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "enters",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 12000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 18000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 24000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 30000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 36000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 42000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 48000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 54000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 60000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 66000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 72000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 78000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 84000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 90000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 96000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 102000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 108000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 114000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 120000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 126000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 156000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "dock"
+          ],
+          "conf": "med"
+        },
+        {
+          "pred": "near",
+          "args": [
+            "p1",
+            "v1"
+          ],
+          "conf": "low"
+        }
+      ]
+    }
+  ],
+  "context": {
+    "sub_type": "vehicle",
+    "event_kind": "motion",
+    "local_hour": 6,
+    "weekday": 4,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A box truck pulls into the loading dock and stays there for over two minutes.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 23,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

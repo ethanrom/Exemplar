@@ -1,0 +1,801 @@
+{
+  "$defs": {
+    "Always": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "A"
+        },
+        "arg": {
+          "discriminator": {
+            "mapping": {
+              "always": "#/$defs/Always",
+              "and": "#/$defs/And",
+              "atom": "#/$defs/Atom",
+              "eventually": "#/$defs/Eventually",
+              "holds_for": "#/$defs/HoldsFor",
+              "not": "#/$defs/Not",
+              "or": "#/$defs/Or",
+              "then": "#/$defs/Then"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Atom"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            },
+            {
+              "$ref": "#/$defs/And"
+            },
+            {
+              "$ref": "#/$defs/Or"
+            },
+            {
+              "$ref": "#/$defs/Eventually"
+            },
+            {
+              "$ref": "#/$defs/Always"
+            },
+            {
+              "$ref": "#/$defs/Then"
+            },
+            {
+              "$ref": "#/$defs/HoldsFor"
+            }
+          ],
+          "title": "Arg"
+        },
+        "b": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "B"
+        },
+        "op": {
+          "const": "always",
+          "default": "always",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "arg"
+      ],
+      "title": "Always",
+      "type": "object"
+    },
+    "And": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "always": "#/$defs/Always",
+                "and": "#/$defs/And",
+                "atom": "#/$defs/Atom",
+                "eventually": "#/$defs/Eventually",
+                "holds_for": "#/$defs/HoldsFor",
+                "not": "#/$defs/Not",
+                "or": "#/$defs/Or",
+                "then": "#/$defs/Then"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Atom"
+              },
+              {
+                "$ref": "#/$defs/Not"
+              },
+              {
+                "$ref": "#/$defs/And"
+              },
+              {
+                "$ref": "#/$defs/Or"
+              },
+              {
+                "$ref": "#/$defs/Eventually"
+              },
+              {
+                "$ref": "#/$defs/Always"
+              },
+              {
+                "$ref": "#/$defs/Then"
+              },
+              {
+                "$ref": "#/$defs/HoldsFor"
+              }
+            ]
+          },
+          "minItems": 2,
+          "title": "Args",
+          "type": "array"
+        },
+        "op": {
+          "const": "and",
+          "default": "and",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "title": "And",
+      "type": "object"
+    },
+    "Atom": {
+      "additionalProperties": false,
+      "description": "pred(args). Each arg is a bound variable name, a Zone literal, or an attr Label literal.",
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Args",
+          "type": "array"
+        },
+        "op": {
+          "const": "atom",
+          "default": "atom",
+          "title": "Op",
+          "type": "string"
+        },
+        "pred": {
+          "title": "Pred",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pred",
+        "args"
+      ],
+      "title": "Atom",
+      "type": "object"
+    },
+    "DeviceEq": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "device_eq",
+          "default": "device_eq",
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DeviceEq",
+      "type": "object"
+    },
+    "Eventually": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "A"
+        },
+        "arg": {
+          "discriminator": {
+            "mapping": {
+              "always": "#/$defs/Always",
+              "and": "#/$defs/And",
+              "atom": "#/$defs/Atom",
+              "eventually": "#/$defs/Eventually",
+              "holds_for": "#/$defs/HoldsFor",
+              "not": "#/$defs/Not",
+              "or": "#/$defs/Or",
+              "then": "#/$defs/Then"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Atom"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            },
+            {
+              "$ref": "#/$defs/And"
+            },
+            {
+              "$ref": "#/$defs/Or"
+            },
+            {
+              "$ref": "#/$defs/Eventually"
+            },
+            {
+              "$ref": "#/$defs/Always"
+            },
+            {
+              "$ref": "#/$defs/Then"
+            },
+            {
+              "$ref": "#/$defs/HoldsFor"
+            }
+          ],
+          "title": "Arg"
+        },
+        "b": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "B"
+        },
+        "op": {
+          "const": "eventually",
+          "default": "eventually",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "arg"
+      ],
+      "title": "Eventually",
+      "type": "object"
+    },
+    "HoldsFor": {
+      "additionalProperties": false,
+      "description": "holds_for >= d arg: `arg` holds continuously for at least d s.",
+      "properties": {
+        "arg": {
+          "discriminator": {
+            "mapping": {
+              "always": "#/$defs/Always",
+              "and": "#/$defs/And",
+              "atom": "#/$defs/Atom",
+              "eventually": "#/$defs/Eventually",
+              "holds_for": "#/$defs/HoldsFor",
+              "not": "#/$defs/Not",
+              "or": "#/$defs/Or",
+              "then": "#/$defs/Then"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Atom"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            },
+            {
+              "$ref": "#/$defs/And"
+            },
+            {
+              "$ref": "#/$defs/Or"
+            },
+            {
+              "$ref": "#/$defs/Eventually"
+            },
+            {
+              "$ref": "#/$defs/Always"
+            },
+            {
+              "$ref": "#/$defs/Then"
+            },
+            {
+              "$ref": "#/$defs/HoldsFor"
+            }
+          ],
+          "title": "Arg"
+        },
+        "d": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "D"
+        },
+        "op": {
+          "const": "holds_for",
+          "default": "holds_for",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "d",
+        "arg"
+      ],
+      "title": "HoldsFor",
+      "type": "object"
+    },
+    "Hole": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "const": "hole",
+          "default": "hole",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Hole",
+      "type": "object"
+    },
+    "HourIn": {
+      "additionalProperties": false,
+      "description": "Local hour in [h1, h2] (inclusive; h1 > h2 wraps past midnight, e.g. [22, 6]).",
+      "properties": {
+        "h1": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "H1"
+        },
+        "h2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "H2"
+        },
+        "op": {
+          "const": "hour_in",
+          "default": "hour_in",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "h1",
+        "h2"
+      ],
+      "title": "HourIn",
+      "type": "object"
+    },
+    "Not": {
+      "additionalProperties": false,
+      "properties": {
+        "arg": {
+          "discriminator": {
+            "mapping": {
+              "always": "#/$defs/Always",
+              "and": "#/$defs/And",
+              "atom": "#/$defs/Atom",
+              "eventually": "#/$defs/Eventually",
+              "holds_for": "#/$defs/HoldsFor",
+              "not": "#/$defs/Not",
+              "or": "#/$defs/Or",
+              "then": "#/$defs/Then"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Atom"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            },
+            {
+              "$ref": "#/$defs/And"
+            },
+            {
+              "$ref": "#/$defs/Or"
+            },
+            {
+              "$ref": "#/$defs/Eventually"
+            },
+            {
+              "$ref": "#/$defs/Always"
+            },
+            {
+              "$ref": "#/$defs/Then"
+            },
+            {
+              "$ref": "#/$defs/HoldsFor"
+            }
+          ],
+          "title": "Arg"
+        },
+        "op": {
+          "const": "not",
+          "default": "not",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "arg"
+      ],
+      "title": "Not",
+      "type": "object"
+    },
+    "Or": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "always": "#/$defs/Always",
+                "and": "#/$defs/And",
+                "atom": "#/$defs/Atom",
+                "eventually": "#/$defs/Eventually",
+                "holds_for": "#/$defs/HoldsFor",
+                "not": "#/$defs/Not",
+                "or": "#/$defs/Or",
+                "then": "#/$defs/Then"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Atom"
+              },
+              {
+                "$ref": "#/$defs/Not"
+              },
+              {
+                "$ref": "#/$defs/And"
+              },
+              {
+                "$ref": "#/$defs/Or"
+              },
+              {
+                "$ref": "#/$defs/Eventually"
+              },
+              {
+                "$ref": "#/$defs/Always"
+              },
+              {
+                "$ref": "#/$defs/Then"
+              },
+              {
+                "$ref": "#/$defs/HoldsFor"
+              }
+            ]
+          },
+          "minItems": 2,
+          "title": "Args",
+          "type": "array"
+        },
+        "op": {
+          "const": "or",
+          "default": "or",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "title": "Or",
+      "type": "object"
+    },
+    "SubtypeEq": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "subtype_eq",
+          "default": "subtype_eq",
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "enum": [
+            "human",
+            "vehicle",
+            "package_delivery",
+            "other_motion",
+            "motion",
+            "ding",
+            "on_demand"
+          ],
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SubtypeEq",
+      "type": "object"
+    },
+    "Then": {
+      "additionalProperties": false,
+      "description": "left then[a,b] right: `right` occurs within [a,b] s after `left`.",
+      "properties": {
+        "a": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "A"
+        },
+        "b": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Hole"
+            }
+          ],
+          "title": "B"
+        },
+        "left": {
+          "discriminator": {
+            "mapping": {
+              "always": "#/$defs/Always",
+              "and": "#/$defs/And",
+              "atom": "#/$defs/Atom",
+              "eventually": "#/$defs/Eventually",
+              "holds_for": "#/$defs/HoldsFor",
+              "not": "#/$defs/Not",
+              "or": "#/$defs/Or",
+              "then": "#/$defs/Then"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Atom"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            },
+            {
+              "$ref": "#/$defs/And"
+            },
+            {
+              "$ref": "#/$defs/Or"
+            },
+            {
+              "$ref": "#/$defs/Eventually"
+            },
+            {
+              "$ref": "#/$defs/Always"
+            },
+            {
+              "$ref": "#/$defs/Then"
+            },
+            {
+              "$ref": "#/$defs/HoldsFor"
+            }
+          ],
+          "title": "Left"
+        },
+        "op": {
+          "const": "then",
+          "default": "then",
+          "title": "Op",
+          "type": "string"
+        },
+        "right": {
+          "discriminator": {
+            "mapping": {
+              "always": "#/$defs/Always",
+              "and": "#/$defs/And",
+              "atom": "#/$defs/Atom",
+              "eventually": "#/$defs/Eventually",
+              "holds_for": "#/$defs/HoldsFor",
+              "not": "#/$defs/Not",
+              "or": "#/$defs/Or",
+              "then": "#/$defs/Then"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Atom"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            },
+            {
+              "$ref": "#/$defs/And"
+            },
+            {
+              "$ref": "#/$defs/Or"
+            },
+            {
+              "$ref": "#/$defs/Eventually"
+            },
+            {
+              "$ref": "#/$defs/Always"
+            },
+            {
+              "$ref": "#/$defs/Then"
+            },
+            {
+              "$ref": "#/$defs/HoldsFor"
+            }
+          ],
+          "title": "Right"
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "left",
+        "right"
+      ],
+      "title": "Then",
+      "type": "object"
+    },
+    "VarDecl": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "Entity",
+            "Person",
+            "Vehicle",
+            "Package",
+            "Animal",
+            "Object",
+            "Carryable"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "VarDecl",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "exists v1:T1, \u2026: body [when ctx and \u2026].",
+  "properties": {
+    "body": {
+      "discriminator": {
+        "mapping": {
+          "always": "#/$defs/Always",
+          "and": "#/$defs/And",
+          "atom": "#/$defs/Atom",
+          "eventually": "#/$defs/Eventually",
+          "holds_for": "#/$defs/HoldsFor",
+          "not": "#/$defs/Not",
+          "or": "#/$defs/Or",
+          "then": "#/$defs/Then"
+        },
+        "propertyName": "op"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Atom"
+        },
+        {
+          "$ref": "#/$defs/Not"
+        },
+        {
+          "$ref": "#/$defs/And"
+        },
+        {
+          "$ref": "#/$defs/Or"
+        },
+        {
+          "$ref": "#/$defs/Eventually"
+        },
+        {
+          "$ref": "#/$defs/Always"
+        },
+        {
+          "$ref": "#/$defs/Then"
+        },
+        {
+          "$ref": "#/$defs/HoldsFor"
+        }
+      ],
+      "title": "Body"
+    },
+    "vars": {
+      "items": {
+        "$ref": "#/$defs/VarDecl"
+      },
+      "minItems": 1,
+      "title": "Vars",
+      "type": "array"
+    },
+    "when": {
+      "default": [],
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "device_eq": "#/$defs/DeviceEq",
+            "hour_in": "#/$defs/HourIn",
+            "subtype_eq": "#/$defs/SubtypeEq"
+          },
+          "propertyName": "op"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/HourIn"
+          },
+          {
+            "$ref": "#/$defs/SubtypeEq"
+          },
+          {
+            "$ref": "#/$defs/DeviceEq"
+          }
+        ]
+      },
+      "title": "When",
+      "type": "array"
+    }
+  },
+  "required": [
+    "vars",
+    "body"
+  ],
+  "title": "Rule",
+  "type": "object"
+}

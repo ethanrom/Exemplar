@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "clip_id": "visitor_no_ring",
+  "source": "fixture",
+  "duration_ms": 15000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "p1",
+      "type": "person",
+      "attrs": [
+        "hoodie"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "enters",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 2000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "door"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 4000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "door"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "facing_camera",
+          "args": [
+            "p1"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 7000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "door"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 10000,
+      "facts": [
+        {
+          "pred": "leaves",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 13000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "sidewalk"
+          ],
+          "conf": "low"
+        }
+      ]
+    },
+    {
+      "t_ms": 15000,
+      "facts": []
+    }
+  ],
+  "context": {
+    "sub_type": "human",
+    "event_kind": "motion",
+    "local_hour": 23,
+    "weekday": 4,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A person in a hoodie comes to the door, looks at the camera and leaves without ringing.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 7,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

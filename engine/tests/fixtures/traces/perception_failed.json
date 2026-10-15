@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "clip_id": "perception_failed",
+  "source": "fixture",
+  "duration_ms": 20000,
+  "status": "perception_failed",
+  "error": "schema validation failed twice: frame 3: in_zone('p1', 'garage') is not a valid Zone",
+  "entities": [],
+  "frames": [],
+  "context": {
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": ""
+}

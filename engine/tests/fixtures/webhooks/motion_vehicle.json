@@ -1,0 +1,8 @@
+{
+  "expect": "accept",
+  "headers": {
+    "X-Signature": "sha256=5d4ac44f2be20f2e01cb69ae5cf07f2121186f2926ef19c48d35155000217b84",
+    "Content-Type": "application/json"
+  },
+  "body": "{\"meta\":{\"version\":\"1.1\",\"time\":\"2026-10-15T07:08:25Z\",\"request_id\":\"req-0002\",\"account_id\":\"ava1.ring.account.FIXTUREACCOUNT\"},\"data\":{\"id\":\"evt-req-0002\",\"type\":\"motion_detected\",\"subType\":\"vehicle\",\"attributes\":{\"source\":\"ava1.ring.device.FIXTUREDEVICE0001\",\"source_type\":\"devices\",\"timestamp\":1792048103109},\"relationships\":{\"devices\":{\"links\":{\"self\":\"/v1/devices/ava1.ring.device.FIXTUREDEVICE0001\"}}}}}"
+}

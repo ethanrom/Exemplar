@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "clip_id": "delivery_a",
+  "source": "fixture",
+  "duration_ms": 20000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "p1",
+      "type": "person",
+      "attrs": [
+        "delivery_uniform",
+        "hi_vis"
+      ]
+    },
+    {
+      "id": "k1",
+      "type": "package",
+      "attrs": [
+        "box"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "enters",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "carrying",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 3000,
+      "facts": [
+        {
+          "pred": "carrying",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "puts_down",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 9000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "porch"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 12000,
+      "facts": [
+        {
+          "pred": "leaves",
+          "args": [
+            "p1",
+            "porch"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 16000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 20000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "porch"
+          ],
+          "conf": "high"
+        }
+      ]
+    }
+  ],
+  "context": {
+    "sub_type": "package_delivery",
+    "event_kind": "motion",
+    "local_hour": 11,
+    "weekday": 1,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A courier in a uniform drops a box on the porch and leaves.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 7,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

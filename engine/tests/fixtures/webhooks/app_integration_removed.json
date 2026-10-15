@@ -1,0 +1,8 @@
+{
+  "expect": "accept",
+  "headers": {
+    "X-Signature": "sha256=265824fc4b7f5752bfb8738236f4348dfe98295794b858db3b17a8ee24bdb969",
+    "Content-Type": "application/json"
+  },
+  "body": "{\"meta\":{\"version\":\"1.1\",\"time\":\"2026-10-15T07:08:25Z\",\"request_id\":\"req-0005\",\"account_id\":\"ava1.ring.account.FIXTUREACCOUNT\"},\"data\":{\"id\":\"evt-req-0005\",\"type\":\"app_integration_removed\",\"attributes\":{\"source\":\"ava1.ring.account.FIXTUREACCOUNT\",\"source_type\":\"users\",\"timestamp\":1792049999000}}}"
+}

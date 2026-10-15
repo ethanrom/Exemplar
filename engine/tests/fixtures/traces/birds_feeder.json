@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "clip_id": "birds_feeder",
+  "source": "fixture",
+  "duration_ms": 39000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "a1",
+      "type": "animal",
+      "attrs": [
+        "woodpecker"
+      ]
+    },
+    {
+      "id": "a2",
+      "type": "animal",
+      "attrs": [
+        "cardinal"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 3000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 9000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 12000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 15000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 18000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 21000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "a2",
+            "yard"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 24000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "a2",
+            "yard"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 27000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "a2",
+            "yard"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 30000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "a2",
+            "yard"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 33000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "a2",
+            "yard"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 36000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "a2",
+            "yard"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 39000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "a1",
+            "yard"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "a2",
+            "yard"
+          ],
+          "conf": "med"
+        }
+      ]
+    }
+  ],
+  "context": {
+    "sub_type": "other_motion",
+    "event_kind": "on_demand",
+    "local_hour": 9,
+    "weekday": 0,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A woodpecker and a cardinal visit a snowy bird feeder.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 14,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

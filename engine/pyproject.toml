@@ -1,0 +1,44 @@
+[project]
+name = "exemplar"
+version = "0.1.0"
+description = "Teach-by-example detectors for Ring cameras: perception -> symbolic traces -> Z3 rule synthesis -> STL robustness -> conformal calibration"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sse-starlette>=2.1",
+    "python-multipart>=0.0.9",
+    "httpx>=0.27",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "numpy>=1.26",
+    "scipy>=1.13",
+    "z3-solver>=4.13",
+    "lark>=1.2",
+    "boto3>=1.35",
+    "strands-agents>=1.0",
+    "imageio-ffmpeg>=0.5",
+    "pillow>=10.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "hypothesis>=6.100",
+    "respx>=0.21",
+    "openapi-spec-validator>=0.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["exemplar"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "clip_id": "vehicle_passby",
+  "source": "fixture",
+  "duration_ms": 20000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "v1",
+      "type": "vehicle",
+      "attrs": [
+        "sedan"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": []
+    },
+    {
+      "t_ms": 2000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "street"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 4000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "street"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "v1",
+            "street"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 8000,
+      "facts": [
+        {
+          "pred": "present",
+          "args": [
+            "v1"
+          ],
+          "conf": "low"
+        }
+      ]
+    },
+    {
+      "t_ms": 12000,
+      "facts": []
+    },
+    {
+      "t_ms": 16000,
+      "facts": []
+    },
+    {
+      "t_ms": 20000,
+      "facts": []
+    }
+  ],
+  "context": {
+    "sub_type": "vehicle",
+    "event_kind": "on_demand",
+    "local_hour": 9,
+    "weekday": 0,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A grey sedan drives through the lot and out of view.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 8,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "clip_id": "unattended_package",
+  "source": "fixture",
+  "duration_ms": 30000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "k1",
+      "type": "package",
+      "attrs": [
+        "box"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 3000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 9000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 12000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 15000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 18000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 21000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 24000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 27000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 30000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "steps"
+          ],
+          "conf": "high"
+        }
+      ]
+    }
+  ],
+  "context": {
+    "event_kind": "on_demand",
+    "local_hour": 9,
+    "weekday": 0,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A cardboard package sits on snowy porch steps; nobody appears.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 11,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

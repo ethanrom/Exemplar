@@ -1,0 +1,8 @@
+{
+  "expect": "accept",
+  "headers": {
+    "X-Signature": "sha256=bd25cb97c37ec8782a499eb26a917feb1c4e85c9978b84cc9d26da182858445f",
+    "Content-Type": "application/json"
+  },
+  "body": "{\"meta\":{\"version\":\"1.1\",\"time\":\"2026-10-15T07:08:25Z\",\"request_id\":\"req-0003\",\"account_id\":\"ava1.ring.account.FIXTUREACCOUNT\"},\"data\":{\"id\":\"evt-req-0003\",\"type\":\"button_press\",\"attributes\":{\"source\":\"ava1.ring.device.FIXTUREDEVICE0001\",\"source_type\":\"devices\",\"timestamp\":1792048133868},\"relationships\":{\"devices\":{\"links\":{\"self\":\"/v1/devices/ava1.ring.device.FIXTUREDEVICE0001\"}}}}}"
+}

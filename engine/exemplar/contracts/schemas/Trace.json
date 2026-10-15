@@ -1,0 +1,367 @@
+{
+  "$defs": {
+    "Entity": {
+      "additionalProperties": false,
+      "properties": {
+        "attrs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Attrs",
+          "type": "array"
+        },
+        "id": {
+          "description": "stable across frames, e.g. p1, v1, k1",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "person",
+            "vehicle",
+            "package",
+            "animal",
+            "object"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "title": "Entity",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Args",
+          "type": "array"
+        },
+        "conf": {
+          "enum": [
+            "low",
+            "med",
+            "high"
+          ],
+          "title": "Conf",
+          "type": "string"
+        },
+        "pred": {
+          "title": "Pred",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pred",
+        "args",
+        "conf"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "Frame": {
+      "additionalProperties": false,
+      "properties": {
+        "facts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "t_ms": {
+          "description": "ms from clip start",
+          "minimum": 0,
+          "title": "T Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "t_ms"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
+    "PerceptionMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Key"
+        },
+        "latency_ms": {
+          "default": 0,
+          "title": "Latency Ms",
+          "type": "integer"
+        },
+        "mode": {
+          "enum": [
+            "fast",
+            "strong",
+            "fixture",
+            "manual"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Alias"
+        },
+        "n_frames": {
+          "default": 0,
+          "title": "N Frames",
+          "type": "integer"
+        },
+        "samples": {
+          "default": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "tokens_in": {
+          "default": 0,
+          "title": "Tokens In",
+          "type": "integer"
+        },
+        "tokens_out": {
+          "default": 0,
+          "title": "Tokens Out",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "PerceptionMeta",
+      "type": "object"
+    },
+    "TraceContext": {
+      "additionalProperties": false,
+      "description": "Context signals (\u00a72.1.6). Context atoms in rules read these; all optional.",
+      "properties": {
+        "device_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Id"
+        },
+        "event_kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "motion",
+                "ding",
+                "on_demand",
+                "live",
+                "upload"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Kind"
+        },
+        "local_hour": {
+          "anyOf": [
+            {
+              "maximum": 23,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Local Hour"
+        },
+        "started_at_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "epoch ms of clip start",
+          "title": "Started At Ms"
+        },
+        "sub_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "human",
+                "vehicle",
+                "package_delivery",
+                "other_motion",
+                "motion",
+                "ding",
+                "on_demand"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sub Type"
+        },
+        "weekday": {
+          "anyOf": [
+            {
+              "maximum": 6,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "0 = Monday",
+          "title": "Weekday"
+        }
+      },
+      "title": "TraceContext",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "clip_id": {
+      "title": "Clip Id",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/TraceContext",
+      "default": {
+        "device_id": null,
+        "event_kind": null,
+        "local_hour": null,
+        "started_at_ms": null,
+        "sub_type": null,
+        "weekday": null
+      }
+    },
+    "duration_ms": {
+      "minimum": 0,
+      "title": "Duration Ms",
+      "type": "integer"
+    },
+    "entities": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Entity"
+      },
+      "title": "Entities",
+      "type": "array"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    },
+    "frames": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Frame"
+      },
+      "title": "Frames",
+      "type": "array"
+    },
+    "perception": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PerceptionMeta"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "source": {
+      "enum": [
+        "ring",
+        "ring_live",
+        "upload",
+        "meva",
+        "fixture"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "status": {
+      "default": "ok",
+      "enum": [
+        "ok",
+        "perception_failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "summary": {
+      "default": "",
+      "title": "Summary",
+      "type": "string"
+    }
+  },
+  "required": [
+    "clip_id",
+    "source",
+    "duration_ms"
+  ],
+  "title": "Trace",
+  "type": "object"
+}

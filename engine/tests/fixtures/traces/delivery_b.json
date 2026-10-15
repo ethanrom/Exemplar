@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "clip_id": "delivery_b",
+  "source": "fixture",
+  "duration_ms": 18000,
+  "status": "ok",
+  "entities": [
+    {
+      "id": "p1",
+      "type": "person",
+      "attrs": [
+        "delivery_uniform"
+      ]
+    },
+    {
+      "id": "k1",
+      "type": "package",
+      "attrs": [
+        "envelope"
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "t_ms": 0,
+      "facts": [
+        {
+          "pred": "carrying",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "med"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "steps"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 3000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "door"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "rings_bell",
+          "args": [
+            "p1"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 6000,
+      "facts": [
+        {
+          "pred": "puts_down",
+          "args": [
+            "p1",
+            "k1"
+          ],
+          "conf": "med"
+        },
+        {
+          "pred": "in_zone",
+          "args": [
+            "p1",
+            "door"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 9000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "door"
+          ],
+          "conf": "high"
+        },
+        {
+          "pred": "leaves",
+          "args": [
+            "p1",
+            "door"
+          ],
+          "conf": "med"
+        }
+      ]
+    },
+    {
+      "t_ms": 13000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "door"
+          ],
+          "conf": "high"
+        }
+      ]
+    },
+    {
+      "t_ms": 18000,
+      "facts": [
+        {
+          "pred": "in_zone",
+          "args": [
+            "k1",
+            "door"
+          ],
+          "conf": "high"
+        }
+      ]
+    }
+  ],
+  "context": {
+    "sub_type": "package_delivery",
+    "event_kind": "ding",
+    "local_hour": 16,
+    "weekday": 3,
+    "device_id": "ava1.ring.device.FIXTUREDEVICE0001"
+  },
+  "summary": "A delivery driver rings the bell, leaves an envelope at the door and goes.",
+  "perception": {
+    "mode": "fixture",
+    "n_frames": 6,
+    "samples": 1,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0
+  }
+}

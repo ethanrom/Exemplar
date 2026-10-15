@@ -1,0 +1,873 @@
+openapi: 3.1.0
+info:
+  title: Exemplar engine API
+  version: "1.0.0"
+  description: |
+    Engine REST + SSE consumed by apps/web (PLAN.md §1, §2.8). Frozen contract — changes go through
+    the integrator. The engine listens on http://127.0.0.1:8787 by default; apps/web proxies
+    /api/engine/* to it server-side (the browser never talks to Ring or the engine directly).
+
+    Model schemas marked `x-pydantic` mirror exemplar.contracts.* and are generated into
+    contracts/schemas/*.json by `uv run --project engine python -m exemplar.contracts.gen_schemas`;
+    tests fail if they drift.
+
+    SSE streams send `event: <type>` + `data: <json>` frames. Every stream sends `event: ping`
+    every 15 s. Clients reconnect with `Last-Event-ID`; servers replay from that id when they can.
+servers:
+  - url: http://127.0.0.1:8787
+tags:
+  - name: ring
+  - name: library
+  - name: teach
+  - name: rules
+  - name: live
+  - name: eval
+
+paths:
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, version]
+                properties:
+                  ok: { type: boolean }
+                  version: { type: string }
+
+  # ------------------------------------------------------------------ ring connection
+  /ring/auth:
+    get:
+      tags: [ring]
+      operationId: getRingAuth
+      responses:
+        "200":
+          description: current Ring auth state (never returns the token itself)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RingAuthStatus" }
+    put:
+      tags: [ring]
+      operationId: setPlaygroundToken
+      description: Paste a Developer Playground token (valid 30 min, read-only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [access_token]
+              properties:
+                access_token: { type: string }
+      responses:
+        "200":
+          description: accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RingAuthStatus" }
+        "400": { $ref: "#/components/responses/Error" }
+  /ring/oauth/start:
+    get:
+      tags: [ring]
+      operationId: oauthStart
+      description: Begin app-integration OAuth (account linking). Redirects to Ring.
+      responses:
+        "302": { description: redirect to Ring authorize URL }
+  /ring/oauth/callback:
+    get:
+      tags: [ring]
+      operationId: oauthCallback
+      parameters:
+        - { name: code, in: query, required: true, schema: { type: string } }
+        - { name: state, in: query, required: false, schema: { type: string } }
+      responses:
+        "302": { description: back to the UI }
+        "400": { $ref: "#/components/responses/Error" }
+  /ring/devices:
+    get:
+      tags: [ring]
+      operationId: listDevices
+      responses:
+        "200":
+          description: devices visible to the token
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Device" }
+        "401": { $ref: "#/components/responses/Error" }
+  /ring/sync:
+    post:
+      tags: [ring]
+      operationId: syncHistory
+      description: Poll Ring event history now and ingest new events (download clip → trace). Async.
+      responses:
+        "202":
+          description: started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  new_events: { type: integer }
+  /ring/webhook-events:
+    post:
+      tags: [ring]
+      operationId: ingestWebhookEvent
+      description: |
+        Called by apps/web's webhook route AFTER it has verified X-Signature on the raw body and
+        deduplicated on meta.request_id. Body is the original Ring webhook JSON. Returns fast;
+        processing is async.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RingWebhook" }
+      responses:
+        "202": { description: queued }
+        "409": { description: duplicate meta.request_id (already processed) }
+
+  # ------------------------------------------------------------------ library
+  /uploads:
+    post:
+      tags: [library]
+      operationId: uploadVideo
+      description: |
+        Add third-party footage (e.g. CC BY clips) to the Library. The video is cut into windows of
+        `window_s` seconds every `stride_s` seconds; each window becomes an `upload` event + clip and is
+        traced. Not a Ring event: it never reaches deployed monitors.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, attribution]
+              properties:
+                file: { type: string, format: binary, description: MP4 }
+                attribution: { type: string, description: "credit line, e.g. 'Thief stealing our package' by frollard, CC BY 4.0" }
+                source_url: { type: string }
+                window_s: { type: number, default: 20 }
+                stride_s: { type: number, default: 10 }
+      responses:
+        "202":
+          description: windows queued for perception
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EventSummary" }
+  /events:
+    get:
+      tags: [library]
+      operationId: listEvents
+      parameters:
+        - { name: concept_id, in: query, schema: { type: string }, description: include this concept's labels }
+        - { name: source, in: query, schema: { type: string, enum: [ring, ring_live, upload, meva, fixture] } }
+        - { name: labelled, in: query, schema: { type: string, enum: [any, pos, neg, unlabelled] } }
+        - { name: limit, in: query, schema: { type: integer, default: 100, maximum: 500 } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/EventSummary" }
+                  next_cursor: { type: [string, "null"] }
+  /events/{event_id}:
+    get:
+      tags: [library]
+      operationId: getEvent
+      parameters: [{ $ref: "#/components/parameters/EventId" }]
+      responses:
+        "200":
+          description: event with its trace(s)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventDetail" }
+        "404": { $ref: "#/components/responses/Error" }
+  /events/{event_id}/snapshot:
+    get:
+      tags: [library]
+      operationId: getSnapshot
+      parameters: [{ $ref: "#/components/parameters/EventId" }]
+      responses:
+        "200":
+          description: JPEG thumbnail
+          content:
+            image/jpeg: { schema: { type: string, format: binary } }
+        "404": { $ref: "#/components/responses/Error" }
+  /events/{event_id}/clip:
+    get:
+      tags: [library]
+      operationId: getClip
+      parameters: [{ $ref: "#/components/parameters/EventId" }]
+      responses:
+        "200":
+          description: MP4 (supports Range)
+          content:
+            video/mp4: { schema: { type: string, format: binary } }
+        "404": { $ref: "#/components/responses/Error" }
+
+  # ------------------------------------------------------------------ concepts, labels, teach
+  /concepts:
+    get:
+      tags: [teach]
+      operationId: listConcepts
+      responses:
+        "200":
+          description: all concepts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Concept" }
+    post:
+      tags: [teach]
+      operationId: createConcept
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                nl_hint: { type: [string, "null"] }
+                alpha: { type: number, default: 0.1, exclusiveMinimum: 0, exclusiveMaximum: 1 }
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Concept" }
+  /concepts/{concept_id}/labels:
+    get:
+      tags: [teach]
+      operationId: listLabels
+      parameters: [{ $ref: "#/components/parameters/ConceptId" }]
+      responses:
+        "200":
+          description: labels for this concept
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Label" }
+    put:
+      tags: [teach]
+      operationId: putLabel
+      description: Set (or replace) the label of one clip. value null deletes it ("?" chip).
+      parameters: [{ $ref: "#/components/parameters/ConceptId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clip_id, value, provenance]
+              properties:
+                clip_id: { type: string }
+                value: { type: [string, "null"], enum: [pos, neg, null] }
+                provenance: { type: string, enum: [example, active, random] }
+      responses:
+        "200":
+          description: stored
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LabelSummary" }
+  /concepts/{concept_id}/labels/bulk-negative:
+    post:
+      tags: [teach]
+      operationId: bulkNegative
+      description: Label the given clips negative (weight 1). Provenance must be given; use `random` only for clips that came from /random-sample.
+      parameters: [{ $ref: "#/components/parameters/ConceptId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clip_ids, provenance]
+              properties:
+                clip_ids: { type: array, items: { type: string } }
+                provenance: { type: string, enum: [example, random] }
+      responses:
+        "200":
+          description: stored
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LabelSummary" }
+  /concepts/{concept_id}/random-sample:
+    post:
+      tags: [teach]
+      operationId: randomSample
+      description: Uniformly sample unlabelled clips from history for calibration labelling ("label 10 random").
+      parameters:
+        - { $ref: "#/components/parameters/ConceptId" }
+        - { name: n, in: query, schema: { type: integer, default: 10, minimum: 1, maximum: 50 } }
+        - { name: seed, in: query, schema: { type: integer } }
+      responses:
+        "200":
+          description: clips to label with provenance=random
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EventSummary" }
+  /concepts/{concept_id}/teach:
+    post:
+      tags: [teach]
+      operationId: startTeach
+      description: Start a CEGIS synthesis run on the concept's example+active labels. Progress streams on /runs/{run_id}/stream.
+      parameters: [{ $ref: "#/components/parameters/ConceptId" }]
+      responses:
+        "202":
+          description: run started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Run" }
+        "409": { description: a run is already in progress for this concept }
+  /concepts/{concept_id}/question:
+    get:
+      tags: [teach]
+      operationId: getQuestion
+      description: The unlabelled clip the candidate rules disagree on most (§2.4). 204 when nothing is informative.
+      parameters: [{ $ref: "#/components/parameters/ConceptId" }]
+      responses:
+        "200":
+          description: question card
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Question" }
+        "204": { description: no informative question }
+  /concepts/{concept_id}/rules:
+    get:
+      tags: [rules]
+      operationId: listRules
+      parameters: [{ $ref: "#/components/parameters/ConceptId" }]
+      responses:
+        "200":
+          description: candidates ranked by MDL ascending, then margin descending
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RuleSummary" }
+  /runs/{run_id}:
+    get:
+      tags: [teach]
+      operationId: getRun
+      parameters: [{ $ref: "#/components/parameters/RunId" }]
+      responses:
+        "200":
+          description: run state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Run" }
+  /runs/{run_id}/stream:
+    get:
+      tags: [teach]
+      operationId: streamRun
+      description: SSE of RunEvent frames (event type = RunEvent.type); replays from the start.
+      parameters: [{ $ref: "#/components/parameters/RunId" }]
+      responses:
+        "200":
+          description: text/event-stream
+          content:
+            text/event-stream:
+              schema: { $ref: "#/components/schemas/RunEvent" }
+
+  # ------------------------------------------------------------------ rules
+  /rules/{rule_id}:
+    get:
+      tags: [rules]
+      operationId: getRule
+      parameters: [{ $ref: "#/components/parameters/RuleId" }]
+      responses:
+        "200":
+          description: rule
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RuleSummary" }
+        "404": { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [rules]
+      operationId: updateRule
+      parameters: [{ $ref: "#/components/parameters/RuleId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [candidate, selected, deployed, retired] }
+                actions:
+                  type: array
+                  items: { type: string, enum: [ui, webhook_out, slack, chime] }
+      responses:
+        "200":
+          description: updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RuleSummary" }
+  /rules/{rule_id}/backtest:
+    get:
+      tags: [rules]
+      operationId: backtestRule
+      description: Score the rule on every traced clip; calibration from provenance=random labels only.
+      parameters: [{ $ref: "#/components/parameters/RuleId" }]
+      responses:
+        "200":
+          description: backtest
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Backtest" }
+
+  # ------------------------------------------------------------------ live
+  /live/frames:
+    post:
+      tags: [live]
+      operationId: postLiveFrame
+      description: Frame grabbed from the WHEP <video> (~2 fps) for the live fact ticker; also the fallback clip source.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [session_id, t_ms, image]
+              properties:
+                session_id: { type: string }
+                device_id: { type: string }
+                t_ms: { type: integer, description: ms since the live session started }
+                image: { type: string, format: binary, description: JPEG }
+      responses:
+        "202": { description: accepted }
+  /live/sessions/{session_id}/finish:
+    post:
+      tags: [live]
+      operationId: finishLiveSession
+      description: Close a live capture; its frames become a ring_live clip, traced and run through deployed monitors.
+      parameters:
+        - { name: session_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "202":
+          description: queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event_id: { type: string }
+  /monitor/stream:
+    get:
+      tags: [live]
+      operationId: streamMonitor
+      description: SSE of MonitorEvent frames (event type = MonitorEvent.type).
+      responses:
+        "200":
+          description: text/event-stream
+          content:
+            text/event-stream:
+              schema: { $ref: "#/components/schemas/MonitorEvent" }
+  /monitor/cost:
+    get:
+      tags: [live]
+      operationId: getCost
+      responses:
+        "200":
+          description: cost meter
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CostSummary" }
+  /monitor/firings:
+    get:
+      tags: [live]
+      operationId: listFirings
+      parameters:
+        - { name: rule_id, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 50 } }
+      responses:
+        "200":
+          description: newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Firing" }
+
+  # ------------------------------------------------------------------ eval
+  /eval/results:
+    get:
+      tags: [eval]
+      operationId: getEvalResults
+      description: MEVA benchmark results for the Eval screen (written by `python -m eval.run`).
+      responses:
+        "200":
+          description: results
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EvalResults" }
+
+components:
+  parameters:
+    EventId: { name: event_id, in: path, required: true, schema: { type: string } }
+    ConceptId: { name: concept_id, in: path, required: true, schema: { type: string } }
+    RuleId: { name: rule_id, in: path, required: true, schema: { type: string } }
+    RunId: { name: run_id, in: path, required: true, schema: { type: string } }
+
+  responses:
+    Error:
+      description: error
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+        code: { type: [string, "null"], description: "upstream Ring error code if any, e.g. TIME_RANGE_NOT_AUTHORIZED" }
+
+    # ---- generated from pydantic (x-pydantic); see contracts/schemas/
+    Trace: { $ref: "./schemas/Trace.json", x-pydantic: exemplar.contracts.trace.Trace }
+    Rule: { $ref: "./schemas/Rule.json", x-pydantic: exemplar.contracts.dsl_ast.Rule }
+    Label: { $ref: "./schemas/Label.json", x-pydantic: exemplar.contracts.labels.Label }
+
+    RingAuthStatus:
+      type: object
+      required: [mode, connected]
+      properties:
+        mode: { type: [string, "null"], enum: [playground, oauth, null] }
+        connected: { type: boolean }
+        expires_at_ms: { type: [integer, "null"] }
+        issued_at_ms: { type: [integer, "null"], description: "Playground: media before this time is not authorized" }
+        user_name: { type: [string, "null"] }
+
+    Device:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        online: { type: [boolean, "null"] }
+        image_url: { type: [string, "null"] }
+        codecs: { type: array, items: { type: string } }
+        snapshot: { type: boolean }
+        chime: { type: boolean, description: "audio.supported_actions includes chime.play" }
+
+    RingWebhook:
+      type: object
+      description: Ring notification envelope (notifications.md). Extra fields allowed.
+      required: [meta, data]
+      properties:
+        meta:
+          type: object
+          required: [request_id]
+          properties:
+            version: { type: string }
+            time: { type: string }
+            request_id: { type: string }
+            account_id: { type: string }
+        data:
+          type: object
+          required: [type]
+          properties:
+            id: { type: string }
+            type: { type: string, description: "motion_detected | button_press | device_* | app_integration_* | subscription_*" }
+            subType: { type: string, description: "motion_detected only: motion | human | vehicle | other_motion" }
+            attributes:
+              type: object
+              properties:
+                source: { type: string }
+                source_type: { type: string }
+                timestamp: { type: integer }
+
+    EventSummary:
+      type: object
+      required: [id, clip_id, source, start_ms, trace_status]
+      properties:
+        id: { type: string }
+        clip_id: { type: string }
+        source: { type: string, enum: [ring, ring_live, upload, meva, fixture] }
+        device_id: { type: [string, "null"] }
+        kind: { type: [string, "null"] }
+        sub_type: { type: [string, "null"] }
+        start_ms: { type: integer }
+        duration_ms: { type: [integer, "null"] }
+        clip_status: { type: string, enum: [pending, downloading, ready, not_found, failed] }
+        trace_status: { type: string, enum: [none, ok, perception_failed] }
+        summary: { type: [string, "null"], description: "trace.summary (one sentence from perception)" }
+        has_snapshot: { type: boolean }
+        attribution: { type: [string, "null"] }
+        label: { oneOf: [{ $ref: "#/components/schemas/LabelSummary" }, { type: "null" }] }
+
+    EventDetail:
+      allOf:
+        - { $ref: "#/components/schemas/EventSummary" }
+        - type: object
+          properties:
+            trace: { oneOf: [{ $ref: "#/components/schemas/Trace" }, { type: "null" }] }
+            strong_trace: { oneOf: [{ $ref: "#/components/schemas/Trace" }, { type: "null" }] }
+            trace_text: { type: [string, "null"], description: "compact text rendering (as shown to the sketch LLM)" }
+
+    LabelSummary:
+      type: object
+      required: [concept_id, clip_id, value, provenance, weight]
+      properties:
+        concept_id: { type: string }
+        clip_id: { type: string }
+        value: { type: [string, "null"], enum: [pos, neg, null] }
+        provenance: { type: string, enum: [example, active, random] }
+        weight: { type: number }
+
+    Concept:
+      type: object
+      required: [id, name, alpha, counts]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        nl_hint: { type: [string, "null"] }
+        alpha: { type: number }
+        counts:
+          type: object
+          description: label counts by provenance and value
+          properties:
+            example_pos: { type: integer }
+            example_neg: { type: integer }
+            active_pos: { type: integer }
+            active_neg: { type: integer }
+            random_pos: { type: integer }
+            random_neg: { type: integer }
+        deployed_rule_id: { type: [string, "null"] }
+
+    Run:
+      type: object
+      required: [id, concept_id, status, started_at_ms]
+      properties:
+        id: { type: string }
+        concept_id: { type: string }
+        status: { type: string, enum: [running, done, failed, cancelled] }
+        error: { type: [string, "null"] }
+        started_at_ms: { type: integer }
+        finished_at_ms: { type: [integer, "null"] }
+
+    RunEvent:
+      type: object
+      description: One step of the CEGIS agent timeline (Teach screen).
+      required: [seq, type, at_ms]
+      properties:
+        seq: { type: integer }
+        at_ms: { type: integer }
+        type:
+          type: string
+          enum: [round_started, sketch_proposed, typecheck_failed, solve_started, solve_result,
+                 differential_check, counterexample, candidates, question_ready, done, error]
+        round: { type: integer }
+        sketch: { type: [string, "null"], description: DSL text with holes }
+        error: { type: [string, "null"] }
+        result: { type: [string, "null"], enum: [sat, unsat, timeout, grid_fallback, null] }
+        holes: { type: [object, "null"], additionalProperties: { type: number } }
+        margin: { type: [number, "null"] }
+        violated_clip_ids: { type: array, items: { type: string } }
+        rule_ids: { type: array, items: { type: string } }
+        message: { type: [string, "null"] }
+
+    RuleSummary:
+      type: object
+      required: [id, concept_id, dsl_text, english, margin, mdl, status]
+      properties:
+        id: { type: string }
+        concept_id: { type: string }
+        sketch_text: { type: string }
+        dsl_text: { type: string }
+        english: { type: string, description: deterministic printer output — never an LLM paraphrase }
+        ast: { $ref: "#/components/schemas/Rule" }
+        holes: { type: object, additionalProperties: { type: number } }
+        margin: { type: number }
+        mdl: { type: number }
+        violated_clip_ids: { type: array, items: { type: string }, description: perception-suspect examples }
+        status: { type: string, enum: [candidate, selected, deployed, retired] }
+        calibration: { oneOf: [{ $ref: "#/components/schemas/Calibration" }, { type: "null" }] }
+        actions: { type: array, items: { type: string, enum: [ui, webhook_out, slack, chime] } }
+
+    Question:
+      type: object
+      required: [concept_id, clip_id, p]
+      properties:
+        concept_id: { type: string }
+        clip_id: { type: string }
+        event: { $ref: "#/components/schemas/EventSummary" }
+        p: { type: number, description: "weighted fraction of committee members that match; shown as 'your rules disagree on this one'" }
+        committee_size: { type: integer }
+
+    Calibration:
+      type: object
+      required: [alpha, n_random_neg, guarantee, tau]
+      properties:
+        alpha: { type: number }
+        n_random_neg: { type: integer }
+        n_random_pos: { type: integer }
+        k: { type: [integer, "null"], description: "ceil((n+1)(1-alpha)); null when k > n" }
+        tau: { type: number, description: "τ_α, or 0 when the guarantee is unavailable" }
+        guarantee: { type: boolean }
+        message: { type: [string, "null"], description: "e.g. 'guarantee needs ≥ 9 random negatives (have 4)'" }
+        delta: { type: number, description: escalation band half-width }
+        recall: { type: [number, "null"] }
+        recall_ci95: { type: [array, "null"], items: { type: number }, minItems: 2, maxItems: 2, description: Clopper–Pearson }
+
+    Witness:
+      type: object
+      description: Why a rule fired — bindings and the times chosen for each temporal operator (§2.6).
+      required: [rule_id, clip_id, score, bindings, spans]
+      properties:
+        rule_id: { type: string }
+        clip_id: { type: string }
+        score: { type: number }
+        tau: { type: number }
+        margin: { type: number, description: score − τ }
+        bindings: { type: object, additionalProperties: { type: string }, description: "var → entity id" }
+        entities: { type: array, items: { type: object }, description: "the bound entities (Trace.Entity)" }
+        spans:
+          type: array
+          items:
+            type: object
+            required: [path, op, t_start_ms, t_end_ms, rho]
+            properties:
+              path: { type: string, description: "AST path, e.g. 'body.left' or 'body.args[1]'" }
+              op: { type: string }
+              text: { type: string, description: DSL text of this subformula }
+              t_start_ms: { type: integer }
+              t_end_ms: { type: integer }
+              rho: { type: number }
+        english: { type: string }
+
+    BacktestRow:
+      type: object
+      required: [clip_id, score, matched]
+      properties:
+        clip_id: { type: string }
+        event: { $ref: "#/components/schemas/EventSummary" }
+        score: { type: number }
+        matched: { type: boolean, description: "score > tau (or > 0 without guarantee)" }
+        label: { oneOf: [{ $ref: "#/components/schemas/LabelSummary" }, { type: "null" }] }
+        witness: { oneOf: [{ $ref: "#/components/schemas/Witness" }, { type: "null" }] }
+
+    Backtest:
+      type: object
+      required: [rule_id, rows, calibration]
+      properties:
+        rule_id: { type: string }
+        rows: { type: array, items: { $ref: "#/components/schemas/BacktestRow" } }
+        calibration: { $ref: "#/components/schemas/Calibration" }
+        counts:
+          type: object
+          properties:
+            tp: { type: integer }
+            fp: { type: integer }
+            fn: { type: integer }
+            tn: { type: integer }
+            unlabelled_matches: { type: integer }
+
+    Firing:
+      type: object
+      required: [id, rule_id, event_id, stage, fired, created_at_ms]
+      properties:
+        id: { type: string }
+        rule_id: { type: string }
+        event_id: { type: string }
+        stage: { type: integer, enum: [0, 1, 2], description: "0 sub_type prefilter, 1 fast perception, 2 escalated" }
+        score: { type: [number, "null"] }
+        tau: { type: [number, "null"] }
+        fired: { type: boolean }
+        witness: { oneOf: [{ $ref: "#/components/schemas/Witness" }, { type: "null" }] }
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              action: { type: string }
+              status: { type: string, enum: [ok, skipped, failed] }
+              detail: { type: [string, "null"] }
+        created_at_ms: { type: integer }
+
+    MonitorEvent:
+      type: object
+      description: Live screen stream.
+      required: [type, at_ms]
+      properties:
+        type:
+          type: string
+          enum: [event_ingested, clip_ready, trace_ready, live_facts, rule_fired, rule_dropped,
+                 escalated, action_result, cost_update, auth_expiring, error]
+        at_ms: { type: integer }
+        event_id: { type: [string, "null"] }
+        rule_id: { type: [string, "null"] }
+        firing: { oneOf: [{ $ref: "#/components/schemas/Firing" }, { type: "null" }] }
+        facts:
+          type: [array, "null"]
+          description: "live_facts: facts from the latest live frame(s) for the ticker"
+          items:
+            type: object
+            properties:
+              t_ms: { type: integer }
+              pred: { type: string }
+              args: { type: array, items: { type: string } }
+              conf: { type: string }
+        cost: { oneOf: [{ $ref: "#/components/schemas/CostSummary" }, { type: "null" }] }
+        message: { type: [string, "null"] }
+
+    CostSummary:
+      type: object
+      required: [events, stage0_dropped, stage1_scored, stage2_escalated, tokens_in, tokens_out]
+      properties:
+        events: { type: integer }
+        stage0_dropped: { type: integer }
+        stage1_scored: { type: integer }
+        stage2_escalated: { type: integer }
+        tokens_in: { type: integer }
+        tokens_out: { type: integer }
+        usd_estimate: { type: number }
+        per_event_usd: { type: number }
+
+    EvalResults:
+      type: object
+      description: Written by eval.run; one row per (concept, method, k, q, seed).
+      required: [generated_at, rows]
+      properties:
+        generated_at: { type: string }
+        alpha: { type: number }
+        rows:
+          type: array
+          items:
+            type: object
+            required: [concept, method, k, q, seed]
+            properties:
+              concept: { type: string }
+              method: { type: string, enum: [exemplar, zero_shot_vlm, knn_embed, nova_video] }
+              k: { type: integer }
+              q: { type: integer }
+              seed: { type: integer }
+              f1: { type: number }
+              precision: { type: number }
+              recall: { type: number }
+              false_alarm_rate: { type: number }
+              tokens_per_event: { type: number }
+              usd_per_event: { type: number }
+              p50_latency_ms: { type: number }
+              escalated_fraction: { type: number }
