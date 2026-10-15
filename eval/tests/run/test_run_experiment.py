@@ -209,3 +209,48 @@ def test_call_supported_filters_unknown_keywords():
 
     assert call_supported(f, 5, x=2, y=3) == (5, 2)
     assert call_supported(lambda a, **kw: (a, kw), 1, z=2) == (1, {"z": 2})
+
+
+# ------------------------------------------------------------------ LLM synthesis spend
+class _LlmProposer:
+    def __init__(self):
+        self.usage = {"inputTokens": 0, "outputTokens": 0, "calls": 0}
+
+
+def _llm_services():
+    svc, rec = fake_services()
+    inner = svc.run_cegis
+
+    def run_cegis(examples, *, model=None, **kw):
+        model.usage.update(inputTokens=20000, outputTokens=2000, calls=3)           # what D's StrandsProposer reports
+        kw.pop("solve_timeout_s", None)
+        return inner(examples, model=model, **kw)
+
+    svc.run_cegis, svc.new_proposer = run_cegis, _LlmProposer
+    return svc, rec
+
+
+def test_llm_synthesis_is_charged_to_the_ledger_and_amortised_over_the_test_events(tmp_path):
+    from eval.harness.budget import BudgetGuard, read_ledger, usd
+    w = make_world()
+    guard = BudgetGuard(5.0, tmp_path / "costs.jsonl")
+    svc, _ = _llm_services()
+    out = run_trial(cfg_for(w, synth_guard=guard), 1, 0, [0, 2], svc)
+    runs = read_ledger(tmp_path / "costs.jsonl")
+    assert len(runs) == 3 and {r["phase"] for r in runs} == {"synth"} and runs[0]["tokens_in"] == 20000
+    one = usd("strong", 20000, 2000)
+    assert guard.spent == pytest.approx(3 * one)
+    q0, q2 = out.rows
+    assert q0["synth_tokens_in"] == 20000 and q2["synth_tokens_in"] == 60000 and q2["synth_tokens_out"] == 6000
+    assert q0["usd_synthesis_amortised"] == pytest.approx(one / 14) and q2["usd_synthesis_amortised"] == pytest.approx(3 * one / 14)
+    assert q0["tokens_per_event"] == pytest.approx(9500 + 22000 / 14)
+    assert q2["usd_per_event"] > q0["usd_per_event"]
+
+
+def test_llm_synthesis_refuses_to_start_when_the_budget_is_exhausted(tmp_path):
+    from eval.harness.budget import BudgetExceeded, BudgetGuard
+    w = make_world()
+    svc, rec = _llm_services()
+    with pytest.raises(BudgetExceeded):
+        run_trial(cfg_for(w, synth_guard=BudgetGuard(0.1, tmp_path / "costs.jsonl")), 1, 0, [0], svc)
+    assert rec.cegis_ids == []

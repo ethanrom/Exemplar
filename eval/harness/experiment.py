@@ -23,12 +23,13 @@ from typing import Any, Callable, Iterable, Mapping, Optional, Sequence
 from exemplar.contracts.trace import Trace
 
 from . import metrics
-from .budget import usd
+from .budget import BudgetExceeded, BudgetGuard, usd
 from .dataset import Window
 
 WEIGHT_CONFIRMED = 3.0          # contracts.labels.WEIGHT_CONFIRMED: the user looked at the clip and chose the label
 METHOD = "exemplar"
 STRONG_PERCEPTION_USD_ESTIMATE = 0.028     # Phase 0 spike 5, 16 frames; used only when no strong trace was executed
+EST_SYNTH_USD = 0.25                        # reservation per LLM synthesis run (a run is a few proposal calls on compact traces)
 FAILED_SCORE = -0.5                         # robustness of a perception_failed trace (-C)
 
 
@@ -107,6 +108,7 @@ class TrialConfig:
     solve_timeout_s: float = 10.0
     strong_fn: Optional[Callable[[Window], tuple[Trace, float, int]]] = None    # window -> (strong trace, usd paid now, latency ms)
     proposer_label: str = ""
+    synth_guard: Optional[BudgetGuard] = None                                  # set when synthesis calls the LLM: spend is guarded
 
 
 @dataclass
@@ -164,9 +166,22 @@ def run_trial(cfg: TrialConfig, k: int, seed: int, qs: Sequence[int], svc: Servi
         assert_no_leak(train_ids=train_ids, calib_ids=calib_ids, test_ids=test_ids, synth_ids=[w.id for w, _ in labelled],
                        where=f"{cfg.concept} k={k} seed={seed} round={r}")
         proposer, events = svc.new_proposer(), []              # fresh proposer per synthesis run: template libraries depend on the examples
-        cands = call_supported(svc.run_cegis, exs, nl_hint=cfg.hint, emit=events.append, k=cfg.cand_k, max_rounds=cfg.max_rounds,
-                               model=proposer, solve_timeout_s=cfg.solve_timeout_s) or []
+        token = None
+        if cfg.synth_guard is not None:
+            token = cfg.synth_guard.reserve(EST_SYNTH_USD)
+            if token is None:
+                raise BudgetExceeded("LLM synthesis would exceed the budget cap; rerun with --proposer offline or a higher --max-usd (<= 20)")
+        try:
+            cands = call_supported(svc.run_cegis, exs, nl_hint=cfg.hint, emit=events.append, k=cfg.cand_k, max_rounds=cfg.max_rounds,
+                                   model=proposer, solve_timeout_s=cfg.solve_timeout_s) or []
+        except BaseException:
+            if token is not None:
+                cfg.synth_guard.release(token)
+            raise
         t_in, t_out = _synth_usage(proposer, events)
+        if token is not None:
+            cfg.synth_guard.commit(token, {"phase": "synth", "id": f"{cfg.concept}|k{k}|s{seed}|r{r}", "mode": "strong", "model_alias": "strong",
+                                           "tokens_in": t_in, "tokens_out": t_out, "usd": usd("strong", t_in, t_out)})
         synth_in, synth_out, n_events_total = synth_in + t_in, synth_out + t_out, n_events_total + len(events)
         if r in qs:
             out.rows.append(row_for(r, r))

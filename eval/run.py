@@ -161,10 +161,11 @@ def main(argv: Optional[Sequence[str]] = None, *, services: Optional[Services] =
     path = Path(results_path) if results_path else None
     done = set() if a.force else existing_keys(path)
     guard, strong_fn = None, None
-    if a.escalate:
+    if a.escalate or a.proposer == "llm":
         guard = BudgetGuard(a.max_usd, eval_dir() / "costs.jsonl")
+    if a.escalate:
         from exemplar.perception.extract import make_client
-        strong_fn = make_strong_fn(guard, make_client())
+        strong_fn = make_strong_fn(guard, make_client(read_timeout=90))
     runs_dir = eval_dir() / "runs"
     runs_dir.mkdir(exist_ok=True)
 
@@ -174,7 +175,7 @@ def main(argv: Optional[Sequence[str]] = None, *, services: Optional[Services] =
         cfg = TrialConfig(concept=cid, hint=None if a.no_hint else hints[cid], alpha=a.alpha, train=by_split["train"],
                           calib=by_split["calib"], test=by_split["test"], traces=traces, n_neg=a.n_neg,
                           committee_samples=a.committee_samples, solve_timeout_s=a.solve_timeout, strong_fn=strong_fn,
-                          proposer_label=svc.proposer_name)
+                          proposer_label=svc.proposer_name, synth_guard=guard if a.proposer == "llm" else None)
         for k in a.k:
             for seed in seeds:
                 todo_q = [q for q in qs if (cid, "exemplar", k, q, seed) not in done]
