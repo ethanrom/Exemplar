@@ -100,12 +100,11 @@ function BacktestTable({
       </div>
 
       <div className="relative overflow-x-auto rounded-xl border border-ex-line bg-ex-panel">
-        <table className="w-full min-w-[720px] border-separate border-spacing-0 text-sm">
+        <table className="w-full min-w-[680px] border-separate border-spacing-0 text-sm">
           <caption className="sr-only">Backtest results, one row per clip. Press the Why button on a matching row to see its witness timeline.</caption>
           <thead>
             <tr>
-              <th scope="col" className={th}>Clip</th>
-              <th scope="col" className={th}>Your label</th>
+              <th scope="col" className={cx(th, 'w-[42%]')}>Clip and your label</th>
               <th scope="col" className={th} aria-sort={asc ? 'ascending' : 'descending'}>
                 <button type="button" className="-ml-1 inline-flex min-h-[28px] items-center gap-1 rounded px-1 font-medium hover:text-ex-ink" onClick={() => setAsc(!asc)}>
                   Score ρ <Icon name="chevron" className={cx('h-3 w-3', asc && 'rotate-180')} />
@@ -133,11 +132,13 @@ function BacktestTable({
                             <EventThumb event={r.event} compact className="h-[36px] w-16" />
                           </button>
                         )}
-                        <span className="line-clamp-2 max-w-[24rem] text-ex-ink">{r.event?.summary ?? r.clip_id}</span>
+                        <div className="min-w-0">
+                          <span className="line-clamp-2 text-ex-ink">{r.event?.summary ?? r.clip_id}</span>
+                          <span className="mt-0.5 block text-xs">
+                            {r.label ? <LabelIndicator label={r.label} showProvenance={false} /> : <span className="text-ex-ink3">No label</span>}
+                          </span>
+                        </div>
                       </div>
-                    </td>
-                    <td className={cell}>
-                      {r.label ? <LabelIndicator label={r.label} showProvenance={false} /> : <span className="text-xs text-ex-ink3">none</span>}
                     </td>
                     <td className={cell}>
                       <div className="flex items-center gap-2.5">
@@ -167,7 +168,7 @@ function BacktestTable({
                   </tr>
                   {r.witness && isOpen && (
                     <tr>
-                      <td colSpan={5} id={`wit-${r.clip_id}`} className="border-b border-ex-line bg-ex-bg/50 p-3 sm:p-4">
+                      <td colSpan={4} id={`wit-${r.clip_id}`} className="border-b border-ex-line bg-ex-bg/50 p-3 sm:p-4">
                         <WitnessTimeline witness={r.witness} durationMs={r.event?.duration_ms} />
                       </td>
                     </tr>

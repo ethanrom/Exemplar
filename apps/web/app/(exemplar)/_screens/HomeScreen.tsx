@@ -132,7 +132,7 @@ export default function HomeScreen() {
   const started = !!auth?.connected
   return (
     <div>
-      <section className="relative grid items-center gap-10 pt-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-14">
+      <section className="relative grid items-center gap-10 overflow-x-clip pt-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-14">
         <div aria-hidden="true" className="pointer-events-none absolute -top-24 left-1/2 h-[420px] w-[900px] -translate-x-1/3 bg-[radial-gradient(closest-side,rgba(88,142,255,0.10),transparent)]" />
         <div className="relative">
           <p className="inline-flex items-center gap-2 rounded-full border border-ex-line2 px-3 py-1 text-xs text-ex-ink2">

@@ -48,12 +48,12 @@ await step('reset', async () => { await fetch(`${new URL(base).origin}/api/engin
 await go('/')
 await shot('01-home')
 
-// ---- connect: a 3 minute token shows the warning state, a fresh one the calm state
-await go('/connect')
+// ---- connect: a 3 minute token shows the warning state, a fresh one the calm state.
+// The token goes straight to the mock engine (PUT /ring/auth through the proxy): the web server's own
+// /api/ring/token route validates tokens and rejects the demo strings.
 const paste = async (value) => {
-  await page.getByLabel('Playground access token').fill(value)
-  await page.getByRole('button', { name: /Save token|Replace token/ }).click()
-  await page.getByText(/Token saved/).waitFor()
+  await fetch(`${new URL(base).origin}/api/engine/ring/auth`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ access_token: value }) })
+  await go('/connect')
   await page.waitForTimeout(500)
 }
 await step('connect: expiring', async () => { await paste('short-lived-demo-token'); await shot('02a-connect-expiring') })

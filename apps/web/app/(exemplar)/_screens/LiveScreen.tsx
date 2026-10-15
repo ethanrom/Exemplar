@@ -37,7 +37,7 @@ function CostRow({ cost }: { cost: CostSummary | null }) {
   const c = cost ?? { events: 0, stage0_dropped: 0, stage1_scored: 0, stage2_escalated: 0, tokens_in: 0, tokens_out: 0 }
   const share = (n: number) => (c.events > 0 ? `${Math.round((n / c.events) * 100)}% of events` : 'of events')
   const cell = (label: string, value: React.ReactNode, hint?: React.ReactNode, key?: string) => (
-    <div key={key ?? label} className="min-w-0 bg-ex-panel px-4 py-3.5">
+    <div key={key ?? label} className="min-w-0 bg-ex-panel px-4 py-3.5 last:col-span-2 sm:last:col-span-1">
       <dt className="text-xs text-ex-ink3">{label}</dt>
       <dd className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-ex-ink">{value}</dd>
       {hint && <dd className="mt-0.5 text-xs text-ex-ink3">{hint}</dd>}
@@ -45,7 +45,7 @@ function CostRow({ cost }: { cost: CostSummary | null }) {
   )
   return (
     <section aria-label="Cost of watching">
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-ex-line bg-ex-line sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-ex-line bg-ex-line sm:grid-cols-5">
         {cell('Events seen', fmtInt(c.events), <>{fmtInt(c.tokens_in)} tokens in · {fmtInt(c.tokens_out)} out</>)}
         {cell('Dropped free', fmtInt(c.stage0_dropped), <>stage 0 · {share(c.stage0_dropped)}</>)}
         {cell('Scored', fmtInt(c.stage1_scored), <>stage 1, fast model</>)}
