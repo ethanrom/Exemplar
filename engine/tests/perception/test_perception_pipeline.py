@@ -85,10 +85,23 @@ def test_harmless_issues_are_normalised_and_counted(video):
 
 
 def test_n_frames_is_clamped_per_mode(video):
-    # 10 s clip, 0.5 s gap -> 20 frames available; fast limit 24 and strong 32 don't bind, the gap does
-    fake = FakeBedrock(tool_response(theft_payload(20)))
-    tr = perceive(video, clip_id="x", source="upload", n_frames=99, client=fake)
-    assert tr.perception.n_frames == 20 and tr.status == "ok"
+    # min_gap_s=0.1 lets the 10 s clip supply 100 frames, so only the per-mode caps (24 fast / 32 strong) bind
+    fast = perceive(video, clip_id="x", source="upload", n_frames=99, min_gap_s=0.1, client=FakeBedrock(auto_response))
+    strong = perceive(video, clip_id="x", source="upload", n_frames=99, min_gap_s=0.1, mode="strong",
+                      client=FakeBedrock(auto_response))
+    assert fast.status == strong.status == "ok"
+    assert fast.perception.n_frames == 24 and len(fast.frames) == 24
+    assert strong.perception.n_frames == 32 and len(strong.frames) == 32
+
+
+def test_min_gap_reduces_frames(video):
+    tr = perceive(video, clip_id="x", source="upload", n_frames=99, client=FakeBedrock(auto_response))
+    assert tr.perception.n_frames == 20                              # 10 s / 0.5 s
+
+
+def test_tool_input_delivered_as_json_text_is_parsed(video):
+    resp = tool_response(json.dumps(theft_payload(N)))
+    assert run(video, FakeBedrock(resp)).trace.status == "ok"
 
 
 # ------------------------------------------------------------------ validation / retry

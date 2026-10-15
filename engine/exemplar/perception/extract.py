@@ -9,6 +9,7 @@ botocore's retries, network) raise `PerceptionBackendError`.
 """
 from __future__ import annotations
 
+import json
 import logging
 import time
 from collections import Counter
@@ -102,7 +103,13 @@ def run_sample(client: Any, *, model_id: str, strong: bool, model_alias: Optiona
         if use is None:
             errors = [f"you did not call the {prompt.TOOL_NAME} tool (stopReason={stop}); call it with the full trace"]
         else:
-            norm = normalize(use.get("input"), times)
+            payload = use.get("input")
+            if isinstance(payload, str):                   # some failure modes hand back the raw JSON text
+                try:
+                    payload = json.loads(payload)
+                except ValueError:
+                    payload = None
+            norm = normalize(payload, times)
             res.dropped = norm.dropped                   # repairs of the *last* parsed attempt only
             meta = PerceptionMeta(mode="strong" if strong else "fast", model_alias=model_alias, n_frames=len(frames),
                                   tokens_in=res.tokens_in, tokens_out=res.tokens_out,
