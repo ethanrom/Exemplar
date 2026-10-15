@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { getAccessToken } from '@/lib/auth'
+import { authErrorStatus, describeRingAuth, getRingAccessToken } from '@/lib/ring/auth'
+
+export const dynamic = 'force-dynamic'
 
 const DEVICE_ID = process.env.NEXT_PUBLIC_RING_DEVICE_ID
 const DEVICE_NAME = process.env.NEXT_PUBLIC_RING_DEVICE_NAME || 'Camera'
@@ -7,15 +9,15 @@ const API_BASE = 'https://api.amazonvision.com'
 
 export async function GET() {
   try {
-    const token = await getAccessToken()
+    const token = await getRingAccessToken()
 
-    // In access token mode, always auto-discover (ignore NEXT_PUBLIC_RING_DEVICE_ID)
-    const isAccessTokenMode = !!process.env.RING_ACCESS_TOKEN
+    // In access token mode (env or pasted Playground token), always auto-discover (ignore NEXT_PUBLIC_RING_DEVICE_ID)
+    const isAccessTokenMode = describeRingAuth().mode === 'access_token'
     const useConfiguredDevice = DEVICE_ID && !isAccessTokenMode
 
     // If device ID is configured (refresh token mode only), use it directly
     if (useConfiguredDevice) {
-      const statusRes = await fetch(`${API_BASE}/v1/devices/${DEVICE_ID}/status`, {
+      const statusRes = await fetch(`${API_BASE}/v1/devices/${encodeURIComponent(DEVICE_ID)}/status`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -60,10 +62,10 @@ export async function GET() {
 
     return NextResponse.json({ devices })
   } catch (error) {
-    console.error('Devices error:', error)
+    console.error('Devices error:', error instanceof Error ? error.message : error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch devices', devices: [] },
-      { status: 500 }
+      { status: authErrorStatus(error) }
     )
   }
 }
