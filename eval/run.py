@@ -130,6 +130,7 @@ def main(argv: Optional[Sequence[str]] = None, *, services: Optional[Services] =
     ap.add_argument("--force", action="store_true", help="recompute trials whose rows already exist")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-write", action="store_true")
+    ap.add_argument("--results", type=Path, default=None, help="results file (default $EXEMPLAR_DATA_DIR/eval/results.json)")
     a = ap.parse_args(argv)
 
     if not 0 <= a.n_neg <= 2:
@@ -158,7 +159,7 @@ def main(argv: Optional[Sequence[str]] = None, *, services: Optional[Services] =
         return 0
 
     svc = services or make_services(a.proposer)
-    path = Path(results_path) if results_path else None
+    path = Path(results_path or a.results) if (results_path or a.results) else None
     done = set() if a.force else existing_keys(path)
     guard, strong_fn = None, None
     if a.escalate or a.proposer == "llm":
