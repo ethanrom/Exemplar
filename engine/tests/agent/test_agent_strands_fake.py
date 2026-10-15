@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 from typing import Any
 
-import pytest
 from strands.models import Model
 
 from exemplar.agent import StrandsProposer, run_cegis
@@ -70,7 +69,7 @@ def _texts(messages) -> str:
 def test_agent_round_trip_with_tools_and_feedback():
     model = FakeModel([
         # round 1: typecheck, one bad sketch rejected by submit_sketches, then a corrected one and a weak one
-        ("tool", "typecheck_sketch", {"sketch": "exists p: Person: rings_bell(p, p)"}),
+        ("tool", "typecheck", {"sketch": "exists p: Person: rings_bell(p, p)"}),
         ("tool", "solve_sketch", {"sketch": GOOD}),
         ("tool", "submit_sketches", {"sketches": ["exists p: Person: rings_bell(p, p)", GOOD, WEAK]}),
         ("text", "Submitted two sketches."),
@@ -123,3 +122,24 @@ def test_solve_budget_per_round():
     r1 = tools["solve_sketch"](sketch=GOOD)
     r2 = tools["solve_sketch"](sketch="exists p: Person: eventually[?a, ?b] rings_bell(p)")
     assert "SAT" in r1.upper() and "budget" in r2
+
+
+def test_cancel_stops_the_agent_between_tool_calls():
+    import threading
+
+    cancel = threading.Event()
+
+    class Cancelling(FakeModel):
+        async def stream(self, messages, *a, **k):
+            if len(self.calls) == 1:                       # the user hits stop while the model is mid-conversation
+                cancel.set()
+            async for ev in super().stream(messages, *a, **k):
+                yield ev
+
+    model = Cancelling([("tool", "typecheck", {"sketch": GOOD}), ("tool", "solve_sketch", {"sketch": GOOD}),
+                        ("tool", "solve_sketch", {"sketch": WEAK}), ("text", "never reached")])
+    events: list[dict] = []
+    out = run_cegis(_theft(), nl_hint=None, emit=events.append, model=StrandsProposer(model), cancel=cancel)
+    assert events[-1] == {"type": "done", "message": "cancelled"}
+    assert len(model.calls) <= 2 and model.turns           # the agent stopped at the next safe point, script unused
+    assert not any(e["type"] == "candidates" for e in events)

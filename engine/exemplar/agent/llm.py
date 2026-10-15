@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Optional
+import threading
+from typing import TYPE_CHECKING
 
 from .prompts import system_prompt, task_message
 from .tools import build_tools
@@ -67,16 +68,29 @@ class StrandsProposer:
         model = self._model if self._model is not None else build_bedrock_model(self._max_tokens)
         self._agent = Agent(model=model, tools=build_tools(ctx.state), system_prompt=system_prompt(ctx.k),
                             callback_handler=None, tool_executor=SequentialToolExecutor())
+        ctx.state.cancel_hooks.append(self._agent.cancel)
 
     def propose(self, ctx: "RoundContext") -> list[str]:
         self._ensure(ctx)
         prompt = task_message(ctx.examples, ctx.nl_hint, ctx.k) if ctx.round == 1 else ctx.feedback()
+        done = threading.Event()
+        cancel = ctx.state.cancel
+        if cancel is not None:                              # stop the agent at its next safe point when the user cancels
+            def watch() -> None:
+                while not done.wait(0.1):
+                    if cancel.is_set():
+                        self._agent.cancel()
+                        return
+            threading.Thread(target=watch, daemon=True, name="cegis-cancel-watch").start()
         try:
             res = self._agent(prompt)
         except ProposerUnavailable:
             raise
         except Exception as e:                              # botocore / strands errors: scrub, then let the loop fall back
             raise ProposerUnavailable(_scrub(f"{type(e).__name__}: {e}")) from None
+        finally:
+            done.set()
+        ctx.state.check_cancel()
         try:
             u = res.metrics.accumulated_usage
             self.usage = {"inputTokens": int(u.get("inputTokens", 0)), "outputTokens": int(u.get("outputTokens", 0)),

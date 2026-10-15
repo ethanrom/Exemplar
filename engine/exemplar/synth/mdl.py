@@ -3,8 +3,7 @@ from __future__ import annotations
 
 import math
 
-from ..contracts.dsl_ast import (Always, And, Atom, Eventually, HoldsFor, Hole, HourIn, Not, Or, Rule, Then, children,
-                                 holes as ast_holes, node_count)
+from ..contracts.dsl_ast import Always, Eventually, HoldsFor, HourIn, Rule, Then, children, holes as ast_holes, node_count
 from ..contracts.ontology import PREDICATES
 
 # |ops| = size of the alphabet a node is drawn from: 7 formula operators (not, and, or, eventually, always,

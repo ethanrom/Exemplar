@@ -80,13 +80,14 @@ How to work
    eventually vs holds_for) so that at least some of them fit. Use ?names for every time constant; never invent predicates, zones or labels.
 3. You may call `typecheck` and `solve_sketch` to try a sketch yourself, and `evaluate` to see how a closed rule scores on a clip.
    `fetch_counterexamples` shows the traces your current best sketches get wrong. Solving is cheap (<1 s); typecheck first.
-4. Finish each round by calling `submit_sketches` ONCE with your final list (up to {k} sketches). Sketches that fail to typecheck are
+4. Be economical: every tool call re-sends the whole conversation. Try at most 2-3 sketches by hand per round, then submit.
+   Finish each round by calling `submit_sketches` ONCE with your final list (up to {k} sketches). Sketches that fail to typecheck are
    rejected with the error: fix and resubmit within the same call sequence. After submitting, reply with one short sentence.
 You will be told which clips each submitted sketch violates (counterexamples) and asked to revise. A clip that many sketches violate may be
 mislabelled or badly perceived: do not contort the rule to fit it."""
 
 
-def task_message(examples: list[Example], nl_hint: str | None, k: int, *, max_each: int = 8) -> str:
+def task_message(examples: list[Example], nl_hint: str | None, k: int, *, max_each: int = 6) -> str:
     pos = [e for e in examples if e.positive]
     neg = [e for e in examples if not e.positive]
     parts = []

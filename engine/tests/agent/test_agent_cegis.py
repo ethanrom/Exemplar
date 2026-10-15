@@ -174,3 +174,32 @@ def test_llm_unavailable_falls_back_to_templates(monkeypatch):
     monkeypatch.setattr(llm, "build_bedrock_model", boom)
     out, ev = _run(_theft(), llm.StrandsProposer(), k=3, max_rounds=2)
     assert out and any("template library" in (e.get("message") or "") for e in ev)
+
+
+def test_events_and_rule_summary_validate_against_api_yaml():
+    import json
+    from pathlib import Path
+
+    import yaml
+    from jsonschema import Draft202012Validator
+
+    contracts = Path(__file__).parents[2] / "exemplar" / "contracts"
+    spec = yaml.safe_load((contracts / "api.yaml").read_text(encoding="utf-8"))
+    run_event = Draft202012Validator(spec["components"]["schemas"]["RunEvent"])
+    summary = dict(spec["components"]["schemas"]["RuleSummary"])
+    summary["properties"] = {k: v for k, v in summary["properties"].items() if k not in ("ast", "calibration")}
+    summary_v = Draft202012Validator(summary)
+    rule_v = Draft202012Validator(json.loads((contracts / "schemas" / "Rule.json").read_text(encoding="utf-8")))
+
+    ex = _theft() + [Example(load("delivery_a"), True, 1, "mislabelled")]
+    script = Script([["exists p: Person: rings_bell(p, p)",
+                      "exists p: Person, k: Package: picks_up(p, k) then[?a, ?b] carrying(p, k)"]])
+    out, events = _run(ex, script, k=2, max_rounds=1, backfill=False)
+    assert {"round_started", "typecheck_failed", "sketch_proposed", "solve_started", "solve_result",
+            "differential_check", "counterexample", "candidates", "done"} <= {e["type"] for e in events}
+    for i, e in enumerate(events):
+        run_event.validate({**e, "seq": i, "at_ms": i})
+    for c in out:
+        api = c.to_api(id="r1", concept_id="c1")
+        summary_v.validate({k: v for k, v in api.items() if k not in ("ast", "calibration")})
+        rule_v.validate(api["ast"])

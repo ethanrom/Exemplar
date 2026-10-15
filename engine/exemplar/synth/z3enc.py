@@ -34,10 +34,10 @@ from typing import Optional, Sequence, Union
 
 import z3
 
-from ..contracts.dsl_ast import (Always, And, Atom, DeviceEq, Eventually, HoldsFor, Hole, HourIn, Not, Or, Rule,
-                                 SubtypeEq, Then, children, holes as ast_holes)
+from ..contracts.dsl_ast import (Always, And, Atom, Eventually, HoldsFor, Hole, HourIn, Not, Or, Rule, Then, children,
+                                 holes as ast_holes)
 from ..contracts.ontology import ABSENT_VALUE, CLAMP, CONF_VALUE, THRESHOLD
-from ..dsl import prepare, typecheck, to_text
+from ..dsl import prepare, typecheck
 from ..dsl.evaluator import PreparedTrace, ctx_holds
 from .types import Example, SketchError
 

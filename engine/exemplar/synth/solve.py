@@ -24,16 +24,17 @@ from typing import Optional, Sequence
 
 import z3
 
-from ..contracts.dsl_ast import Rule, fill_holes
+from ..contracts.dsl_ast import Always, Eventually, Hole, Rule, Then, children, fill_holes
 from ..contracts.ontology import CLAMP
 from ..dsl import compile_rule, to_text
-from .types import EncoderMismatch, Example, SketchError, SolveResult
+from .types import EncoderMismatch, Example, SolveResult
 from .z3enc import Bx, Encoder, margin_levels
 
 log = logging.getLogger(__name__)
 EPS = 1e-6          # tolerance of the mandatory differential check (spec)
 GRID_STEP = 0.5     # temporal-slack / fallback grid (seconds)
 PLACEMENT_BUDGET_S = 5.0
+GRID_BUDGET_S = 5.0
 
 
 class InfeasibleBox(ValueError):
@@ -246,18 +247,15 @@ def _place(enc: Encoder, cr, p0: dict[str, float], m_star: float, sat_idx: list[
 def _grid_search(sketch: Rule, examples: Sequence[Example], enc: Encoder, budget_s: float) -> Optional[dict]:
     """Best point of a 0.5 s grid over the holes, scored with the evaluator.  Not exact; used when Z3 times out.
 
-    Enumerates the full grid when it fits the time budget, otherwise a coarse grid followed by 0.5 s
-    coordinate refinement around the best points.  Returns {"holes", "score" key, ...} or None.
+    The whole grid is enumerated when it is small; otherwise a coarse grid (at most ~1500 points) is scored first and
+    the best points are refined one hole at a time on the full 0.5 s grid.  Always stops at ``budget_s``.  Points that
+    break a window's ``lower <= upper`` order are skipped.  Returns {"holes", "scores"} for the best point
+    (fewest violated weight, then largest margin), or None when no admissible point exists.
     """
     t0 = time.perf_counter()
     cr = compile_rule(sketch)
-    names = enc.hole_names
-    preps = enc.preps
-    L = enc.clip_len
-    full = {h: (list(map(float, range(24))) if enc.kinds[h] == "hour" else _grid_in(0.0, L)) for h in names}
-    # windows need lo <= hi; evaluated points that violate it are skipped
-    from ..contracts.dsl_ast import Hole, Eventually, Always, Then, children
-
+    names, preps = enc.hole_names, enc.preps
+    full = {h: (list(map(float, range(24))) if enc.kinds[h] == "hour" else _grid_in(0.0, enc.clip_len)) for h in names}
     pairs: list[tuple] = []
 
     def walk(n) -> None:
@@ -269,72 +267,53 @@ def _grid_search(sketch: Rule, examples: Sequence[Example], enc: Encoder, budget
     walk(sketch)
 
     def ordered(pt: dict[str, float]) -> bool:
-        for a, b in pairs:
-            lo = pt[a.name] if isinstance(a, Hole) else a
-            hi = pt[b.name] if isinstance(b, Hole) else b
-            if lo > hi:
-                return False
-        return True
-
-    best: list = []                                           # (key, pt, scores)
+        return all((pt[a.name] if isinstance(a, Hole) else a) <= (pt[b.name] if isinstance(b, Hole) else b)
+                   for a, b in pairs)
 
     def key_of(scores: list[float]) -> tuple:
         viol = sum(ex.weight for ex, s in zip(examples, scores) if not _label_ok(ex.positive, s))
         marg = min([abs(s) for ex, s in zip(examples, scores) if _label_ok(ex.positive, s)] or [CLAMP])
         return (viol, -marg)
 
+    best: list[tuple] = []                                  # (key, point, scores)
+
     def consider(pt: dict[str, float]) -> None:
-        if not ordered(pt):
-            return
-        sc = _score_all(cr, preps, pt)
-        best.append((key_of(sc), dict(pt), sc))
-        if len(best) > 64:
-            best.sort(key=lambda t: t[0])
-            del best[16:]
+        if ordered(pt):
+            sc = _score_all(cr, preps, pt)
+            best.append((key_of(sc), dict(pt), sc))
+            if len(best) > 64:
+                best.sort(key=lambda t: t[0])
+                del best[16:]
 
     def time_left() -> bool:
         return time.perf_counter() - t0 < budget_s
 
-    n_full = 1
+    def sweep(grids: dict[str, list[float]]) -> None:
+        for combo in itertools.product(*(grids[h] for h in names)):
+            if not time_left():
+                return
+            consider(dict(zip(names, combo)))
+
+    total = 1
     for h in names:
-        n_full *= len(full[h])
-    n_budget = max(200, int(budget_s / max(1e-4, 0.0001 * len(examples) + 1e-4)))
-    if n_full <= n_budget:
-        for combo in itertools.product(*(full[h] for h in names)):
-            if not time_left():
-                break
-            consider(dict(zip(names, combo)))
+        total *= max(1, len(full[h]))
+    if total <= 1500:
+        sweep(full)
     else:
-        coarse = {}
-        for h in names:
-            vals = full[h]
-            stride = max(1, len(vals) // max(2, int(round(n_budget ** (1 / max(1, len(names)))))))
-            coarse[h] = vals[::stride]
-        for combo in itertools.product(*(coarse[h] for h in names)):
-            if not time_left():
-                break
-            consider(dict(zip(names, combo)))
-        best.sort(key=lambda t: t[0])
-        frontier = [pt for _, pt, _ in best[:4]]
-        for _ in range(3):
-            for pt in list(frontier):
+        per = max(2, int(round(1500 ** (1 / max(1, len(names))))))
+        sweep({h: full[h][:: max(1, len(full[h]) // per)] for h in names})
+        for _ in range(2):
+            best.sort(key=lambda t: t[0])
+            for _, pt, _ in list(best[:4]):
                 for h in names:
-                    vals = full[h]
-                    if not vals:
-                        continue
-                    for v in vals:
+                    for v in full[h]:
                         if not time_left():
                             break
-                        q = dict(pt)
-                        q[h] = v
-                        consider(q)
-            best.sort(key=lambda t: t[0])
-            frontier = [pt for _, pt, _ in best[:4]]
+                        consider({**pt, h: v})
     if not best:
         return None
     best.sort(key=lambda t: t[0])
-    k, pt, sc = best[0]
-    return {"holes": pt, "scores": sc, "key": k}
+    return {"holes": best[0][1], "scores": best[0][2]}
 
 
 # ============================================================================ public: solve_sketch
@@ -356,8 +335,9 @@ def solve_sketch(sketch: Rule, examples: Sequence[Example], *, timeout_s: float 
 
     Algorithm: MaxSMT at the lowest margin level (= sign-correctness) gives the minimal violated weight W*; the
     margin levels above it (see `margin_levels`) are then tried in ascending order, each with its own MaxSMT, and
-    the highest level that still achieves W* wins.  ``timeout_s`` bounds the whole solve (the placement step gets
-    its own `PLACEMENT_BUDGET_S`).
+    the highest level that still achieves W* wins.  ``timeout_s`` is the wall-clock budget of the Z3 work (the Python
+    encoding time counts, but a single Z3 call is only interrupted by its own limit, so the real total can exceed it
+    by the placement step, at most `PLACEMENT_BUDGET_S`, and by the grid fallback, at most `GRID_BUDGET_S`).
     """
     t0 = time.perf_counter()
     examples = list(examples)
@@ -375,7 +355,7 @@ def solve_sketch(sketch: Rule, examples: Sequence[Example], *, timeout_s: float 
                            True, ms(), note="no hole assignment is admissible for this sketch on these clips")
 
     if status == "unknown":
-        res = _grid_search(sketch, examples, enc, budget_s=min(timeout_s, 10.0))
+        res = _grid_search(sketch, examples, enc, budget_s=min(timeout_s, GRID_BUDGET_S))
         if res is None:
             return SolveResult("timeout", sketch, None, {}, 0.0, tuple(e.clip_id for e in examples), (), True, ms(),
                                note="Z3 timed out")
@@ -439,7 +419,7 @@ def solve_sketch(sketch: Rule, examples: Sequence[Example], *, timeout_s: float 
     sat_idx = [k for k, o in enumerate(z3_ok) if o]
 
     # ---- temporal-slack placement, then the mandatory differential check on the returned rule
-    holes, how = _place(enc, cr, p0, m_star, sat_idx, min(timeout_s, PLACEMENT_BUDGET_S))
+    holes, how = _place(enc, cr, p0, m_star, sat_idx, max(1.0, min(PLACEMENT_BUDGET_S, timeout_s - (time.perf_counter() - t0))))
     log.debug("placed (%s) at %d ms", how, ms())
     scores = _score_all(cr, enc.preps, holes)
     for k in sat_idx:

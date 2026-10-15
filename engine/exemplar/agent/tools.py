@@ -9,7 +9,8 @@ from typing import Callable
 
 from strands import tool
 
-from ..dsl import DSLError, parse, robustness, to_english, to_text, typecheck, witness
+from ..dsl import DSLError, parse, robustness, to_english, to_text, witness
+from ..dsl import typecheck as dsl_typecheck
 from ..contracts.dsl_ast import holes as ast_holes
 from .state import Cancelled, RunState
 
@@ -20,7 +21,7 @@ def _cancelled() -> str:
 
 def build_tools(state: RunState) -> list[Callable]:
     @tool
-    def typecheck_sketch(sketch: str) -> str:
+    def typecheck(sketch: str) -> str:
         """Check that a rule sketch parses and type-checks against the ontology. Returns 'ok' or the list of problems.
 
         Args:
@@ -79,7 +80,7 @@ def build_tools(state: RunState) -> list[Callable]:
             rule = parse(rule_text.strip())
         except DSLError as e:
             return f"syntax error: {e}"
-        errs = typecheck(rule)
+        errs = dsl_typecheck(rule)
         if errs:
             return "problems:\n- " + "\n- ".join(errs)
         if ast_holes(rule):
@@ -130,4 +131,4 @@ def build_tools(state: RunState) -> list[Callable]:
                         ". Reply with one short sentence; do not call more tools."))
         return "\n".join(lines)
 
-    return [typecheck_sketch, solve_sketch, evaluate, fetch_counterexamples, submit_sketches]
+    return [typecheck, solve_sketch, evaluate, fetch_counterexamples, submit_sketches]

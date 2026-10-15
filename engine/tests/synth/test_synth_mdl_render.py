@@ -9,7 +9,7 @@ from exemplar.contracts.dsl_ast import node_count
 from exemplar.contracts.ontology import PREDICATES
 from exemplar.dsl import parse
 from exemplar.synth import mdl, render_trace_text
-from exemplar.synth.mdl import BITS_PER_NODE, OPS_ALPHABET
+from exemplar.synth.mdl import OPS_ALPHABET
 from dsl_helpers import ALL_FIXTURES, load
 
 

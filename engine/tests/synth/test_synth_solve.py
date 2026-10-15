@@ -198,3 +198,40 @@ def test_encoder_mismatch_is_loud(monkeypatch):
     sk = parse("exists p: Person, k: Package: picks_up(p, k) then[?a, ?b] carrying(p, k)")
     with pytest.raises(EncoderMismatch):
         solve_sketch(sk, _theft_examples())
+
+
+# --------------------------------------------------------------------------- Z3 timeout -> grid fallback
+def _force_timeout(monkeypatch):
+    import exemplar.synth.solve as S
+    monkeypatch.setattr(S, "_maxsmt", lambda enc, timeout_s: ("unknown", None))
+
+
+def test_grid_fallback_when_z3_times_out(monkeypatch):
+    _force_timeout(monkeypatch)
+    sk = parse("exists p: Person, k: Package: picks_up(p, k) then[?a, ?b] carrying(p, k)")
+    res = solve_sketch(sk, _theft_examples(), timeout_s=5)
+    assert res.status == "grid_fallback" and res.rule is not None and not ast_holes(res.rule)
+    assert res.diff_check_ok and not res.violated and res.margin == pytest.approx(0.3)
+    assert all(v % 0.5 == 0 for v in res.holes.values())                 # on the 0.5 s grid
+    cr = compile_rule(sk)
+    for ex in _theft_examples():
+        assert (cr.score(prepare(ex.trace), res.holes) > 0) == ex.positive
+
+
+def test_grid_fallback_large_grid_and_hours(monkeypatch):
+    _force_timeout(monkeypatch)
+    sk = parse("exists p: Person, k: Package: eventually[?a, ?b] picks_up(p, k) and holds_for >= ?d near(p, k) "
+               "when hour in [?h1, ?h2]")
+    t = load("theft_a")
+    other = t.model_copy(update={"clip_id": "late", "context": t.context.model_copy(update={"local_hour": 3})})
+    res = solve_sketch(sk, [Example(t, True, 3, "theft_a"), Example(other, False, 3, "late")], timeout_s=5)
+    assert res.status in ("grid_fallback", "timeout")
+    if res.status == "grid_fallback":
+        assert robustness(res.rule, t) > 0 and robustness(res.rule, other) < 0
+
+
+def test_timeout_when_nothing_matches_a_positive(monkeypatch):
+    _force_timeout(monkeypatch)
+    sk = parse("exists v: Vehicle: eventually[?a, ?b] in_zone(v, driveway)")
+    res = solve_sketch(sk, _theft_examples(), timeout_s=5)
+    assert res.status == "timeout" and res.rule is None

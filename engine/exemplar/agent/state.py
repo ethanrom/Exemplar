@@ -8,12 +8,12 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Optional
 
 from ..contracts.dsl_ast import Rule
 from ..contracts.trace import Trace
-from ..dsl import DSLError, parse, to_english, to_text, typecheck
+from ..dsl import DSLError, parse, to_text, typecheck
 from ..synth import Candidate, EncoderMismatch, Example, SketchError, SolveResult, mdl, render_trace_text, solve_sketch
 
 log = logging.getLogger(__name__)
@@ -56,6 +56,7 @@ class RunState:
         self.accepted_this_round: list[str] = []         # canonical texts, in submission order
         self.agent_solves_this_round = 0
         self.lock = threading.RLock()
+        self.cancel_hooks: list[Callable[[], None]] = []
 
     # ------------------------------------------------------------------ plumbing
     def emit(self, event: dict) -> None:
@@ -66,6 +67,11 @@ class RunState:
 
     def check_cancel(self) -> None:
         if self.cancel is not None and self.cancel.is_set():
+            for hook in list(self.cancel_hooks):           # e.g. Strands `Agent.cancel`: stop the model loop now
+                try:
+                    hook()
+                except Exception:                           # pragma: no cover
+                    log.exception("cancel hook failed")
             raise Cancelled()
 
     def start_round(self, r: int) -> None:
