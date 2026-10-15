@@ -1,6 +1,6 @@
 """Opt-in live checks against the real Developer Playground + Bedrock (EXEMPLAR_LIVE=1; needs a fresh token).
 
-    EXEMPLAR_LIVE=1 EXEMPLAR_DOTENV="<main checkout>/.env" uv run pytest tests/api/test_api_live_ring.py -s
+    EXEMPLAR_LIVE=1 EXEMPLAR_DOTENV="/path/to/.env" uv run pytest tests/api/test_api_live_ring.py -s
 
 Spend is capped: at most LIVE_EVENTS events are traced (about $0.0014 each on the fast model). The token is read
 through `get_settings()` and never printed.

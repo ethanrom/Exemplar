@@ -15,7 +15,7 @@ BULK_WEIGHT = 1.0
 
 
 def _fallback(o: Any) -> Any:
-    """json fallback for numpy scalars / arrays and other stray types in events coming from other streams."""
+    """json fallback for numpy scalars / arrays and other stray types in events coming from other modules."""
     if hasattr(o, "item") and callable(o.item):
         try:
             return o.item()

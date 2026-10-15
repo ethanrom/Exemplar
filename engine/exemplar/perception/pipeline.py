@@ -124,7 +124,7 @@ def perceive(clip_path: str | Path, *, clip_id: str, source: Source, context: Tr
              mode: Literal["fast", "strong"] = "fast", n_frames: int = 16, roi: Optional[ROI] = None,
              start_s: float = 0, dur_s: Optional[float] = None, samples: int = 1, force: bool = False,
              client: Any = None, width: int = DEFAULT_WIDTH, min_gap_s: float = DEFAULT_MIN_GAP_S) -> Trace:
-    """Clip (window) -> symbolic `Trace`.  The one call other streams need.
+    """Clip (window) -> symbolic `Trace`.  The one call other modules need.
 
     * `clip_id` / `source` / `context` are stamped onto the trace; they identify the event, not the pixels.
       `clip_id` is part of the cache key — give distinct ids to distinct windows/ROIs of a file only if you

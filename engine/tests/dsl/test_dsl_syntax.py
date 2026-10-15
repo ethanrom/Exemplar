@@ -28,7 +28,7 @@ def at(pred, *args):
 def test_contract_examples_parse_typecheck_and_roundtrip(text):
     r = parse(text)
     assert typecheck(r) == []
-    assert to_text(r) == text                    # the contract examples are already canonical
+    assert to_text(r) == text                    # the pinned grammar examples are already canonical
     assert parse(to_text(r)) == r
 
 

@@ -290,7 +290,7 @@ def test_teach_unknown_concept_and_run(env):
     assert env.client.get("/runs/run_nope/stream").status_code == 404
 
 
-def test_teach_503_until_synthesis_is_merged(make_env):
+def test_teach_503_when_synthesis_is_unavailable(make_env):
     env = make_env(disable=("run_cegis",))
     env.seed_fixture_events("theft_a")
     cid = env.new_concept()
@@ -300,22 +300,22 @@ def test_teach_503_until_synthesis_is_merged(make_env):
     assert env.state.store.runs.latest_for_concept(cid) is None                  # nothing half-created
 
 
-def test_missing_streams_surface_as_503_by_default(make_env):
-    """Without injected fakes the real `exemplar.synth` / `exemplar.agent` are imported lazily: 503 while unmerged."""
+def test_missing_modules_surface_as_503_by_default(make_env):
+    """Without injected fakes the real `exemplar.synth` / `exemplar.agent` are imported lazily: 503 if they cannot be imported."""
     from exemplar.api import Services
     env = make_env()
-    env.state.services = Services(perceive=env.perceive)       # no D / E overrides: resolved by import
+    env.state.services = Services(perceive=env.perceive)       # no overrides: resolved by import
     env.seed_fixture_events("theft_a")
     cid = env.new_concept()
     env.label(cid, "theft_a", "pos")
     import importlib
     try:
         importlib.import_module("exemplar.agent").run_cegis
-        merged = True
+        available = True
     except (ImportError, AttributeError):
-        merged = False
+        available = False
     r = env.client.post(f"/concepts/{cid}/teach")
-    assert (r.status_code == 202) if merged else (r.status_code == 503)
+    assert (r.status_code == 202) if available else (r.status_code == 503)
 
 
 def test_retraining_reuses_identical_rules_and_retires_stale_candidates(tenv):

@@ -264,7 +264,7 @@ def test_one_firing_row_per_rule_and_event(renv):
     assert again[0].fired and len(renv.client.get("/monitor/firings").json()) == 1       # upserted, not duplicated
 
 
-# ------------------------------------------------------------------------------------------ 503 until E is merged
+# ------------------------------------------------------------------------------------------ 503 when the monitor is unavailable
 def test_deploy_is_503_without_a_monitor_and_changes_nothing(make_env):
     env = make_env(disable=("monitor_cls",))
     env.seed_fixture_events(*ALL)
@@ -275,7 +275,7 @@ def test_deploy_is_503_without_a_monitor_and_changes_nothing(make_env):
     assert r.status_code == 503 and r.json()["error"].endswith("not available yet")
     got = env.client.get(f"/rules/{rid}").json()
     assert got["status"] == "candidate" and got["actions"] == ["ui"]
-    assert env.client.patch(f"/rules/{rid}", json={"status": "selected"}).status_code == 200       # no E needed for that
+    assert env.client.patch(f"/rules/{rid}", json={"status": "selected"}).status_code == 200       # no monitor needed for that
     assert env.client.patch(f"/rules/{rid}", json={"status": "retired"}).status_code == 200
 
 
