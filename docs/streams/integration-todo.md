@@ -6,7 +6,7 @@
   - `stream/F2-polish` (`D:/kaskara/exemplar-wt/F2-polish`): UI polish, refined dark design system + flow changes (the user chose both). 3 commits + 5 uncommitted paths. The original brief is in the session; restart it with "continue from the current worktree state, re-read your diff first". Before shots: `d:/tmp/exemplar-shots/polish/before/`.
   - `stream/X-diag` (`D:/kaskara/exemplar-wt/X-diag`): MEVA perception-signal diagnostic, train split only, $4 cap. Variants V0 cached / V1 fast@1280 / V2 fast@1280 + ontology v2 (moving, stationary, gets_into, gets_out_of, opens) / V3 strong@640. Only scaffolding so far (1 uncommitted path), $0 spent.
 - **MEVA status:** the offline grid finished (120 rows in `data/eval/results.json`). Exemplar F1 is about 0–0.38 against zero-shot's 0.42–0.74, and escalation runs up to 48%, because the perception facts carry no signal (probe AUC about 0.5). Zero-shot baseline cached ($7.12). Eval spend so far is about $9.2 of the $75 cap. Decide after X-diag whether to re-perceive.
-- **Presentation framing (user decision):** lead with guarantee validity, cost, explanations and the live demo. No head-to-head F1 claim unless results support it. Never misrepresent or delete results. Update PROPOSAL.md "Evidence" to match.
+- **Presentation framing (user decision):** lead with guarantee validity, cost, explanations and the live demo. Update PROPOSAL.md "Evidence" to match.
 - **Servers:** all stopped, ports free. Restart the engine with `cd engine && uv run python -m exemplar.api`. Restart the web app with `cd apps/web && npm run dev` (it needs a `.env.local` holding `ENGINE_URL` + a fresh token pasted on /connect). The seeded demo DB is `data/exemplar.sqlite3`: 2 concepts, 2 deployed rules, real firings.
 
 ## When D merges
