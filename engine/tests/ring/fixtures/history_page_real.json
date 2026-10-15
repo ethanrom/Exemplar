@@ -1,0 +1,148 @@
+{
+  "data": [
+    {
+      "type": "history-events",
+      "id": "ava1.ring.history.event.FIXTUREHISTORYEVENT0001",
+      "attributes": {
+        "is_third_party_reviewed": true,
+        "event_type": "on_demand",
+        "end": 1792049303577,
+        "start": 1792049271835
+      },
+      "relationships": {
+        "source": {
+          "data": {
+            "type": "devices",
+            "id": "ava1.ring.device.FIXTUREDEVICE0001"
+          }
+        },
+        "cv_detections": {
+          "data": []
+        }
+      },
+      "meta": {
+        "riid": null
+      }
+    },
+    {
+      "type": "history-events",
+      "id": "ava1.ring.history.event.FIXTUREHISTORYEVENT0002",
+      "attributes": {
+        "event_type": "on_demand",
+        "end": 1792049235499,
+        "is_third_party_reviewed": true,
+        "start": 1792049203757
+      },
+      "relationships": {
+        "cv_detections": {
+          "data": []
+        },
+        "source": {
+          "data": {
+            "type": "devices",
+            "id": "ava1.ring.device.FIXTUREDEVICE0001"
+          }
+        }
+      },
+      "meta": {
+        "riid": null
+      }
+    },
+    {
+      "type": "history-events",
+      "id": "ava1.ring.history.event.FIXTUREHISTORYEVENT0003",
+      "attributes": {
+        "start": 1792048410206,
+        "end": 1792048449853,
+        "is_third_party_reviewed": true,
+        "event_type": "on_demand"
+      },
+      "relationships": {
+        "cv_detections": {
+          "data": []
+        },
+        "source": {
+          "data": {
+            "type": "devices",
+            "id": "ava1.ring.device.FIXTUREDEVICE0001"
+          }
+        }
+      },
+      "meta": {
+        "riid": null
+      }
+    },
+    {
+      "type": "history-events",
+      "id": "ava1.ring.history.event.FIXTUREHISTORYEVENT0004",
+      "attributes": {
+        "event_type": "on_demand",
+        "start": 1792048133868,
+        "end": 1792048173518,
+        "is_third_party_reviewed": true
+      },
+      "relationships": {
+        "cv_detections": {
+          "data": []
+        },
+        "source": {
+          "data": {
+            "type": "devices",
+            "id": "ava1.ring.device.FIXTUREDEVICE0001"
+          }
+        }
+      },
+      "meta": {
+        "riid": null
+      }
+    },
+    {
+      "type": "history-events",
+      "id": "ava1.ring.history.event.FIXTUREHISTORYEVENT0005",
+      "attributes": {
+        "event_type": "on_demand",
+        "end": 1792048124869,
+        "is_third_party_reviewed": true,
+        "start": 1792048103109
+      },
+      "relationships": {
+        "source": {
+          "data": {
+            "type": "devices",
+            "id": "ava1.ring.device.FIXTUREDEVICE0001"
+          }
+        },
+        "cv_detections": {
+          "data": []
+        }
+      },
+      "meta": {
+        "riid": null
+      }
+    },
+    {
+      "type": "history-events",
+      "id": "ava1.ring.history.event.FIXTUREHISTORYEVENT0006",
+      "attributes": {
+        "is_third_party_reviewed": true,
+        "end": 1792048090776,
+        "start": 1792048059034,
+        "event_type": "on_demand"
+      },
+      "relationships": {
+        "cv_detections": {
+          "data": []
+        },
+        "source": {
+          "data": {
+            "type": "devices",
+            "id": "ava1.ring.device.FIXTUREDEVICE0001"
+          }
+        }
+      },
+      "meta": {
+        "riid": null
+      }
+    }
+  ]
+}
