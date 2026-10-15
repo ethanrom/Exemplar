@@ -135,8 +135,14 @@ class AppState:
                 mon_cost = mon.cost()
             except Exception:  # noqa: BLE001
                 log.exception("monitor.cost() failed")
-        return cost_mod.summarize(self.store.cost.totals(), self.store.firings.stage_counts(),
-                                  self.store.firings.distinct_events() or self.store.cost.distinct_clips(), mon_cost)
+        # The meter is the cost of watching: perception spend of monitored events / number of monitored events.
+        # Before any rule has scored an event, fall back to perception spend per ingested clip.
+        n_monitored = self.store.firings.distinct_events()
+        if n_monitored:
+            totals, denom = self.store.cost.perception_totals(monitored_only=True), n_monitored
+        else:
+            totals, denom = self.store.cost.perception_totals(monitored_only=False), self.store.cost.distinct_clips()
+        return cost_mod.summarize(totals, self.store.firings.stage_counts(), denom, mon_cost, per_event_denominator=denom)
 
     # ------------------------------------------------------------------ lifecycle
     def shutdown(self) -> None:

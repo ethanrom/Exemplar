@@ -746,6 +746,18 @@ class CostRepo(_Repo):
                 for r in self.s.query("SELECT purpose, COUNT(*) AS n, SUM(tokens_in) AS ti, SUM(tokens_out) AS 'to' "
                                       "FROM cost_ledger GROUP BY purpose")}
 
+    def perception_totals(self, *, monitored_only: bool) -> dict[str, dict[str, int]]:
+        """Perception spend only (teach-time `sketch` calls and baselines excluded). With `monitored_only`, just
+        the clips of events the monitor scored (have a `firings` row), so the live meter isn't inflated by
+        seeding, uploads or history imports that no rule ever watched."""
+        where = "purpose IN ('perception_fast', 'perception_strong')"
+        if monitored_only:
+            where += (" AND clip_id IN (SELECT c.id FROM clips c WHERE c.event_id IN"
+                      " (SELECT DISTINCT event_id FROM firings))")
+        return {r["purpose"]: {"calls": r["n"], "tokens_in": r["ti"] or 0, "tokens_out": r["to"] or 0}
+                for r in self.s.query("SELECT purpose, COUNT(*) AS n, SUM(tokens_in) AS ti, SUM(tokens_out) AS 'to' "
+                                      f"FROM cost_ledger WHERE {where} GROUP BY purpose")}
+
 
 class AuthRepo(_Repo):
     """A's `TokenStore` over the single-row `ring_auth` table."""

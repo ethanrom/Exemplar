@@ -186,8 +186,9 @@ def test_cost_without_a_monitor_is_derived_from_firings_and_ledger(env):
         env.state.store.firings.upsert({"id": f"fi_{i}", "rule_id": "ru_a", "event_id": ev, "stage": stage,
                                         "score": 0.1, "tau": 0.0, "fired": False, "witness": None, "actions": [],
                                         "created_at_ms": 1000 + i})
-    env.state.store.cost.add("perception_fast", tokens_in=6400, tokens_out=1400)
-    env.state.store.cost.add("perception_strong", tokens_in=6200, tokens_out=1600)
+    env.state.store.cost.add("perception_fast", clip_id="theft_a", tokens_in=6400, tokens_out=1400)
+    env.state.store.cost.add("perception_strong", clip_id="birds_feeder", tokens_in=6200, tokens_out=1600)
+    env.state.store.cost.add("sketch", run_id="r1", tokens_in=500_000, tokens_out=50_000)   # teach cost: not per-event
     c = env.client.get("/monitor/cost").json()
     assert (c["events"], c["stage0_dropped"], c["stage1_scored"], c["stage2_escalated"]) == (3, 1, 1, 1)
     assert (c["tokens_in"], c["tokens_out"]) == (12600, 3000)

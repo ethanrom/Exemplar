@@ -24,8 +24,10 @@ def usd(purpose: str, tokens_in: int, tokens_out: int) -> float:
 
 
 def summarize(totals: dict[str, dict[str, int]], stage_counts: dict[int, int], events: int,
-              monitor: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Build a CostSummary. Stage counters come from the monitor when it reports them, else from `firings`."""
+              monitor: dict[str, Any] | None = None, *, per_event_denominator: int | None = None) -> dict[str, Any]:
+    """Build a CostSummary. Stage counters come from the monitor when it reports them, else from `firings`.
+    `per_event_usd` divides by `per_event_denominator` when given (the events `totals` was computed over),
+    so a monitor restarted mid-session can't skew it."""
     t_in = sum(v["tokens_in"] for v in totals.values())
     t_out = sum(v["tokens_out"] for v in totals.values())
     total_usd = sum(usd(p, v["tokens_in"], v["tokens_out"]) for p, v in totals.items())
@@ -39,6 +41,7 @@ def summarize(totals: dict[str, dict[str, int]], stage_counts: dict[int, int], e
     else:
         out = {"events": events, "stage0_dropped": stage_counts.get(0, 0),
                "stage1_scored": stage_counts.get(1, 0), "stage2_escalated": stage_counts.get(2, 0)}
+    denom = per_event_denominator if per_event_denominator is not None else out["events"]
     out.update(tokens_in=t_in, tokens_out=t_out, usd_estimate=round(total_usd, 6),
-               per_event_usd=round(total_usd / out["events"], 6) if out["events"] else 0.0)
+               per_event_usd=round(total_usd / denom, 6) if denom else 0.0)
     return out
