@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef } from 'react'
-import { fmtNum } from '../_lib/format'
+import { clipName, fmtNum } from '../_lib/format'
 import type { EventSummary, RunEvent, RunEventType } from '../_lib/types'
 import { Dsl } from './Dsl'
 import { EventThumb } from './EventBits'
@@ -18,7 +18,7 @@ const STEP: Record<Exclude<RunEventType, 'round_started'>, { icon: IconName; ton
     title: (e) => (e.result === 'sat' ? 'Z3 found thresholds that fit every example' : e.result === 'unsat' ? 'Z3 proved no thresholds fit' : e.result === 'timeout' ? 'Z3 timed out' : e.result === 'grid_fallback' ? 'Fell back to a grid search' : 'Solver finished'),
   },
   differential_check: { icon: 'shield', tone: 'pos', title: () => 'Differential check against the independent evaluator' },
-  counterexample: { icon: 'warning', tone: 'warn', title: () => 'Counterexample: perception suspect?' },
+  counterexample: { icon: 'info', tone: 'neutral', title: () => 'A labelled clip does not fit this rule' },
   candidates: { icon: 'check', tone: 'pos', title: () => 'Candidate rules ready' },
   question_ready: { icon: 'question', tone: 'info', title: () => 'One question is ready for you' },
   done: { icon: 'check', tone: 'pos', title: () => 'Done' },
@@ -32,6 +32,17 @@ const NODE: Record<Tone, string> = {
   warn: 'border-ex-warn-line bg-ex-warn-soft text-ex-warn',
   info: 'border-ex-accent-line bg-ex-accent-soft text-ex-accent-ink',
   accent: 'border-ex-accent-line bg-ex-accent-soft text-ex-accent-ink',
+}
+
+const HINT = 'The facts the model read from this clip disagree with the label you gave it, so the rule does not fit it. Either the label or the reading may be off.'
+
+/** The "perception suspect?" flag as a calm, neutral hint: information about a clip, not an error. */
+function PerceptionHint() {
+  return (
+    <span className="inline-flex h-5 cursor-help items-center gap-1 whitespace-nowrap rounded bg-white/[0.06] px-1.5 text-xs font-medium text-ex-ink2" title={HINT}>
+      <Icon name="info" className="h-3 w-3" />perception may differ<span className="sr-only">. {HINT}</span>
+    </span>
+  )
 }
 
 function Step({ e, t0, clips, last }: { e: RunEvent; t0: number; clips: Map<string, EventSummary>; last: boolean }) {
@@ -48,8 +59,11 @@ function Step({ e, t0, clips, last }: { e: RunEvent; t0: number; clips: Map<stri
         <Icon name={icon} className="h-3 w-3" />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <p className="text-sm font-medium text-ex-ink">{s.title(e)}</p>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+            <p className="text-sm font-medium text-ex-ink">{s.title(e)}</p>
+            {e.type === 'counterexample' && <PerceptionHint />}
+          </div>
           <span className="font-mono text-xs tabular-nums text-ex-ink3">+{((e.at_ms - t0) / 1000).toFixed(1)} s</span>
         </div>
         {e.sketch && (
@@ -64,15 +78,19 @@ function Step({ e, t0, clips, last }: { e: RunEvent; t0: number; clips: Map<stri
             {e.margin != null && <span><span className="font-sans text-ex-ink3">margin</span> {fmtNum(e.margin)}</span>}
           </p>
         )}
-        {e.message && <p className="mt-1 text-sm text-ex-ink2">{e.message}</p>}
+        {e.message && e.type !== 'counterexample' && <p className="mt-1 text-sm text-ex-ink2">{e.message}</p>}
         {e.type === 'counterexample' && (e.violated_clip_ids?.length ?? 0) > 0 && (
           <ul className="mt-2 grid gap-1.5">
             {e.violated_clip_ids!.map((id) => {
-              const ev = clips.get(id)
+              const ev = clips.get(id)   // the id only finds the clip; people see its picture and a short description
+              const label = ev?.label?.value
               return (
                 <li key={id} className="flex items-center gap-2.5">
-                  {ev && <EventThumb event={ev} compact className="h-8 w-14 shrink-0 rounded" />}
-                  <span className="min-w-0 truncate text-xs text-ex-ink2">{ev?.summary ?? id}</span>
+                  {ev
+                    ? <EventThumb event={ev} compact className="h-8 w-14 shrink-0 rounded" />
+                    : <span aria-hidden="true" className="grid h-8 w-14 shrink-0 place-items-center rounded bg-ex-raised text-ex-ink3"><Icon name="image" className="h-3.5 w-3.5" /></span>}
+                  <span className="min-w-0 flex-1 truncate text-xs text-ex-ink2" title={clipName(ev)}>{clipName(ev)}</span>
+                  {label && <span className="shrink-0 text-xs text-ex-ink3">you labelled it {label === 'pos' ? '+' : '−'}</span>}
                 </li>
               )
             })}
@@ -119,7 +137,7 @@ const IDLE: { icon: IconName; title: string; text: string }[] = [
   { icon: 'check', title: 'Type check', text: 'Anything that does not fit the ontology is sent back.' },
   { icon: 'sliders', title: 'Z3 solve', text: 'The solver fills the holes so every example is right, or proves none fit.' },
   { icon: 'shield', title: 'Differential check', text: 'An independent evaluator re-scores the solution.' },
-  { icon: 'warning', title: 'Counterexamples', text: 'Examples a rule cannot satisfy come back as hints.' },
+  { icon: 'warning', title: 'Counterexamples', text: 'Clips a rule does not fit come back as hints that perception may differ.' },
 ]
 
 export const AgentTimeline = forwardRef<HTMLDivElement, {

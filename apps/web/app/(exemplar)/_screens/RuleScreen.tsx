@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useApp } from '../_lib/app'
 import { errorMessage, patch } from '../_lib/api'
-import { fmtInt, fmtNum, fmtScore, fmtUsd, keepUnits } from '../_lib/format'
+import { clipName, fmtInt, fmtNum, fmtScore, fmtUsd, keepUnits } from '../_lib/format'
 import { useApi, type ApiState } from '../_lib/hooks'
 import type { Backtest, BacktestRow, CostSummary, RuleAction, RuleSummary } from '../_lib/types'
 import { CalibrationPanel, GuaranteeBadge } from '../_components/CalibrationPanel'
@@ -128,12 +128,12 @@ function BacktestTable({
                     <td className={cell}>
                       <div className="flex items-center gap-3">
                         {r.event && (
-                          <button type="button" className="shrink-0 overflow-hidden rounded-md" onClick={() => onOpen(r.event!.id)} aria-label={`View clip: ${r.event.summary ?? r.clip_id}`}>
+                          <button type="button" className="shrink-0 overflow-hidden rounded-md" onClick={() => onOpen(r.event!.id)} aria-label={`View clip: ${clipName(r.event)}`}>
                             <EventThumb event={r.event} compact className="h-[36px] w-16" />
                           </button>
                         )}
                         <div className="min-w-0">
-                          <span className="line-clamp-2 text-ex-ink">{r.event?.summary ?? r.clip_id}</span>
+                          <span className="line-clamp-2 text-ex-ink">{clipName(r.event)}</span>
                           <span className="mt-0.5 block text-xs">
                             {r.label ? <LabelIndicator label={r.label} showProvenance={false} /> : <span className="text-ex-ink3">No label</span>}
                           </span>
@@ -162,7 +162,7 @@ function BacktestTable({
                           onClick={() => toggle(r.clip_id)}
                         >
                           Why <Icon name="chevron" className={cx('h-3 w-3 transition-transform', isOpen && 'rotate-180')} />
-                          <span className="sr-only">: {r.event?.summary ?? r.clip_id}</span>
+                          <span className="sr-only">: {clipName(r.event)}</span>
                         </button>
                       )}
                     </td>

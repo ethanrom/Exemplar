@@ -95,6 +95,7 @@ def test_noisy_example_gives_counterexample_event_and_a_ranked_candidate():
                    k=1, max_rounds=1, backfill=False)
     cx = [e for e in ev if e["type"] == "counterexample"]
     assert len(cx) == 1 and cx[0]["violated_clip_ids"] == ["mislabelled"]
+    assert "mislabelled" not in cx[0]["message"] and "perception suspect" in cx[0]["message"]    # the UI shows the message: no raw ids
     assert out[0].violated_clip_ids == ("mislabelled",)
     assert out[0].mdl == pytest.approx(mdl(out[0].sketch, 1.0))          # one violated bulk example (weight 1)
 

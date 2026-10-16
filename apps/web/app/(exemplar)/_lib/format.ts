@@ -1,3 +1,5 @@
+import type { EventSummary } from './types'
+
 export const fmtScore = (x: number | null | undefined, digits = 2) =>
   x == null ? '-' : `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(digits)}`
 
@@ -41,6 +43,9 @@ export function fmtRelative(ms: number, now = Date.now()): string {
   return `${Math.round(abs / 86_400_000)} d ${sign}`
 }
 
+/** "Oct 13, 2:25 AM": the date with the time of day. */
+export const fmtDay = (ms: number) => new Date(ms).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+
 export const fmtUsd = (x: number | null | undefined) =>
   x == null ? '-' : x === 0 ? '$0' : x < 0.01 ? `$${x.toFixed(4)}` : `$${x.toFixed(3)}`
 
@@ -73,6 +78,17 @@ export const SUBTYPE_LABEL: Record<string, string> = {
   motion: 'Motion',
   ding: 'Ring',
   on_demand: 'On demand',
+}
+
+/**
+ * A clip's name for people: its one-sentence summary, else what it is and when ("Person · Oct 15, 12:38 PM").
+ * Never the raw clip or event id, which means nothing to the reader.
+ */
+export function clipName(ev: Pick<EventSummary, 'summary' | 'kind' | 'sub_type' | 'source' | 'start_ms' | 'trace_status'> | null | undefined): string {
+  if (!ev) return 'A labelled clip'
+  if (ev.summary && ev.trace_status !== 'perception_failed') return ev.summary
+  const what = (ev.sub_type && SUBTYPE_LABEL[ev.sub_type]) || (ev.kind && KIND_LABEL[ev.kind]) || SOURCE_LABEL[ev.source] || 'Clip'
+  return `${what} · ${fmtDay(ev.start_ms)}`
 }
 
 /** Minimum number of random negatives for a conformal guarantee at level alpha: ceil(1/alpha) - 1. */

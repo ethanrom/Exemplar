@@ -159,7 +159,7 @@ class RunState:
         if res.rule is not None and res.violated:
             self.emit({"type": "counterexample", "round": self.round, "sketch": canon,
                        "violated_clip_ids": list(res.violated),
-                       "message": "perception suspect? " + ", ".join(res.violated)})
+                       "message": f"{len(res.violated)} labelled example(s) violated: perception suspect?"})   # ids stay in violated_clip_ids
         log.debug("solved %s in %.0f ms: %s", canon, (time.perf_counter() - t0) * 1000, res.status)
         return rec
 

@@ -152,7 +152,7 @@ export function WitnessTimeline({
       {compact ? (
         <div className="mt-4" tabIndex={0} role="region" aria-label="Witness timeline">
           <p className="sr-only">
-            Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each item is a part of the rule with the window it was evaluated on (or the moment of evidence) and its robustness ρ.
+            Witness timeline: each item is a part of the rule with the window it was evaluated on (or the moment of evidence) and its robustness ρ.
           </p>
           <div className="mb-1"><Axis ticks={ticks} domain={domain} /></div>
           <ol className="divide-y divide-ex-line border-t border-ex-line">
@@ -174,7 +174,7 @@ export function WitnessTimeline({
         <div className="relative mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Witness timeline (scrolls sideways on narrow screens)">
           <table className="w-full min-w-[560px] table-fixed border-separate border-spacing-0 text-sm">
             <caption className="sr-only">
-              Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each row is a subformula with the window it was evaluated on (or the moment of evidence) and its robustness ρ.
+              Witness timeline: each row is a subformula with the window it was evaluated on (or the moment of evidence) and its robustness ρ.
             </caption>
             <colgroup>
               <col className="w-[34%]" />

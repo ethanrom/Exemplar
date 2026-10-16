@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { fmtDateTime, fmtDuration } from '../_lib/format'
+import { clipName, fmtDateTime, fmtDuration } from '../_lib/format'
 import { useApi } from '../_lib/hooks'
 import type { EventDetail } from '../_lib/types'
 import { Icon } from './Icon'
@@ -62,7 +62,7 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
                       preload="metadata"
                       poster={ev.has_snapshot ? snapshotUrl(ev.id) : undefined}
                       onError={() => setClipError(true)}
-                      aria-label={`Clip: ${name ?? ev.id}`}
+                      aria-label={`Clip: ${name ?? clipName(ev)}`}
                       className="aspect-video w-full rounded-lg bg-black"
                     >
                       <source src={clipUrl(ev.id)} type="video/mp4" />

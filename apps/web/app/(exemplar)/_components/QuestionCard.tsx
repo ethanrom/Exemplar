@@ -1,6 +1,6 @@
 'use client'
 
-import { fmtPct } from '../_lib/format'
+import { clipName, fmtPct } from '../_lib/format'
 import type { Question } from '../_lib/types'
 import { EventThumb, SourceBadge } from './EventBits'
 import { Icon } from './Icon'
@@ -25,11 +25,11 @@ export function QuestionCard({
     <section aria-labelledby="q-h" className="overflow-hidden rounded-xl border border-ex-accent-line bg-ex-panel">
       <div className="grid gap-5 p-5 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:p-6 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
         {ev ? (
-          <button type="button" onClick={onOpen} className="group block aspect-video w-full self-start overflow-hidden rounded-lg" aria-label={`View clip: ${ev.summary ?? q.clip_id}`}>
+          <button type="button" onClick={onOpen} className="group block aspect-video w-full self-start overflow-hidden rounded-lg" aria-label={`View clip: ${clipName(ev)}`}>
             <EventThumb event={ev} className="h-full w-full transition-transform duration-200 group-hover:scale-[1.03]" />
           </button>
         ) : (
-          <div className="grid aspect-video place-items-center rounded-lg bg-ex-bg text-sm text-ex-ink3">Clip {q.clip_id}</div>
+          <div className="grid aspect-video place-items-center rounded-lg bg-ex-bg text-sm text-ex-ink3">Clip not loaded</div>
         )}
 
         <div className="min-w-0">
@@ -39,7 +39,7 @@ export function QuestionCard({
           <h3 id="q-h" className="mt-2 text-lg font-semibold leading-snug tracking-tight text-ex-ink">Should this one count?</h3>
           {ev && (
             <p className="mt-1.5 line-clamp-3 text-sm text-ex-ink2">
-              {ev.summary ?? q.clip_id}
+              {clipName(ev)}
               <span className="ml-2 inline-block align-middle"><SourceBadge source={ev.source} /></span>
             </p>
           )}

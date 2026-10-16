@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../_lib/app'
 import { errorMessage, get, post, put, api } from '../_lib/api'
-import { fmtDuration, fmtRelative, negativesNeeded } from '../_lib/format'
+import { clipName, fmtDuration, fmtRelative, negativesNeeded } from '../_lib/format'
 import type { Concept, EventSummary, LabelSummary } from '../_lib/types'
 import { ConceptSelect } from '../_components/ConceptSelect'
 import { EventDialog } from '../_components/EventDialog'
@@ -178,7 +178,7 @@ function CalibrationPanel({
                 <li key={c.id} className="flex gap-3.5 border-b border-ex-line py-3">
                   <EventThumb event={c} className="h-[68px] w-[120px] shrink-0 rounded-md" />
                   <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-sm text-ex-ink"><span className="mr-1.5 tabular-nums text-ex-ink3">{i + 1}.</span>{c.summary || c.clip_id}</p>
+                    <p className="line-clamp-2 text-sm text-ex-ink"><span className="mr-1.5 tabular-nums text-ex-ink3">{i + 1}.</span>{clipName(c)}</p>
                     <div role="group" aria-label={`Does clip ${i + 1} show ${concept.name}?`} className="mt-2 flex gap-1.5">
                       <button
                         type="button"
@@ -301,7 +301,7 @@ function EventCard({
 }) {
   // A clip the engine cannot read (e.g. Bedrock is not set up) says why in plain language, in the summary slot.
   const unread = ev.trace_status === 'perception_failed' && !!ev.summary
-  const title = ev.summary || (ev.trace_status === 'none' ? 'Waiting for the model to read this clip' : ev.clip_id)
+  const title = ev.summary || (ev.trace_status === 'none' ? 'Waiting for the model to read this clip' : clipName(ev))
   const label = ev.label?.value ?? null
   const reveal = 'transition-opacity [@media(hover:none)]:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100'
   return (
@@ -510,7 +510,7 @@ export default function LibraryScreen() {
     setItems((list) => list.map((e) => (e.id === ev.id ? { ...e, label: next } : e)))
     try {
       await put(`/concepts/${concept.id}/labels`, { clip_id: ev.clip_id, value, provenance })
-      setNotice(value ? `Marked ${value === 'pos' ? 'positive' : 'negative'}: ${ev.summary ?? ev.clip_id}` : `Cleared label: ${ev.summary ?? ev.clip_id}`)
+      setNotice(value ? `Marked ${value === 'pos' ? 'positive' : 'negative'}: ${clipName(ev)}` : `Cleared label: ${clipName(ev)}`)
       refreshConcepts()
     } catch (e) {
       setItems((list) => list.map((x) => (x.id === ev.id ? { ...x, label: prev } : x)))
