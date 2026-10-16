@@ -198,7 +198,7 @@ export default function LiveScreen() {
   const [expiring, setExpiring] = useState<string | null>(null)
   const [errors, setErrors] = useState<string[]>([])
   const cost = useApi<CostSummary>('/monitor/cost')
-  const [liveCost, setLiveCost] = useState<CostSummary | null>(null)
+  const reloadCost = cost.reload
   const firings = useApi<Firing[]>('/monitor/firings?limit=30')
 
   useEffect(() => { refreshConcepts() }, [refreshConcepts])
@@ -295,7 +295,8 @@ export default function LiveScreen() {
         else if (ev.message) setLog((prev) => [{ key: `${at}:${ev.message}`, at, rule: ev.rule_id, action: ev.message!, status: 'ok' as const }, ...prev].slice(0, 40))
         break
       case 'cost_update':
-        if (ev.cost) setLiveCost(ev.cost)
+        // Re-read the figures from the API instead of trusting the event payload; the last value stays on screen until the new one lands.
+        reloadCost()
         break
       case 'auth_expiring':
         setExpiring(ev.message || 'The Playground token is about to expire.')
@@ -318,7 +319,7 @@ export default function LiveScreen() {
     return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idsKey])
-  const shownCost = liveCost ?? cost.data ?? null
+  const shownCost = cost.data
 
   // ---- mock helper (only when talking to the mock engine)
   const [mockKind, setMockKind] = useState('package')
