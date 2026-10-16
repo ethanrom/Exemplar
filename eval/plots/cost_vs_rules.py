@@ -82,8 +82,11 @@ def table_rows(m: Measured, max_rules: int) -> list[tuple[int, float, float, flo
 def markdown(m: Measured, max_rules: int) -> str:
     rows = table_rows(m, max_rules)
     ex, zs = rows[0][1], round(m.zero_shot_usd, 4)
-    src = ("`data/eval/precompute.jsonl` and `data/eval/costs.jsonl` (gitignored; regenerate with the commands in `eval/README.md`)"
-           if m.from_ledgers else "the recorded figures in `eval/plots/cost_vs_rules.py` (copied from those ledgers on 2026-10-15)")
+    # The same wording whether the figures came from the ledgers or from FALLBACK, so regenerating on a fresh clone
+    # (no gitignored data/) leaves the tracked page byte-identical.
+    src = ("the cost ledgers `data/eval/precompute.jsonl` and `data/eval/costs.jsonl` (gitignored; regenerate with the commands in "
+           "`eval/README.md`). `eval/plots/cost_vs_rules.py` records the same figures (copied on 2026-10-15), so the page "
+           "regenerates identically from a fresh clone")
     lines = [
         "# Model cost per event versus number of rules",
         "",
