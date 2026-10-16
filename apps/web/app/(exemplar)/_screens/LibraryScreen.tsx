@@ -299,6 +299,8 @@ function EventCard({
   onOpen: () => void
   onLabel: (v: 'pos' | 'neg' | null) => void
 }) {
+  // A clip the engine cannot read (e.g. Bedrock is not set up) says why in plain language, in the summary slot.
+  const unread = ev.trace_status === 'perception_failed' && !!ev.summary
   const title = ev.summary || (ev.trace_status === 'none' ? 'Waiting for the model to read this clip' : ev.clip_id)
   const label = ev.label?.value ?? null
   const reveal = 'transition-opacity [@media(hover:none)]:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100'
@@ -331,7 +333,7 @@ function EventCard({
         </div>
       </div>
 
-      <p className="mt-2.5 line-clamp-2 min-h-[2.5rem] text-sm leading-5 text-ex-ink">{title}</p>
+      <p className={cx('mt-2.5 text-sm leading-5', unread ? 'text-ex-warn' : 'line-clamp-2 min-h-[2.5rem] text-ex-ink')}>{title}</p>
 
       <div className="mt-1.5 flex min-h-[28px] items-center justify-between gap-2">
         <div className="min-w-0 truncate text-xs text-ex-ink3">
