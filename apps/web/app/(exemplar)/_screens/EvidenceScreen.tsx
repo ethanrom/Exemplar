@@ -214,7 +214,7 @@ function CostFigure() {
 function Verified() {
   return (
     <section aria-labelledby="ver-h" className="mt-20">
-      <h2 id="ver-h" className="text-lg font-semibold tracking-tight text-ex-ink">Verified, not just tested</h2>
+      <h2 id="ver-h" className="text-lg font-semibold tracking-tight text-ex-ink">Cross-checked, not just unit-tested</h2>
       <p className="mt-1.5 max-w-2xl text-base text-ex-ink2">
         A wrong threshold from the solver, or a false-alarm bound that does not hold, would quietly break the whole promise. So both are checked against independent code and by simulation.
       </p>
