@@ -14,10 +14,12 @@ Result (api.yaml `Witness` minus ``rule_id`` / ``tau`` / ``margin``, which the m
 (a point span at the evaluation time, with the positive robustness of the absence; the descent stops
 there), and the body root when it is an and / or (covering all the times its evidence spans touch).
 
-Times per op:  atom, not -> the frame; eventually -> the chosen frame t' (argmax of the operand in the
-window); always -> first..last frame of the window, descending into the weakest frame; then -> from the
-chosen t1 to the chosen t2; holds_for -> from t1 to the last frame in [t1, t1 + d], descending into the
-weakest frame; or -> descends into the best branch; and -> descends into all branches.
+Times per op:  atom, not -> the frame (a point); eventually / always -> the window the evaluator used,
+[t + a, t + b] clipped to the last frame's time, then descending into the argmax frame (eventually) or the
+weakest frame (always) as an atom point; then -> from the chosen t1 to the chosen t2; holds_for -> the
+window it required, [t1, t1 + d] clipped to the last frame's time, descending into the weakest frame; or ->
+descends into the best branch; and -> descends into all branches. So a window span reports the interval
+the rule asked about (``holds_for >= 15`` from t1 reads t1 .. t1 + 15 s), not the last sampled frame in it.
 """
 from __future__ import annotations
 
@@ -80,6 +82,17 @@ def _span(path: str, n, i: int, j: int, rho: float, prep: PreparedTrace) -> dict
             "t_start_ms": int(prep.t_ms[i]), "t_end_ms": int(prep.t_ms[j]), "rho": float(rho)}
 
 
+def _window_span(path: str, n, i: int, a: float, b: float, rho: float, prep: PreparedTrace) -> dict:
+    """Span for a windowed operator at frame ``i``: [t_i + a, t_i + b] in ms, clipped to the last frame's time.
+
+    The clip end is the evaluator's ``t_end`` (the last frame), the same bound that limits ``W(i; a, b)``.
+    """
+    t0, t_end = int(prep.t_ms[i]), int(prep.t_ms[-1])
+    return {"path": path, "op": n.op, "text": to_text(n.node),
+            "t_start_ms": min(t0 + int(round(a * 1000)), t_end), "t_end_ms": min(t0 + int(round(b * 1000)), t_end),
+            "rho": float(rho)}
+
+
 def _first_at_or_after(inner: np.ndarray, t: int, val: float) -> int:
     """Earliest frame t1 >= t whose inner value attains ``val`` (the max over t1 >= t)."""
     tail = inner[t:]
@@ -102,18 +115,15 @@ def _explain(n, t: int, path: str, ev: _Ev, prep: PreparedTrace, spans: list[dic
         j = int(np.argmax(vals))                                    # first best branch
         _explain(n.kids[j], t, f"{path}.args[{j}]", ev, prep, spans)
     elif op in ("eventually", "always"):
-        M, _ = prep.window(_hv(n.a, ev), _hv(n.b, ev))
+        a, b = _hv(n.a, ev), _hv(n.b, ev)
+        M, _ = prep.window(a, b)
         idx = np.flatnonzero(M[t])
         if idx.size == 0:                                           # empty window: nothing to point at
             spans.append(_span(path, n, t, t, val, prep))
             return
         x = series(n.kids[0])[idx]
-        if op == "eventually":
-            j = int(idx[np.argmax(x)])
-            spans.append(_span(path, n, j, j, val, prep))
-        else:
-            j = int(idx[np.argmin(x)])
-            spans.append(_span(path, n, int(idx[0]), int(idx[-1]), val, prep))
+        j = int(idx[np.argmax(x)]) if op == "eventually" else int(idx[np.argmin(x)])
+        spans.append(_window_span(path, n, t, a, b, val, prep))     # the window searched; the evidence atom is a point
         _explain(n.kids[0], j, f"{path}.arg", ev, prep, spans)
     elif op == "then":
         inner = ev.extra[id(n)][0]
@@ -132,13 +142,14 @@ def _explain(n, t: int, path: str, ev: _Ev, prep: PreparedTrace, spans: list[dic
     elif op == "holds_for":
         inner = ev.extra[id(n)][0]
         t1 = _first_at_or_after(inner, t, val)
-        M, _ = prep.window(0.0, _hv(n.a, ev))
+        d = _hv(n.a, ev)
+        M, _ = prep.window(0.0, d)
         idx = np.flatnonzero(M[t1])
         if idx.size == 0:
             spans.append(_span(path, n, t1, t1, val, prep))
             return
         j = int(idx[np.argmin(series(n.kids[0])[idx])])             # weakest frame of the run
-        spans.append(_span(path, n, t1, int(idx[-1]), val, prep))
+        spans.append(_window_span(path, n, t1, 0.0, d, val, prep))  # [t1, t1 + d], the run the rule required
         _explain(n.kids[0], j, f"{path}.arg", ev, prep, spans)
 
 

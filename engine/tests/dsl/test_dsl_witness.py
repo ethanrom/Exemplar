@@ -74,15 +74,66 @@ def test_eventually_and_always_spans():
             [("p1", "person")])
     w = W("exists p: Person: eventually[0, 3] in_zone(p, door)", tr)
     top, leaf = w["spans"]
-    assert (top["op"], top["t_start_ms"], top["t_end_ms"]) == ("eventually", 1000, 1000)    # earliest best frame
+    # the span is the window searched, [0, 3] s from the start frame; the atom is the earliest best frame
+    assert (top["op"], top["t_start_ms"], top["t_end_ms"]) == ("eventually", 0, 3000)
     assert leaf["path"] == "body.arg" and leaf["rho"] == pytest.approx(0.45)
+    assert (leaf["t_start_ms"], leaf["t_end_ms"]) == (1000, 1000)
     # the best start time is 1 s (window 1..4 s covers the high, high, med frames); starting at 0 s would
-    # include the low frame. The weakest frame in the window is the med one at 3 s.
+    # include the low frame. The window is clipped to the last frame (3 s); the weakest frame is the med one.
     w = W("exists p: Person: always[0, 3] in_zone(p, door)", tr)
     top, leaf = w["spans"]
     assert (top["op"], top["t_start_ms"], top["t_end_ms"], top["rho"]) == ("always", 1000, 3000, pytest.approx(0.30))
     assert leaf["t_start_ms"] == 3000 and leaf["rho"] == pytest.approx(0.30)
     assert w["score"] == pytest.approx(0.30)
+
+
+def _steps_clip(times_ms, last_true_ms):
+    """A package on the steps (high) in every frame up to ``last_true_ms``, absent in frames after it."""
+    frames = [(t, [("in_zone", ("k1", "steps"), "high")] if t <= last_true_ms else []) for t in times_ms]
+    return mk(frames, [("k1", "package")])
+
+
+def test_holds_for_span_is_the_required_window_not_the_last_sampled_frame():
+    # frames are 1.0, 5.0, 9.0, 13.9, 14.9 s true, then 20 s absent: the 15 s run from t1 = 1 s ends at 16 s,
+    # but the last sampled frame inside the window is 14.9 s. The span must report [1.0, 16.0], not [1.0, 14.9].
+    tr = _steps_clip([1000, 5000, 9000, 13900, 14900, 20000], last_true_ms=14900)
+    w = W("exists k: Package: holds_for >= 15 in_zone(k, steps)", tr)
+    top, leaf = w["spans"]
+    assert w["score"] == pytest.approx(0.45)
+    assert (top["op"], top["t_start_ms"], top["t_end_ms"]) == ("holds_for", 1000, 16000)
+    assert top["t_end_ms"] - top["t_start_ms"] == 15000
+    assert (leaf["op"], leaf["t_start_ms"], leaf["t_end_ms"]) == ("atom", 1000, 1000)   # atoms stay frame points
+    # a hole is resolved before the span is built
+    r = parse("exists k: Package: holds_for >= ?d in_zone(k, steps)")
+    w = witness(r, tr, {"d": 15})
+    assert (w["spans"][0]["t_start_ms"], w["spans"][0]["t_end_ms"]) == (1000, 16000)
+
+
+def test_holds_for_span_is_clipped_to_the_clip_end():
+    # a 10 s clip cannot hold a 15 s run: the rule does not match and the window is clipped to the last frame
+    tr = _steps_clip([1000, 5000, 9000, 10000], last_true_ms=10000)
+    w = W("exists k: Package: holds_for >= 15 in_zone(k, steps)", tr)
+    top = w["spans"][0]
+    assert w["score"] == -C
+    assert (top["t_start_ms"], top["t_end_ms"]) == (1000, 10000)
+
+
+def test_eventually_and_always_spans_are_the_evaluated_window_clipped_to_the_clip():
+    tr = _steps_clip([500, 4000, 9000, 12500], last_true_ms=12500)
+    w = W("exists k: Package: eventually[2, 6] in_zone(k, steps)", tr)
+    top, leaf = w["spans"]
+    # best start 0.5 s (earliest): window [2.5, 6.5] s holds the 4 s frame; the span is the window, not the frame
+    assert (top["op"], top["t_start_ms"], top["t_end_ms"]) == ("eventually", 2500, 6500)
+    assert (leaf["t_start_ms"], leaf["t_end_ms"]) == (4000, 4000)
+    # the window runs past the end of the clip, so it is clipped at the last frame (12.5 s)
+    w = W("exists k: Package: always[1, 100] in_zone(k, steps)", tr)
+    top, leaf = w["spans"]
+    assert (top["op"], top["t_start_ms"], top["t_end_ms"]) == ("always", 1500, 12500)
+    assert leaf["op"] == "atom" and leaf["t_start_ms"] == leaf["t_end_ms"]
+    # an empty window keeps the point span at the evaluation frame (nothing was evaluated)
+    w = W("exists k: Package: eventually[50, 60] in_zone(k, steps)", tr)
+    top = w["spans"][0]
+    assert top["t_start_ms"] == top["t_end_ms"] and w["score"] == -C
 
 
 def test_or_follows_the_best_branch_and_ties_take_the_first():

@@ -152,7 +152,7 @@ export function WitnessTimeline({
       {compact ? (
         <div className="mt-4" tabIndex={0} role="region" aria-label="Witness timeline">
           <p className="sr-only">
-            Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each item is a part of the rule with the interval the monitor chose and its robustness ρ.
+            Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each item is a part of the rule with the window it was evaluated on (or the moment of evidence) and its robustness ρ.
           </p>
           <div className="mb-1"><Axis ticks={ticks} domain={domain} /></div>
           <ol className="divide-y divide-ex-line border-t border-ex-line">
@@ -174,7 +174,7 @@ export function WitnessTimeline({
         <div className="relative mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Witness timeline (scrolls sideways on narrow screens)">
           <table className="w-full min-w-[560px] table-fixed border-separate border-spacing-0 text-sm">
             <caption className="sr-only">
-              Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each row is a subformula with the interval the monitor chose and its robustness ρ.
+              Witness timeline for rule {witness.rule_id} on clip {witness.clip_id}: each row is a subformula with the window it was evaluated on (or the moment of evidence) and its robustness ρ.
             </caption>
             <colgroup>
               <col className="w-[34%]" />
@@ -207,7 +207,7 @@ export function WitnessTimeline({
         </div>
       )}
       {!compact && (
-        <p className="mt-3 text-xs text-ex-ink3">Each bar is the window of the clip where that part of the rule held. ρ says how strongly, from −0.5 (clearly not) to +0.5 (clearly yes).</p>
+        <p className="mt-3 text-xs text-ex-ink3">A bar is the window of the clip that part of the rule was checked over (a 15 s rule shows a 15 s bar); a diamond is the moment of evidence. ρ says how strongly, from −0.5 (clearly not) to +0.5 (clearly yes).</p>
       )}
     </div>
   )
