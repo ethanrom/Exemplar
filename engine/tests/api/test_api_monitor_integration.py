@@ -63,6 +63,13 @@ def test_real_monitor_fires_drops_and_prunes(real_env):
     # ingest already paid for the fast traces: the monitor must not have asked for them again or counted them twice
     assert [c["mode"] for c in real_env.perceive.calls_for("evt-rqA")] == ["fast"]
     assert cost["tokens_in"] == 3 * 6400
+    # the stream's cost_update carries the same figures as GET /monitor/cost (ledger-based), not the monitor's own meter,
+    # which never sees the tokens ingest already paid for and would read $0 per event
+    assert cost["usd_estimate"] > 0 and cost["per_event_usd"] > 0
+    def last_cost():
+        return [e["cost"] for e in real_env.state.bus.recent() if e["type"] == "cost_update"][-1]
+    H.wait_until(lambda: last_cost()["events"] == 3, what="cost_update for the third event")
+    assert last_cost() == cost
 
 
 def test_default_action_runner_is_built_from_the_config(real_env):

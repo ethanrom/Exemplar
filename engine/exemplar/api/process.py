@@ -196,5 +196,14 @@ class Processor:
             log.exception("could not persist firing %s", f.get("id"))
 
     def on_monitor_event(self, event: dict[str, Any]) -> None:
-        """Monitor -> `/monitor/stream`."""
+        """Monitor -> `/monitor/stream`.
+
+        A `cost_update` carries the API's cost summary (the same figures as `GET /monitor/cost`, from the ledger), not
+        the monitor's own meter: ingest pays for the fast trace before the monitor sees the event, so the meter alone
+        reads zero tokens and $0 per event."""
+        if event.get("type") == "cost_update":
+            try:
+                event = {**event, "cost": self.state.cost_summary()}
+            except Exception:  # noqa: BLE001 - keep the monitor's own figures rather than drop the event
+                log.exception("cost summary for cost_update failed")
         self.state.bus.publish(jsonable(event))
