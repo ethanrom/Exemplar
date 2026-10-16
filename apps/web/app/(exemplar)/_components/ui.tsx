@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { fmtFull, fmtWhen } from '../_lib/format'
 import { Icon, type IconName } from './Icon'
 
 export const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ')
@@ -48,6 +49,11 @@ export function Badge({
       {children}
     </span>
   )
+}
+
+/** A moment in words ("2 min ago", "yesterday 2:25 AM") with the full timestamp in the tooltip. Pass `now` so lists tick together. */
+export function When({ ms, now, className }: { ms: number; now?: number; className?: string }) {
+  return <time dateTime={new Date(ms).toISOString()} title={fmtFull(ms)} className={className}>{fmtWhen(ms, now)}</time>
 }
 
 /** Small coloured dot with a word beside it: the lightest possible status indicator. */

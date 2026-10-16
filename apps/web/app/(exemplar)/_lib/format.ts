@@ -43,8 +43,29 @@ export function fmtRelative(ms: number, now = Date.now()): string {
   return `${Math.round(abs / 86_400_000)} d ${sign}`
 }
 
+/** Full local timestamp, for tooltips: "Oct 15, 2026, 2:25:08 AM". */
+export const fmtFull = (ms: number) => new Date(ms).toLocaleString([], { dateStyle: 'medium', timeStyle: 'medium' })
+
+const fmtTime = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+
 /** "Oct 13, 2:25 AM": the date with the time of day. */
 export const fmtDay = (ms: number) => new Date(ms).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+
+/**
+ * A moment as a person says it, so times on different days never look out of order:
+ * "just now", "2 min ago", "3 h ago" (today), "yesterday 2:25 AM", then "Oct 13, 2:25 AM". Pair it with `fmtFull` in a tooltip.
+ */
+export function fmtWhen(ms: number, now = Date.now()): string {
+  const diff = now - ms
+  if (diff < -60_000) return fmtDay(ms)
+  if (diff < 45_000) return 'just now'
+  if (diff < 3_600_000) return `${Math.max(1, Math.round(diff / 60_000))} min ago`
+  const midnight = (t: number) => { const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() }
+  const days = Math.round((midnight(now) - midnight(ms)) / 86_400_000)
+  if (days <= 0) return `${Math.round(diff / 3_600_000)} h ago`
+  if (days === 1) return `yesterday ${fmtTime(ms)}`
+  return fmtDay(ms)
+}
 
 export const fmtUsd = (x: number | null | undefined) =>
   x == null ? '-' : x === 0 ? '$0' : x < 0.01 ? `$${x.toFixed(4)}` : `$${x.toFixed(3)}`
