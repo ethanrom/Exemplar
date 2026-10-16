@@ -8,13 +8,18 @@ Copy-ready text for the Devpost form. Fields that depend on the final upload are
 
 ## Tagline (one line)
 
-Teach your Ring camera new detectors by example: readable rules, a proven false-alarm rate, and an explanation for every alert.
+Teach your Ring camera new detectors by example: readable rules, a bounded false-alarm rate, and an explanation for every alert.
 
 ## Track and mini challenge
 
 - **Primary track:** Ring
 - **Mini challenge:** AWS Builder
-  - **AWS services used and how** (also in the product feedback answer): Amazon Bedrock with two Claude models called through the Converse API via application inference profiles (the fast model reads each clip into symbolic facts with forced tool use; the strong model reasons inside the synthesis agent and re-checks borderline events); the Strands Agents SDK, which runs the counterexample-guided rule-synthesis loop as a real tool-calling agent (`typecheck`, `solve_sketch`, `evaluate`, `fetch_counterexamples`, `submit_sketches`); AWS Open Data (MEVA on S3, anonymous access) for evaluation data. Detail and code pointers: [`FEEDBACK.md`](FEEDBACK.md#5-aws-services-used-in-detail).
+  - **AWS services used and how:**
+    - **Amazon Bedrock** runs two Claude models through the Converse API. A fast model reads each Ring clip once into typed, per-frame facts, using forced tool use. A strong model reasons inside the rule-synthesis agent and re-checks events near a rule's decision boundary.
+    - **Strands Agents SDK** runs the counterexample-guided synthesis loop as a real tool-calling agent, with the tools `typecheck`, `solve_sketch`, `evaluate`, `fetch_counterexamples` and `submit_sketches`.
+    - **AWS Open Data** (the MEVA dataset on S3, anonymous access) supplied outdoor surveillance footage for evaluation.
+
+    Details and code pointers: [`FEEDBACK.md`](FEEDBACK.md#5-aws-services-used-in-detail).
 
 ## Links
 
@@ -25,79 +30,125 @@ Teach your Ring camera new detectors by example: readable rules, a proven false-
 
 ## Description
 
-### Inspiration: the problem
+### Inspiration
 
-Every household cares about something different. People's real questions are specific:
+A Ring camera already tells you when it sees a person, a vehicle or motion. But the moments people actually care about are specific to their home or business, and they unfold over time:
 
-- "A package was taken by someone who isn't the one who delivered it."
-- "A car is idling at my loading dock for more than two minutes."
-- "Someone came to the door but didn't ring the bell."
+- a delivery that has been sitting on the steps for a while;
+- someone picking a package up off the porch;
+- a van parked at the loading dock for longer than it should be.
 
-These are questions about what happens over time, not just what appears in a frame. Prompting a vision model with a sentence can sometimes work, but it gives no idea how often it will be wrong until it has already spammed you, it cannot explain why it fired, and it costs a model call for every rule on every event.
+Every household and every shop wants a different detector, and nobody wants to write code or tune thresholds to get one.
+
+We wanted a Ring app where you teach your camera the way you would explain it to a person: show it a few clips, say "like this, not like that", and get back a detector you can read, test and trust.
 
 ### What it does
 
-You show Exemplar one to three clips and say "alert me about things like *this*". Exemplar:
+Exemplar is a web app for Ring customers, designed for the Ring Appstore. It needs read-only access, and every Ring API call happens on the server.
 
-1. **Learns a readable rule.** For example *"There is a vehicle v such that v is in the driveway"*, or *"There is a person p and a package k such that p picks up k, and then within 0 to 20 s p leaves the porch."* The rule is shown in plain English and in a small temporal-logic language, and the English comes from a deterministic printer, not from an LLM paraphrase.
-2. **Asks you one good question.** It samples a committee of rules that are all consistent with your examples and asks about the clip they disagree on most ("should this one count?"). In our run the committee had 1,206 members and the question was the theft window of the "Thief stealing our package" footage, at p = 0.50.
-3. **Proves the rule before it goes live.** It backtests on your event history, then calibrates the firing threshold with conformal prediction on randomly sampled labels, so the false-alarm rate is at most the alpha you choose, and reports recall with a confidence interval.
-4. **Runs it live on Ring.** On the Ring Developer Playground, the engine polls history, downloads each simulated event's clip, perceives it and scores the deployed rules. A package event fired only the package rule (with a witness: the moments and the margin that made it true), a vehicle event fired only the vehicle rule, and the bird events fired neither, at about $0.0015 per watched event. Events near a rule's decision boundary can be re-checked by a stronger model; clear matches and clear misses cost almost nothing.
+1. **You show examples.** Mark a few clips from your Ring history as "yes, like this" or "no". In our demo, a package left on the steps is a yes; someone carrying a box past, a car and birds at a feeder are no.
+2. **Exemplar learns a readable rule.** A Strands agent on Amazon Bedrock drafts the shape of the rule and leaves the numbers blank. The Z3 solver fills them in exactly. In our demo the agent's first draft only looked at the steps, so it missed a clip where the box sat on the porch. That clip came back as a counterexample and the agent revised the rule. Z3 then chose the duration, giving *"There is a package k such that (k is on the steps or k is on the porch) continuously for at least 15 s."* This took under 30 seconds. The English is printed from the rule by code, never paraphrased by a model.
+3. **It asks you one good question.** When the candidate rules that fit your examples disagree about a clip, Exemplar shows you that clip and asks "Should this one count?".
+4. **It tests the rule before it goes live.** It backtests the rule on your history and sets the firing threshold from randomly sampled clips the rule never trained on. For events like these, the chance of a false alarm is then at most the level you choose (10% by default).
+5. **It watches live and explains every alert.** One switch deploys the rule. On the Ring Developer Playground, Exemplar polls event history, downloads each new clip, has Claude read it once, and scores every deployed rule.
+   - The package event fired only the package rule, along with the moments that made it true.
+   - The vehicle event fired only the vehicle rule.
+   - The bird events fired neither.
+6. **It learns harder things too.** From real porch footage it learned *"a person picks up a package"* from the steps.
 
-Teaching is fast and forgiving. From Playground clips the agent and Z3 produced rules in 15 to 21 seconds. When perception called the same box "porch" instead of "steps" and the first rule missed one package event, labelling that one example and re-teaching (21 s) produced a rule that no longer cared about the zone name.
+**Who it's for:**
+- homeowners who want to know when a delivery has been left out or picked up;
+- small businesses watching a loading dock, a storefront or a short-term rental;
+- property managers with many cameras and many different questions.
 
-Cost does not grow with the number of rules. Perception runs once per event ($0.00179 on average over 1,005 clips) and each rule is then scored on the cached trace in about 0.05 to 0.1 ms with no model call. Asking a vision model per rule costs $0.0133 per rule per event on the same frames, so ten rules cost about 74 times as much ([chart](eval/cost_vs_rules.md)).
+**Why it scales:** Claude on Amazon Bedrock reads each event once, for under two-tenths of a cent: $0.0014–$0.0015 per watched event in our live runs, and $0.0018 on average over 1,005 clips. Every rule after that runs on the cached facts in about a tenth of a millisecond, with no model call. Adding a rule therefore adds almost no cost ([chart](eval/cost_vs_rules.md)), and backtesting a new rule against your whole history is free.
 
 ### How we built it
 
-- **Ring.** A Python engine calls the Ring API server-side: devices with `include=status,capabilities,configurations`, event history with cursor pagination and `event_types` filters, event-scoped video and image download (303 to a pre-signed URL, with 416/425 backoff), WHEP live view through a hardened server proxy, signed webhooks (HMAC-SHA256 over the raw body, constant-time compare, `meta.request_id` dedupe, lifecycle events), OAuth app mode with PKCE and refresh rotation, and Chime playback behind a flag. The web app is a Next.js 15 fork of the `ring-api-helloworld` sample with a WCAG 2.2 AA interface.
-- **Perception.** Claude (fast model) on Amazon Bedrock reads 16 frames per clip through the Converse API with forced tool use and returns typed entities and per-frame facts with confidence. The result is validated against an ontology and cached as a symbolic trace.
-- **Program synthesis, not prompting.** A Strands agent (strong model) proposes rule sketches with numeric holes; Z3 solves the holes exactly as a MaxSMT problem (so noisy perception cannot make a rule impossible) with a max-margin objective; counterexamples go back to the agent (CEGIS); candidates are ranked by description length.
-- **Quantitative logic.** Rules are Signal Temporal Logic formulas with a real-valued robustness margin, which drives rule choice, the escalation band and calibration. The semantics are specified operator by operator in [`docs/DSL.md`](DSL.md).
-- **Honest statistics.** Calibration uses only randomly sampled labels (actively chosen clips would void the guarantee), exact rational arithmetic for the conformal rank, and recall intervals from Clopper-Pearson.
-- **Verification.** The Z3 encoding and the solver are checked on 3,850 randomly generated cases (against an independent NumPy evaluator and an exhaustive search) with no mismatch, and 7 of 7 deliberately planted encoder bugs are caught by that check; the conformal bound is checked by a 100,000-draw simulation including heavy ties; there are more than 840 engine tests, 207 evaluation tests and 22 webhook tests, and the API contract is enforced against a mock (33 of 33 operations).
+- **Ring API, all server-side:**
+  - devices (`include=status,capabilities,configurations`);
+  - event history with cursor pagination and `event_types` filters;
+  - event-scoped video and snapshot download (a 303 redirect to a pre-signed URL, with 416/425 backoff);
+  - WHEP live view through a hardened server proxy;
+  - signed webhooks: HMAC-SHA256 over the raw body, constant-time compare, `meta.request_id` deduplication, lifecycle events;
+  - the OAuth app-integration flow, with PKCE, refresh-token rotation and account linking;
+  - Chime playback as an optional rule action, behind a flag.
+
+  The web app is built on Ring's `ring-api-helloworld` sample.
+- **Perception on Amazon Bedrock.** The fast Claude model reads 16 frames per clip through the Converse API with forced tool use. It returns typed entities and per-frame facts with a confidence level. These are validated against an ontology and cached as a symbolic trace.
+- **Program synthesis with Strands and Z3.**
+  - The strong Claude model, inside a Strands agent, proposes rule sketches with numeric holes.
+  - Z3 solves the holes as a MaxSMT problem, so a few noisy examples can't make a rule impossible, and maximises the margin.
+  - Clips the rule gets wrong go back to the agent as counterexamples (CEGIS). Candidates are ranked by description length, so the simplest consistent rule comes first.
+- **Rules that score as well as decide.** Rules are Signal Temporal Logic formulas with a real-valued robustness margin. The margin drives rule choice, calibration and the "Why it fired" explanation. The semantics are specified operator by operator in [`docs/DSL.md`](DSL.md).
+- **Sound statistics.**
+  - Conformal calibration uses only randomly sampled labels. Answers to Exemplar's questions train the rule but never touch the guarantee.
+  - The conformal rank is computed with exact rational arithmetic.
+  - Recall comes with Clopper-Pearson intervals.
+- **Cross-checked, not just unit-tested.**
+  - 3,850 randomized cases in which the Z3 encoding must agree with a separate evaluator and a brute-force search, with zero mismatches (over 6,000 ran during development).
+  - 7 of 7 deliberately planted solver bugs caught.
+  - A 100,000-draw simulation of the false-alarm bound.
+  - 860+ engine tests, 205 evaluation tests and 22 webhook tests.
+  - An API contract enforced against a mock (33 of 33 operations).
+  - A WCAG 2.2 AA interface with zero axe-core violations.
 
 ### Challenges we ran into
 
-- **A sandbox is not a real camera.** Playground events arrive as `on_demand` with no sub-type, 27 to 44 seconds after they start, and the package clip loops six seconds of the source footage with no thief in it. We built the live rules around what the clips contain and told the theft story from the full CC BY source footage uploaded through our own `upload` source.
-- **Perception is noisy.** MaxSMT soft constraints, a "perception suspect?" flag, escalation to the strong model, and a cache keyed by event rather than by bytes (Ring re-renders the watermark on every download) keep the system stable.
-- **Making the solver fast and correct.** Building Z3 formulas through z3py cost more than solving them, so we construct n-ary connectives through the C API (3.5 s became 0.2 s). Time is integer milliseconds so window edges agree between the solver and the evaluators.
-- **New-model quirks on Bedrock.** `temperature` is rejected, and the fast and strong models differ in how they accept forced tool use and thinking settings. We found a reliable recipe for each and wrote them into the friction log.
+- **Building against a sandbox.** Playground events arrive as `on_demand` recordings with no smart-alert sub-type, so Exemplar perceives every event itself instead of relying on sub-types. The Playground's package clip shows a box on the steps. We built the live rule around it, and taught the pickup rule from the full CC BY source footage through Exemplar's upload source.
+- **Perception varies from run to run.** The same box was "on the steps" in one read and "on the porch" in the next. MaxSMT soft constraints, counterexamples and a "perception suspect?" flag absorb this, and teach-by-example turns it into one more example rather than a code change.
+- **Making the solver fast and exact.** Building Z3 formulas through the Python bindings cost more than solving them. Building connectives through the C API cut that from 3.5 s to 0.2 s. Time is stored in integer milliseconds so that window edges agree exactly between the solver and the evaluators.
+- **New model parameters on Bedrock.** `temperature` is rejected, and the fast and strong models accept tool-choice and thinking settings differently. We found a reliable recipe for each model and documented it in the friction log.
 
 ### Accomplishments that we're proud of
 
-- A full live loop on the Ring Developer Playground: history, clip download, perception, rules, witnesses, and a cost meter.
-- Rules learned from a handful of clips in seconds, with a single well-chosen question and a statistical guarantee on false alarms.
-- A cost curve that stays flat as rules are added.
-- Rigor that goes beyond a demo: differential testing of the solver, property tests of the logic, a simulation of the conformal bound, signed-webhook fixtures, and an accessibility scan with zero violations.
-- 51 documented friction-log entries and detailed product feedback on every tool.
+- The complete loop on the Ring Developer Playground, in one app: teach, test, deploy, and a live alert that explains itself.
+- Readable rules learned from a handful of clips in under 30 seconds, with one well-chosen question.
+- A statistically sound false-alarm bound, and a cost per event that stays flat as rules are added.
+- Engineering rigor beyond a demo: cross-checked synthesis, property-tested logic, a simulated guarantee, signed-webhook fixtures and an accessible interface.
+- 51 friction-log entries and detailed product feedback on every Ring and AWS tool we used.
 
 ### What we learned
 
-Let the LLM write structure and let a solver fit the numbers: it gives exact, explainable answers and keeps model calls to one per event. Spell out the semantics of a logic before building on it; most of our hard bugs were boundary conventions, not code. And a sandbox teaches as much as a device does, provided you log everything it does differently.
+- **Let the LLM write the structure and let a solver choose the numbers.** You get exact, explainable rules and one model call per event.
+- **Write down the semantics of a logic before building on it.** Most of our hard bugs were boundary conventions, not code.
+- **A sandbox teaches a lot.** Building against the Playground taught us how Ring events, media and webhooks really behave. We logged everything that surprised us so the next developer doesn't hit it.
 
 ### What's next
 
-- Host the synthesis agent on Amazon Bedrock AgentCore Runtime and compare Amazon Nova's native video input as a perception option.
-- Richer facts (motion and state changes such as stopping, dwelling and getting out of a vehicle) for business scenes like loading docks and short-term rentals.
-- Run on a real Ring device with OAuth app mode, and distribute as a web app through the Ring Appstore.
-- Hit-and-run sampling for a larger, better-mixed rule committee.
+- Ship through the Ring Appstore, using the OAuth app-integration flow on real devices and webhooks for instant events.
+- Richer facts for business scenes, such as vehicles stopping and dwelling, or doors opening, so loading docks and storefronts get richer rules.
+- More rule actions: Chime playback (already built, behind a flag), outbound webhooks into business systems, and Slack.
+- Host the synthesis agent on Amazon Bedrock AgentCore Runtime, and evaluate Amazon Nova's native video input for perception.
 
 ## Built with
 
-Ring API · Ring Developer Playground · Amazon Bedrock · Claude (Anthropic) · Strands Agents SDK · AWS Open Data (S3, MEVA) · Z3 (`z3-solver`) · Python · FastAPI · NumPy · SciPy · Pydantic · Lark · SQLite · boto3 · httpx · ffmpeg (`imageio-ffmpeg`) · Hypothesis · Next.js · React · TypeScript · Tailwind CSS · WebRTC (WHEP) · Server-Sent Events · Node.js · uv · axe-core
+Ring API · Ring Developer Playground · Amazon Bedrock · Claude (Anthropic) · Strands Agents SDK · AWS Open Data (S3) · Z3 (`z3-solver`) · Python · FastAPI · NumPy · SciPy · Pydantic · Lark · SQLite · boto3 · httpx · ffmpeg · Hypothesis · Next.js · React · TypeScript · Tailwind CSS · WebRTC (WHEP) · Server-Sent Events · Node.js · uv · axe-core
 
 ## What was built during the submission period
 
-Exemplar is a new project, started inside the submission period (first commit 2026-10-15). The only pre-existing code is the MIT-licensed `AmazonAppDev/ring-api-helloworld` sample, imported unmodified in its own commit (`76100aa`) and then extended: we replaced its webhook receiver and WHEP session handling with verified, hardened versions, kept its live-view hook and video-processor plug-in system, and added the Exemplar interface, the engine and the evaluation tooling. See [`apps/web/UPSTREAM.md`](../apps/web/UPSTREAM.md).
+Exemplar is a new project, started inside the submission period (first commit 2026-10-15). The only pre-existing code is Ring's MIT-licensed `AmazonAppDev/ring-api-helloworld` sample. We imported it unmodified in its own commit (`76100aa`) and then extended it:
+
+- We replaced its webhook receiver and WHEP session handling with verified, hardened versions.
+- We kept its live-view hook and video-processor plug-in system.
+- We added the Exemplar interface, the engine and the evaluation tooling.
+
+See [`apps/web/UPSTREAM.md`](../apps/web/UPSTREAM.md).
 
 ## Image gallery and media
 
-Suggested uploads: `docs/img/home.png`, `docs/img/teach.png`, `docs/img/rule.png`, `docs/img/live.png`, `docs/img/evidence.png`, and `docs/eval/cost_vs_rules.svg` (export a PNG for Devpost).
+Suggested uploads: the video thumbnail, then `docs/img/home.png`, `docs/img/teach.png`, `docs/img/rule.png`, `docs/img/live.png`, `docs/img/evidence.png`, and `docs/eval/cost_vs_rules.svg` (export a PNG for Devpost).
 
 ## Testing instructions for judges
 
-The README has the full steps. In short: run the engine and the web app, paste a Ring Developer Playground token on the Connect screen, click Simulate in the Playground, and teach and deploy a rule. Running the live loop needs Amazon Bedrock access to two Claude models. Without credentials, `uv run --project engine python -m exemplar.api.seed --fixtures` loads twelve hand-written traces so every screen can be explored without any model call, and the demo video shows the complete loop.
+The README has the full steps. The live loop needs a Ring Developer Playground token and Amazon Bedrock access to two Claude models:
+
+1. Run the engine and the web app.
+2. Paste the Playground token on the Connect screen.
+3. Teach and deploy a rule.
+4. Click Simulate in the Playground and watch the Live screen.
+
+Without any credentials, `uv run --project engine python -m exemplar.api.seed --fixtures` loads twelve example traces. Every screen then works, including Teach through an offline rule proposer, Rule and Evidence, and all test suites run. The demo video shows the complete live loop.
 
 ## Attributions
 
