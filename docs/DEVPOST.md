@@ -23,7 +23,7 @@ Teach your Ring camera new detectors by example: readable rules, a bounded false
 
 ## Links
 
-- Code: `<GitHub repository URL>` (MIT license; setup and run instructions in the README)
+- Code: https://github.com/ethanrom/Exemplar (MIT license; setup and run instructions in the README)
 - Demo video (under 3 minutes): `<YouTube or Vimeo URL>`
 - Product feedback: [`docs/FEEDBACK.md`](FEEDBACK.md)
 - Friction log (51 entries): [`docs/FRICTION_LOG.md`](FRICTION_LOG.md)
