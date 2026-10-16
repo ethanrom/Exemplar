@@ -15,7 +15,7 @@ const STORY: { n: string; title: string; text: string; href: string; link: strin
     text: 'Mark a few clips as yes or no. An agent sketches rules, a solver fits the numbers exactly, and it asks you the one question that settles the rest.',
   },
   {
-    n: '02', title: 'Prove it with a false-alarm guarantee', href: '/rule', link: 'Open Rule',
+    n: '02', title: 'Test it with a false-alarm guarantee', href: '/rule', link: 'Open Rule',
     text: 'Backtest on your own history. Random labels calibrate the threshold, so false alarms stay under the rate you chose, or you are told plainly that you cannot say yet.',
   },
   {
@@ -38,7 +38,7 @@ function Pipeline() {
     <section aria-labelledby="pipe-h" className="mt-24">
       <h2 id="pipe-h" className="text-lg font-semibold tracking-tight text-ex-ink">Under the hood</h2>
       <p className="mt-1 max-w-2xl text-base text-ex-ink2">
-        The language model only writes a rule&rsquo;s structure. Everything that decides, proves and fires is exact, checked code.
+        The language model only writes a rule&rsquo;s structure. Everything that decides, tests and fires is exact, checked code.
       </p>
       <ol className="mt-8 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-6">
         {PIPELINE.map((p, i) => (
@@ -143,7 +143,7 @@ export default function HomeScreen() {
             <span className="block text-ex-ink3">new detectors by example.</span>
           </h1>
           <p className="mt-6 max-w-xl text-md text-ex-ink2 sm:text-lg">
-            Ring knows four things: person, vehicle, package, other motion. Show Exemplar a clip or two of what you actually care about. It learns a readable rule, proves its false-alarm rate on your own history, and watches live with an explanation for every alert.
+            Ring knows four things: person, vehicle, package, other motion. Show Exemplar a clip or two of what you actually care about. It learns a readable rule, tests its false-alarm rate on your own history, and watches live with an explanation for every alert.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link href={started ? '/library' : '/connect'} className="btn btn-primary btn-lg">

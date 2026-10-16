@@ -6,7 +6,7 @@ import { Shell } from './(exemplar)/_components/Shell'
 
 export const metadata: Metadata = {
   title: { default: 'Exemplar', template: '%s · Exemplar' },
-  description: 'Teach your Ring camera new detectors by example: readable rules, proven before they go live.',
+  description: 'Teach your Ring camera new detectors by example: readable rules, tested before they go live.',
 }
 
 export const viewport: Viewport = { themeColor: '#0A0B0D', colorScheme: 'dark' }
