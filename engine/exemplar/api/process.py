@@ -16,8 +16,8 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from exemplar.contracts.ontology import SUB_TYPES
 from exemplar.contracts.trace import Trace, TraceContext
-from exemplar.perception import SamplingError
-from exemplar.store import EventRow
+from exemplar.perception import PerceptionNotConfigured, SamplingError
+from exemplar.store import PERCEPTION_UNCONFIGURED, EventRow
 
 from .errors import NotAvailable, short_error
 from .serialize import jsonable
@@ -95,10 +95,25 @@ class Processor:
     def perceive_strong(self, ev: Any) -> PerceptionOutcome:
         return self.perceive_clip(ev.clip_id, mode="strong")
 
+    def _mark_unconfigured(self, clip_id: str) -> None:
+        """Bedrock is not set up: store a failed placeholder trace so the app says why the clip is not read
+        (trace_status perception_failed, the reason as `summary`/`trace.error`) instead of waiting forever. The
+        placeholder is ignored by `has_any` / `awaiting_perception`, so the clip is read once Bedrock is set up."""
+        st = self.state
+        clip = st.store.clips.get(clip_id)
+        event = st.store.events.get(clip.event_id) if clip else None
+        if clip is None or event is None:
+            return
+        trace = Trace(clip_id=clip_id, source=event.source, duration_ms=clip.duration_ms or 0, status="perception_failed",
+                      error=PERCEPTION_UNCONFIGURED, summary=PERCEPTION_UNCONFIGURED, context=self.context_for(event))
+        st.store.traces.put(clip_id, trace, mode="fast")
+        st.store.clips.set_error(clip_id, PERCEPTION_UNCONFIGURED)
+        st.bus.emit("error", event_id=clip.event_id, message=PERCEPTION_UNCONFIGURED)
+
     def process_clip(self, clip_id: str, *, monitor: bool = True,
                      on_trace: Callable[[Trace], None] | None = None) -> PerceptionOutcome | None:
         """fast perception -> trace_ready -> (on_trace) -> monitor. Never raises: problems land in `clips.error`
-        + an `error` event. `on_trace` runs after the trace is stored and before the monitor sees the event."""
+        + an `error` event (Bedrock not set up: also a failed placeholder trace, see `_mark_unconfigured`). `on_trace` runs after the trace is stored and before the monitor sees the event."""
         st = self.state
         key = (clip_id, "fast")
         with self._lock:
@@ -115,7 +130,11 @@ class Processor:
                 st.store.clips.set_status(clip_id, "failed", f"unreadable media: {short_error(e)}")
                 st.bus.emit("error", event_id=clip.event_id, message=f"clip {clip_id[:24]} unreadable: {short_error(e)}")
                 return None
-            except Exception as e:  # noqa: BLE001 - backend outage, missing model config, ...
+            except PerceptionNotConfigured as e:
+                log.warning("perception not configured for %s: %s", clip_id, short_error(e))
+                self._mark_unconfigured(clip_id)
+                return None
+            except Exception as e:  # noqa: BLE001 - backend outage, ...
                 log.warning("perception failed for %s: %s", clip_id, short_error(e))
                 st.store.clips.set_error(clip_id, f"perception unavailable: {short_error(e)}")
                 st.bus.emit("error", event_id=clip.event_id, message=f"perception failed: {short_error(e)}")

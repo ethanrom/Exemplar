@@ -23,6 +23,13 @@ def now_ms() -> int:
     return int(time.time() * 1000)
 
 
+# Shown in the app (as the clip's `summary` and the trace's `error`) when clips cannot be read because Bedrock is not
+# set up. A trace carrying exactly this text is a placeholder, not a result: `has_any` and `awaiting_perception`
+# ignore it, so the clips are read again once the setup is fixed.
+PERCEPTION_UNCONFIGURED = "Can't read clips: Amazon Bedrock isn't configured. Set CLAUDE_AWS_* in .env."
+_NOT_PLACEHOLDER = "json_extract(t.trace_json, '$.error') IS NOT ?"      # on a `traces t` row; bind PERCEPTION_UNCONFIGURED
+
+
 # =================================================================================================== rows
 @dataclass(frozen=True)
 class EventRow:
@@ -346,7 +353,8 @@ class ClipsRepo(_Repo):
         """Ready clips with media but no trace at all (a backend outage left them untraced)."""
         rows = self.s.query(
             "SELECT c.* FROM clips c WHERE c.status = 'ready' AND c.path IS NOT NULL "
-            "AND NOT EXISTS (SELECT 1 FROM traces t WHERE t.clip_id = c.id) ORDER BY c.created_at_ms")
+            "AND NOT EXISTS (SELECT 1 FROM traces t WHERE t.clip_id = c.id AND " + _NOT_PLACEHOLDER + ") "
+            "ORDER BY c.created_at_ms", (PERCEPTION_UNCONFIGURED,))
         return [ClipRow(**dict(r)) for r in rows]
 
     def awaiting_download(self) -> list[ClipRow]:
@@ -393,7 +401,9 @@ class TracesRepo(_Repo):
         return row.trace() if row else None
 
     def has_any(self, clip_id: str) -> bool:
-        return self.s.query_one("SELECT 1 FROM traces WHERE clip_id = ?", (clip_id,)) is not None
+        """True once the clip has a trace, ok or failed (a "Bedrock isn't configured" placeholder does not count)."""
+        return self.s.query_one("SELECT 1 FROM traces t WHERE t.clip_id = ? AND " + _NOT_PLACEHOLDER,
+                                (clip_id, PERCEPTION_UNCONFIGURED)) is not None
 
     def list_primary_ok(self) -> list[tuple[str, Trace]]:
         """Every clip's primary trace with status ok, newest event first (backtest, learning)."""

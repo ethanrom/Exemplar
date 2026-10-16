@@ -13,7 +13,7 @@ from exemplar.contracts.trace import PerceptionMeta, Trace, TraceContext
 from exemplar.settings import get_settings
 
 from . import cache
-from .extract import SampleResult, make_client, run_sample
+from .extract import PerceptionNotConfigured, SampleResult, make_client, run_sample
 from .merge import merge_traces
 from .normalize import failed_trace
 from .sampling import (DEFAULT_MIN_GAP_S, DEFAULT_WIDTH, MAX_FRAMES_FAST, MAX_FRAMES_STRONG, ROI, check_roi,
@@ -78,7 +78,7 @@ def perceive_detailed(clip_path: str | Path, *, clip_id: str, source: Source,
 
     if client is None:
         if not model_id:
-            raise RuntimeError(f"{'CLAUDE_AWS_MODEL' if strong else 'CLAUDE_AWS_FAST_MODEL'} is not configured (.env)")
+            raise PerceptionNotConfigured(f"{'CLAUDE_AWS_MODEL' if strong else 'CLAUDE_AWS_FAST_MODEL'} is not configured (.env)")
         client = make_client()
     model_id = model_id or "unset"
 
@@ -140,7 +140,8 @@ def perceive(clip_path: str | Path, *, clip_id: str, source: Source, context: Tr
     * `client`: a bedrock-runtime client or any object with `.converse(**kw)`; default built from `.env`.
     * Model-quality problems return `Trace(status="perception_failed", error=...)` after one retry; they never
       raise.  Bad arguments raise `ValueError`; unreadable clips raise `SamplingError`; AWS/network failures raise
-      `PerceptionBackendError` (model id scrubbed from the message).
+      `PerceptionBackendError` (model id scrubbed from the message); a missing model id, credentials or region raises its
+      subclass `PerceptionNotConfigured`.
     * `trace.perception` carries mode, model alias, n_frames, samples, tokens, wall-clock latency (sampling +
       model calls) and the cache key.  Nothing is written to SQLite or any cost ledger; callers record usage
       (and should skip recording when `perceive_detailed(...).cached` is True).

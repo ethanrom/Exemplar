@@ -179,6 +179,34 @@ def test_aws_errors_become_backend_errors_without_the_model_id(video):
     assert "fake-fast-model" not in str(ei.value) and "<model>" in str(ei.value)
 
 
+def test_missing_setup_raises_not_configured(video, monkeypatch):
+    """No model id, no credentials, no region: a PerceptionNotConfigured (a backend error), before anything is sent."""
+    from botocore.exceptions import NoCredentialsError, NoRegionError
+
+    from exemplar import settings
+    from exemplar.perception import PerceptionBackendError, PerceptionNotConfigured
+    monkeypatch.delenv("CLAUDE_AWS_FAST_MODEL")
+    settings.get_settings.cache_clear()
+    with pytest.raises(PerceptionNotConfigured, match="CLAUDE_AWS_FAST_MODEL is not configured"):
+        run(video, None)
+    monkeypatch.setenv("CLAUDE_AWS_FAST_MODEL", "fake-fast-model")
+    settings.get_settings.cache_clear()
+    for err in (NoCredentialsError(), NoRegionError()):
+        fake = FakeBedrock(err)
+        with pytest.raises(PerceptionNotConfigured) as ei:
+            run(video, fake)
+        assert isinstance(ei.value, PerceptionBackendError) and ei.value.code == "NotConfigured"
+        assert "fake-fast-model" not in str(ei.value)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+    monkeypatch.delenv("AWS_REGION", raising=False)
+    monkeypatch.delenv("CLAUDE_AWS_REGION", raising=False)
+    monkeypatch.setenv("AWS_CONFIG_FILE", str(video.parent / "no-aws-config"))
+    settings.get_settings.cache_clear()
+    from exemplar.perception.extract import make_client
+    with pytest.raises(PerceptionNotConfigured, match="NoRegionError"):
+        make_client()
+
+
 # ------------------------------------------------------------------ self-consistency
 def test_two_samples_are_merged(video):
     a = theft_payload(N)

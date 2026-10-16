@@ -7,7 +7,7 @@ from typing import Any
 from pydantic_core import to_jsonable_python
 
 from exemplar.contracts.trace import Trace
-from exemplar.store import EventView, LabelRow, RuleRow, Store
+from exemplar.store import PERCEPTION_UNCONFIGURED, EventView, LabelRow, RuleRow, Store
 from exemplar.store.repos import ConceptRow
 
 PROVENANCE_WEIGHT = {"example": 3.0, "active": 3.0, "random": 1.0}     # WEIGHT_CONFIRMED / WEIGHT_BULK (labels.py)
@@ -42,7 +42,7 @@ def event_summary(v: EventView) -> dict[str, Any]:
         "id": v.id, "clip_id": v.clip_id, "source": v.source, "device_id": v.device_id, "kind": v.kind,
         "sub_type": v.sub_type, "start_ms": v.start_ms, "duration_ms": v.duration_ms,
         "clip_status": v.clip_status, "trace_status": v.trace_status,
-        "summary": v.summary if v.trace_status == "ok" else None,
+        "summary": v.summary if v.trace_status == "ok" or v.summary == PERCEPTION_UNCONFIGURED else None,
         "has_snapshot": v.has_snapshot, "attribution": v.attribution, "label": label_summary(v.label),
     }
 

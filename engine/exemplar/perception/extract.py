@@ -16,7 +16,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Optional, Sequence
 
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError, NoRegionError, PartialCredentialsError
 
 from exemplar.contracts.trace import PerceptionMeta, Trace, TraceContext
 
@@ -39,6 +39,14 @@ class PerceptionBackendError(RuntimeError):
         self.code = code
 
 
+class PerceptionNotConfigured(PerceptionBackendError):
+    """Bedrock is not set up: no model id, credentials or region (``CLAUDE_AWS_*`` in `.env`). Nothing was sent;
+    callers can show a "configure Bedrock" message and try again once the setup is fixed."""
+
+    def __init__(self, message: str):
+        super().__init__(message, "NotConfigured")
+
+
 @dataclass
 class SampleResult:
     trace: Optional[Trace] = None
@@ -55,7 +63,10 @@ def make_client(read_timeout: int = 300):
 
     from exemplar.settings import get_settings
     cfg = Config(read_timeout=read_timeout, connect_timeout=15, retries={"max_attempts": 4, "mode": "adaptive"})
-    return get_settings().boto3_session().client("bedrock-runtime", config=cfg)
+    try:
+        return get_settings().boto3_session().client("bedrock-runtime", config=cfg)
+    except NoRegionError as e:
+        raise PerceptionNotConfigured(f"{type(e).__name__}: {e}") from None
 
 
 def _feedback_message(assistant_msg: dict[str, Any], errors: Sequence[str]) -> dict[str, Any]:
@@ -88,6 +99,8 @@ def run_sample(client: Any, *, model_id: str, strong: bool, model_alias: Optiona
         try:
             resp = client.converse(modelId=model_id, system=system, messages=messages, toolConfig=tool_cfg,
                                    inferenceConfig={"maxTokens": max_tokens}, additionalModelRequestFields=extra)
+        except (NoCredentialsError, PartialCredentialsError, NoRegionError) as e:
+            raise PerceptionNotConfigured(f"{type(e).__name__}: {e}") from None
         except (BotoCoreError, ClientError) as e:
             code = e.response.get("Error", {}).get("Code") if isinstance(e, ClientError) else type(e).__name__
             raise PerceptionBackendError(f"{code}: {str(e).replace(model_id, '<model>')}"[:500], code) from None

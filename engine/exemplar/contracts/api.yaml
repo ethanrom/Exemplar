@@ -612,7 +612,7 @@ components:
         duration_ms: { type: [integer, "null"] }
         clip_status: { type: string, enum: [pending, downloading, ready, not_found, failed] }
         trace_status: { type: string, enum: [none, ok, perception_failed] }
-        summary: { type: [string, "null"], description: "trace.summary (one sentence from perception)" }
+        summary: { type: [string, "null"], description: "trace.summary (one sentence from perception); when trace_status is perception_failed because Bedrock is not set up, the plain-language reason instead" }
         has_snapshot: { type: boolean }
         attribution: { type: [string, "null"] }
         label: { oneOf: [{ $ref: "#/components/schemas/LabelSummary" }, { type: "null" }] }
