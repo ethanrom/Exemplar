@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type { EventSummary, RuleSummary } from '../_lib/types'
-import { fmtNum, keepUnits } from '../_lib/format'
+import { clipName, fmtNum, keepUnits } from '../_lib/format'
 import { Dsl, DslBlock } from './Dsl'
 import { EventThumb } from './EventBits'
 import { Icon } from './Icon'
@@ -45,9 +45,9 @@ export function SuspectList({
   const ids = rule.violated_clip_ids ?? []
   if (ids.length === 0) return null
   return (
-    <div className="mt-4 rounded-lg border border-ex-warn-line bg-ex-warn-soft p-3.5">
+    <div className="mt-4 rounded-lg border border-ex-line bg-ex-panel p-3.5">
       <p className="flex items-center gap-2 text-sm font-medium text-ex-ink">
-        <Icon name="warning" className="h-4 w-4 text-ex-warn" /> Perception suspect?
+        <Icon name="info" className="h-4 w-4 text-ex-ink3" /> Perception may differ
       </p>
       <p className="mt-1 text-sm text-ex-ink2">
         This rule disagrees with {ids.length} of your labelled example{ids.length === 1 ? '' : 's'}. The label may be right and the model may have missed a fact: check the clip{ids.length === 1 ? '' : 's'}.
@@ -57,11 +57,13 @@ export function SuspectList({
           const ev = events.get(id)
           return (
             <li key={id} className="flex items-center gap-2.5 rounded-md bg-ex-bg/60 p-1.5">
-              {ev && <EventThumb event={ev} compact className="h-9 w-16 shrink-0 rounded" />}
-              <span className="min-w-0 flex-1 line-clamp-2 text-xs text-ex-ink2">{ev?.summary ?? id}</span>
+              {ev
+                ? <EventThumb event={ev} compact className="h-9 w-16 shrink-0 rounded" />
+                : <span aria-hidden="true" className="grid h-9 w-16 shrink-0 place-items-center rounded bg-ex-raised text-ex-ink3"><Icon name="image" className="h-4 w-4" /></span>}
+              <span className="min-w-0 flex-1 line-clamp-2 text-xs text-ex-ink2">{clipName(ev)}</span>
               {ev && (
                 <button type="button" className="btn btn-sm" onClick={() => onInspect(ev.id)}>
-                  Inspect<span className="sr-only">: {ev.summary ?? id}</span>
+                  Inspect<span className="sr-only">: {clipName(ev)}</span>
                 </button>
               )}
             </li>

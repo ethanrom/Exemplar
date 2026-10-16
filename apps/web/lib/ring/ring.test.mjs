@@ -1,4 +1,4 @@
-// Run:  cd apps/web && node --test lib/ring/*.test.mjs        (Node >= 18, no extra dependencies)
+// Run:  cd apps/web && node --test lib/ring/ring.test.mjs    (Node >= 18, no extra dependencies)
 //
 // Drives the webhook verifier with the SAME signed fixtures the Python tests use
 // (engine/tests/fixtures/webhooks/*.json: `expect`, `headers`, raw `body`; key `exemplar-test-signing-key`),

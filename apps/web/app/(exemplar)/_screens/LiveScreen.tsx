@@ -8,13 +8,13 @@ import '@/lib/video-processors' // registers the built-in processors (and the Ex
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
 import { useApp } from '../_lib/app'
 import { errorMessage, get, post } from '../_lib/api'
-import { fmtClock, fmtInt, fmtNum, fmtUsd, keepUnits } from '../_lib/format'
+import { fmtClock, fmtInt, fmtNum, fmtUsd, hideDeviceIds, keepUnits } from '../_lib/format'
 import { useApi, useEventStream, useNow } from '../_lib/hooks'
 import type { CostSummary, Device, EventDetail, Firing, LiveFact, MonitorEvent, MonitorEventType, RuleSummary } from '../_lib/types'
 import { Dsl, DslBlock } from '../_components/Dsl'
 import { EventThumb } from '../_components/EventBits'
 import { Icon } from '../_components/Icon'
-import { Alert, Badge, Empty, PageHeader, Skeleton, StatusDot, Switch, cx } from '../_components/ui'
+import { Alert, Badge, Empty, PageHeader, Skeleton, StatusDot, Switch, When, cx } from '../_components/ui'
 import { WitnessTimeline } from '../_components/WitnessTimeline'
 
 const MONITOR_TYPES: MonitorEventType[] = [
@@ -87,7 +87,7 @@ function MonitorCard({ rule, state, now }: { rule: RuleSummary | undefined; stat
             ) : (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ex-ink2"><StatusDot tone="info" pulse>Watching</StatusDot></span>
             )}
-            {state && <span className="font-mono text-xs tabular-nums text-ex-ink3">{fmtClock(state.at)}</span>}
+            {state && <When ms={state.at} now={now} className="font-mono text-xs tabular-nums text-ex-ink3" />}
             {state?.firing.score != null && (
               <span className="font-mono text-xs tabular-nums text-ex-ink2">
                 <span className="font-sans text-ex-ink3">score</span> {fmtNum(state.firing.score)}
@@ -117,9 +117,7 @@ function Stage({ done, label }: { done: boolean; label: string }) {
 }
 
 /** One event on its way through the funnel: ingested, clip, facts, then what each rule decided. */
-function FeedRow({ item, rules, deployed }: { item: FeedItem; rules: Record<string, RuleSummary>; deployed: string[] }) {
-  const detail = useApi<EventDetail>(`/events/${encodeURIComponent(item.event_id)}`)
-  const ev = detail.data
+function FeedRow({ item, ev, now, rules, deployed }: { item: FeedItem; ev: EventDetail | undefined; now: number; rules: Record<string, RuleSummary>; deployed: string[] }) {
   const title = ev?.summary || item.label || 'New event'
   const outcomes = deployed.filter((id) => item.outcomes[id]).map((id) => ({ id, o: item.outcomes[id] }))
   const short = (s?: string) => (s ? (s.length > 44 ? `${s.slice(0, 42)}…` : s) : 'rule')
@@ -133,7 +131,7 @@ function FeedRow({ item, rules, deployed }: { item: FeedItem; rules: Record<stri
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-3">
           <p className="line-clamp-2 text-sm leading-5 text-ex-ink">{title}</p>
-          <span className="shrink-0 font-mono text-xs tabular-nums text-ex-ink3">{fmtClock(item.at)}</span>
+          <When ms={ev?.start_ms ?? item.at} now={now} className="shrink-0 text-xs text-ex-ink3" />
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
           <Stage done label="Ingested" />
@@ -195,13 +193,27 @@ export default function LiveScreen() {
   const [byRule, setByRule] = useState<Record<string, RuleState>>({})
   const [log, setLog] = useState<LogRow[]>([])
   const [feed, setFeed] = useState<FeedItem[]>([])
+  const [details, setDetails] = useState<Record<string, EventDetail>>({})
+  const asked = useRef(new Set<string>())
   const [expiring, setExpiring] = useState<string | null>(null)
   const [errors, setErrors] = useState<string[]>([])
   const cost = useApi<CostSummary>('/monitor/cost')
-  const [liveCost, setLiveCost] = useState<CostSummary | null>(null)
+  const reloadCost = cost.reload
   const firings = useApi<Firing[]>('/monitor/firings?limit=30')
 
   useEffect(() => { refreshConcepts() }, [refreshConcepts])
+
+  const loadDetail = useCallback((eventId: string) => {
+    get<EventDetail>(`/events/${encodeURIComponent(eventId)}`).then((d) => setDetails((m) => ({ ...m, [eventId]: d }))).catch(() => undefined)
+  }, [])
+  useEffect(() => {
+    for (const f of feed) if (!asked.current.has(f.event_id)) { asked.current.add(f.event_id); loadDetail(f.event_id) }
+  }, [feed, loadDetail])
+  // Newest event first by when the event started (arrival time until its details are known), so rows never look out of order.
+  const orderedFeed = useMemo(
+    () => [...feed].sort((a, b) => (details[b.event_id]?.start_ms ?? b.at) - (details[a.event_id]?.start_ms ?? a.at)),
+    [feed, details],
+  )
 
   const touchFeed = useCallback((eventId: string | null | undefined, at: number, patch: (i: FeedItem) => FeedItem) => {
     if (!eventId) return
@@ -253,8 +265,9 @@ export default function LiveScreen() {
     })
   }, [])
 
-  const streamStatus = useEventStream<MonitorEvent>('/monitor/stream', MONITOR_TYPES, (type, ev) => {
-    const at = ev.at_ms || Date.now()
+  const streamStatus = useEventStream<MonitorEvent>('/monitor/stream', MONITOR_TYPES, (type, raw) => {
+    const at = raw.at_ms || Date.now()
+    const ev = raw.message ? { ...raw, message: hideDeviceIds(raw.message) } : raw
     switch (type) {
       case 'live_facts': {
         if (pausedRef.current) break
@@ -270,9 +283,11 @@ export default function LiveScreen() {
         break
       case 'clip_ready':
         touchFeed(ev.event_id, at, (i) => ({ ...i, clip: true }))
+        if (ev.event_id) loadDetail(ev.event_id)
         break
       case 'trace_ready':
         touchFeed(ev.event_id, at, (i) => ({ ...i, clip: true, trace: true }))
+        if (ev.event_id) loadDetail(ev.event_id)
         break
       case 'escalated':
         touchFeed(ev.event_id, at, (i) => ({ ...i, escalated: true }))
@@ -294,7 +309,8 @@ export default function LiveScreen() {
         else if (ev.message) setLog((prev) => [{ key: `${at}:${ev.message}`, at, rule: ev.rule_id, action: ev.message!, status: 'ok' as const }, ...prev].slice(0, 40))
         break
       case 'cost_update':
-        if (ev.cost) setLiveCost(ev.cost)
+        // Re-read the figures from the API instead of trusting the event payload; the last value stays on screen until the new one lands.
+        reloadCost()
         break
       case 'auth_expiring':
         setExpiring(ev.message || 'The Playground token is about to expire.')
@@ -317,7 +333,7 @@ export default function LiveScreen() {
     return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idsKey])
-  const shownCost = liveCost ?? cost.data ?? null
+  const shownCost = cost.data
 
   // ---- mock helper (only when talking to the mock engine)
   const [mockKind, setMockKind] = useState('package')
@@ -462,7 +478,7 @@ export default function LiveScreen() {
                         <span className="text-ex-ink">{ACTION_TEXT[r.action] ?? r.action}</span>
                         {r.detail && <span className="text-ex-ink2"> · {r.detail}</span>}
                       </span>
-                      <span className="font-mono text-xs tabular-nums text-ex-ink3">{fmtClock(r.at)}</span>
+                      <When ms={r.at} now={now} className="font-mono text-xs tabular-nums text-ex-ink3" />
                     </li>
                   ))}
                 </ol>
@@ -494,7 +510,7 @@ export default function LiveScreen() {
                 <p className="rounded-xl border border-ex-line bg-ex-panel px-4 py-5 text-sm text-ex-ink3">No events yet. New ones appear here as they land in Ring history.</p>
               ) : (
                 <ol className="divide-y divide-ex-line border-y border-ex-line">
-                  {feed.map((f) => <FeedRow key={f.event_id} item={f} rules={ruleMap} deployed={deployedIds} />)}
+                  {orderedFeed.map((f) => <FeedRow key={f.event_id} item={f} ev={details[f.event_id]} now={now} rules={ruleMap} deployed={deployedIds} />)}
                 </ol>
               )}
             </div>

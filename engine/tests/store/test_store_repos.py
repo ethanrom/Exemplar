@@ -9,7 +9,7 @@ import pytest
 
 from exemplar.contracts.trace import PerceptionMeta, Trace
 from exemplar.ring import AuthManager, InMemoryDeduper, StoredAuth, process_delivery, sign_body
-from exemplar.store import ClipRow, EventRow, Store, decode_cursor, encode_cursor, now_ms
+from exemplar.store import PERCEPTION_UNCONFIGURED, ClipRow, EventRow, Store, decode_cursor, encode_cursor, now_ms
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
@@ -178,6 +178,25 @@ def test_clip_awaiting_queries(store):
     store.clips.set_media("a", path="/p.mp4", snapshot_path="/s.jpg", sha256="ff", duration_ms=9, status="ready")
     got = store.clips.get("a")
     assert (got.status, got.path, got.snapshot_path, got.duration_ms, got.error) == ("ready", "/p.mp4", "/s.jpg", 9, None)
+
+
+def test_unconfigured_placeholder_trace_does_not_count_as_traced(store):
+    """A "Bedrock isn't configured" placeholder shows the reason in the app but is retried once the setup is fixed;
+    any other failed trace is a settled result."""
+    add_event(store, "p")
+    add_event(store, "q")
+    note = Trace(clip_id="p", source="ring", duration_ms=0, status="perception_failed", error=PERCEPTION_UNCONFIGURED,
+                 summary=PERCEPTION_UNCONFIGURED)
+    store.traces.put("p", note, mode="fast")
+    store.traces.put("q", note.model_copy(update={"clip_id": "q", "error": "validation failed after retry", "summary": ""}),
+                     mode="fast")
+    assert not store.traces.has_any("p") and store.traces.has_any("q")
+    assert [c.id for c in store.clips.awaiting_perception()] == ["p"]
+    assert store.events.get_view("p").trace_status == "perception_failed"
+    assert store.events.get_view("p").summary == PERCEPTION_UNCONFIGURED
+    store.traces.put("p", trace("theft_a", "p"), mode="fast")                  # read once Bedrock works: replaced
+    assert store.traces.has_any("p") and store.clips.awaiting_perception() == []
+    assert store.events.get_view("p").trace_status == "ok"
 
 
 # ------------------------------------------------------------------------------------------ labels / concepts

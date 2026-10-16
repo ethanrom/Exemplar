@@ -35,6 +35,20 @@ def test_sync_ingests_playground_events_end_to_end(env):
     assert len(env.perceive.calls) == 2
 
 
+def test_live_feed_message_names_the_camera_not_its_id(env):
+    """The Live feed shows `event_ingested.message` verbatim: the device name, never (a tail of) the Ring device id."""
+    env.connect()
+    env.ring.add_event(EV1, H.T0, 6_000)
+    env.sync()
+    env.wait_trace(EV1)
+    msgs = [e["message"] for e in env.state.bus.recent() if e["type"] == "event_ingested" and e["event_id"] == EV1]
+    assert msgs == ["On-demand clip on Playground Device"]
+    assert H.DEVICE_ID[-8:] not in msgs[0]
+    H.post_webhook(env, "wh1", sub="human")                     # a webhook before any device listing was cached: no name, no id
+    unnamed = [e["message"] for e in env.state.bus.recent() if e["type"] == "event_ingested" and e["event_id"] == "evt-wh1"]
+    assert unnamed and all(H.DEVICE_ID[-8:] not in m for m in unnamed)
+
+
 def test_media_files_are_stored_under_the_data_dir(env):
     env.connect()
     env.ring.add_event(EV1, H.T0, 6_000)
@@ -112,6 +126,30 @@ def test_backend_outage_leaves_clip_untraced_and_the_next_sync_retries(env):
     del env.perceive.script[EV1]                                # backend is back
     env.sync()
     env.wait_trace(EV1)
+    assert env.state.store.clips.get(EV1).error is None
+
+
+def test_bedrock_not_configured_is_shown_instead_of_reading_forever(env):
+    """No Bedrock setup: the event reads perception_failed with a plain-language reason (Library card and detail),
+    not "Reading clip..." forever; once the setup is fixed the next sync reads the clip."""
+    from exemplar.perception import PerceptionNotConfigured
+    from exemplar.store import PERCEPTION_UNCONFIGURED
+    env.connect()
+    env.ring.add_event(EV1, H.T0, 6_000)
+    env.perceive.script[EV1] = PerceptionNotConfigured("CLAUDE_AWS_FAST_MODEL is not configured (.env)")
+    env.sync()
+    ev = env.wait_trace(EV1, "perception_failed")
+    assert ev["clip_status"] == "ready" and ev["summary"] == PERCEPTION_UNCONFIGURED
+    assert ev["trace"]["status"] == "perception_failed" and ev["trace"]["error"] == PERCEPTION_UNCONFIGURED
+    assert ev["trace_text"] is None and "CLAUDE_AWS_*" in PERCEPTION_UNCONFIGURED
+    row = next(i for i in env.client.get("/events").json()["items"] if i["id"] == EV1)
+    assert (row["trace_status"], row["summary"]) == ("perception_failed", PERCEPTION_UNCONFIGURED)
+    assert env.state.store.clips.get(EV1).error == PERCEPTION_UNCONFIGURED
+    assert [c.id for c in env.state.store.clips.awaiting_perception()] == [EV1]
+    del env.perceive.script[EV1]                                # Bedrock is set up
+    env.sync()
+    ev = env.wait_trace(EV1)
+    assert ev["summary"] and ev["summary"] != PERCEPTION_UNCONFIGURED and ev["trace"]["status"] == "ok"
     assert env.state.store.clips.get(EV1).error is None
 
 

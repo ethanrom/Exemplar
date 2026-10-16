@@ -1,3 +1,5 @@
+> This app is part of Exemplar; see the root README for setup. Originally forked from [AmazonAppDev/ring-api-helloworld](https://github.com/AmazonAppDev/ring-api-helloworld) (MIT).
+
 # Ring API Hello World
 
 Get started with the [Ring Partner API](https://developer.amazon.com/docs/ring/api-documentation.html) — explore device APIs from your terminal and stream live video in your browser.

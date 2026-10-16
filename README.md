@@ -110,7 +110,7 @@ The client retries 429 (`Retry-After`), 500, 503 and transport errors with backo
 | **Amazon Bedrock, Claude (fast model)** | per-clip perception through the Converse API: 16 frames in one request, forced tool use with a JSON schema | `engine/exemplar/perception/` |
 | **Amazon Bedrock, Claude (strong model)** | the reasoning in the synthesis agent, and re-perception of events near a rule's decision boundary (up to 32 frames) | `engine/exemplar/agent/llm.py`, `engine/exemplar/monitor/` |
 | **Strands Agents SDK** | the counterexample-guided synthesis agent: `Agent` + `BedrockModel` + tools `typecheck`, `solve_sketch`, `evaluate`, `fetch_counterexamples`, `submit_sketches` | `engine/exemplar/agent/` |
-| **Application inference profiles** | both models are addressed by profile ARN from `.env` (`CLAUDE_AWS_MODEL`, `CLAUDE_AWS_FAST_MODEL`); no model id is in the code | `engine/exemplar/settings.py` |
+| **Application inference profiles** | both models are addressed from `.env` (`CLAUDE_AWS_MODEL`, `CLAUDE_AWS_FAST_MODEL`); we use application inference profile ARNs, and no model id is in the code | `engine/exemplar/settings.py` |
 | **AWS Open Data (MEVA on S3)** | anonymous S3 access to real outdoor surveillance video and annotations (Kitware, IARPA, CC BY 4.0) for evaluation data | `eval/data/` |
 
 Details on how each service is used, what worked and what we would change are in [`docs/FEEDBACK.md`](docs/FEEDBACK.md#5-aws-services-used-in-detail).
@@ -125,8 +125,10 @@ Exemplar perceives an event once ($0.00179 on average over 1,005 clips, p50 late
 
 You need [uv](https://docs.astral.sh/uv/) (it installs Python 3.11+ for you), Node 20 or newer, Chrome, an AWS account with Amazon Bedrock access to two Claude models (one fast, one strong), and a free [Ring Developer Playground](https://developer.amazon.com/ring/console/playground) account. Commands are the same on Windows (Git Bash or PowerShell), macOS and Linux unless noted. ffmpeg is bundled through `imageio-ffmpeg`, so nothing else needs installing.
 
+**No Bedrock keys yet?** Leave every `CLAUDE_AWS_*` value empty, and `RING_*` and `OPENAI_API_KEY` too (the Ring token is pasted in the UI, and OpenAI is only used to narrate a demo video). Without Bedrock these work: the 12 example traces (`seed --fixtures`, step 3), Teach (an offline template proposer stands in for the Claude agent; Z3 solving, ranking and the question card are unchanged), the Rule screen (backtest, witnesses, calibration, Deploy), the Evidence screen, and all the tests (the ones that call Bedrock or Ring skip themselves). Reading new clips needs Bedrock: Playground events and uploads then show *"Can't read clips: Amazon Bedrock isn't configured. Set CLAUDE_AWS_* in .env."* in the Library, and are read after you add the keys and restart the engine.
+
 ```bash
-# 1. Configuration: Bedrock credentials and the two model ARNs. The Ring token is pasted in the UI later.
+# 1. Configuration: Bedrock credentials and the two models. The Ring token is pasted in the UI later.
 cp .env.example .env            # PowerShell: copy .env.example .env
 #    fill in CLAUDE_AWS_ACCESS_KEY, CLAUDE_AWS_SECRET_KEY, CLAUDE_AWS_REGION,
 #    CLAUDE_AWS_MODEL (strong), CLAUDE_AWS_FAST_MODEL (fast), CLAUDE_AWS_MODEL_ALIAS (a display name)
@@ -142,6 +144,8 @@ uv run --project engine python -m exemplar.api.seed --fixtures
 uv run --project engine python -m exemplar.api
 ```
 
+`CLAUDE_AWS_MODEL` and `CLAUDE_AWS_FAST_MODEL` each take a Bedrock model ID, an inference profile ID or an ARN (we use application inference profile ARNs); the value goes unchanged into the Converse `modelId`, and the region must be the one that model or profile lives in. Only `CLAUDE_AWS_ACCESS_KEY`, `CLAUDE_AWS_SECRET_KEY` and `CLAUDE_AWS_REGION` are read for credentials: there is no setting for a session token or an SSO profile, so use an IAM user's long-lived access key (temporary STS or SSO credentials will not work).
+
 In a second terminal:
 
 ```bash
@@ -151,6 +155,8 @@ npm ci
 npm run dev
 ```
 
+**Other ports.** The web app: `npm run dev -- -p 3001`. The engine: set `EXEMPLAR_PORT=8788` (and `EXEMPLAR_HOST`, default `127.0.0.1`) before `python -m exemplar.api`; then tell the web server where it is with `ENGINE_URL=http://127.0.0.1:8788` in its environment or in `apps/web/.env.local` (the browser only talks to the web app, which proxies to the engine). With the mock engine, `MOCK_PORT=8788 PORT=3001 npm run dev:mock` sets the mock engine's port and the web port, and points `ENGINE_URL` at the mock. In PowerShell set variables first, for example `$env:EXEMPLAR_PORT = "8788"; uv run --project engine python -m exemplar.api`.
+
 Then:
 
 1. **Connect.** Open <http://localhost:3000/connect>. In the [Ring Developer Playground](https://developer.amazon.com/ring/console/playground) generate a token (valid about 30 minutes) and paste it. A countdown shows the time left; paste a fresh token when it runs out.
@@ -159,9 +165,9 @@ Then:
 4. **Prove and deploy.** On the Rule screen, label ten random clips for calibration (or use bulk-negative), read the backtest with its witnesses and the false-alarm guarantee, and switch Deploy on. Repeat for a vehicle rule.
 5. **Run live.** Click Simulate again. The Live screen shows which rule fired, the witness timeline and the running cost per event. **Start live view** opens the Playground stream in the browser; the Ring watermark is never covered.
 
-**Upload your own footage.** The Library's **Upload footage** button cuts a video into windows and treats them as events. We use it for the package-theft story with the CC BY footage credited below; download that video yourself and upload it there, or place it at `data/external/frollard_thief.mp4` and run `uv run --project engine python -m exemplar.api.seed --frollard`.
+**Upload your own footage.** The Library's **Upload footage** button cuts a video into windows and treats them as events. We use it for the package-theft story with the CC BY footage credited below; download that video yourself and upload it there, or place it at `data/external/frollard_thief.mp4` and run `uv run --project engine python -m exemplar.api.seed --frollard`. Without `--no-perceive` that calls Bedrock for every window (results are cached); with `--no-perceive` it only imports the clips and skips Bedrock. If the file is missing the command prints a one-line message and exits with a non-zero status.
 
-**Signed webhooks.** The Playground sends none, so replay signed fixtures instead. Put `RING_WEBHOOK_SIGNING_KEY=exemplar-test-signing-key` in `apps/web/.env.local`, restart the web app, and run `uv run --project engine python scripts/send_signed_webhook.py motion_human` (add `--fresh --sub-type vehicle`, `--repeat 2`, `--tamper` and so on; `--list` shows the fixtures).
+**Signed webhooks.** The Playground sends none, so replay signed fixtures instead. The web route reads `RING_WEBHOOK_SIGNING_KEY` from the web app's own environment, so put `RING_WEBHOOK_SIGNING_KEY=exemplar-test-signing-key` in `apps/web/.env.local` (the root `.env` is only read by the engine; without the key the route answers 503 and refuses every delivery), restart the web app, and run `uv run --project engine python scripts/send_signed_webhook.py motion_human` (add `--fresh --sub-type vehicle`, `--repeat 2`, `--tamper` and so on; `--list` shows the fixtures). The script posts to the web app on port 3000 (`http://localhost:3000/api/ring/webhook`); if the web app runs elsewhere, add `--url http://localhost:3001/api/ring/webhook`.
 
 **Useful settings** (environment variables, all optional):
 
@@ -179,27 +185,34 @@ Then:
 ```bash
 uv run --project engine pytest engine/tests            # engine: DSL, solver, calibration, Ring client, API, store
 uv run --project engine pytest eval/tests              # evaluation harness and dataset tooling
-cd apps/web && node --test lib/ring/*.test.mjs         # webhook verification and WHEP URL allow-list (22 tests)
+cd apps/web && node --test lib/ring/ring.test.mjs     # webhook verification and WHEP URL allow-list (22 tests)
 cd apps/web && npm run mock:validate                   # exercises every operation of the engine API contract against a mock
 ```
+
+In PowerShell, run the `cd apps/web` lines as two commands (`cd apps/web`, then the rest), because Windows PowerShell 5.1 has no `&&`. The Node test is given as a file path on purpose: a directory argument (`node --test lib/ring/`) fails on recent Node versions (it does on Node 24), and PowerShell does not expand a `*` glob (Node 21 and later expand it themselves, Node 20 does not).
 
 The heavier checks behind the claims below are opt-in:
 
 ```bash
 # Z3 encoder vs NumPy evaluator and solver vs exhaustive search, ten times the default number of random cases
-# (3,850 generated cases in total, about 7 minutes; the default scale runs 385)
+# (3,850 generated cases in total, about 5 to 7 minutes; the default scale runs 385)
 SYNTH_PROP_SCALE=10 uv run --project engine pytest engine/tests/synth/test_synth_encoding.py engine/tests/synth/test_synth_solve.py
+#   PowerShell: $env:SYNTH_PROP_SCALE = "10"; uv run --project engine pytest engine/tests/synth/test_synth_encoding.py engine/tests/synth/test_synth_solve.py
 
 # plants 7 encoder bugs one at a time and checks that the differential test fails on each (about 15 s)
 uv run --project engine pytest engine/tests/synth/test_synth_mutations.py
 
-# axe-core scan of every screen against the mock engine (setup notes in the script header)
-cd apps/web && npm run dev:mock   # in one terminal, then in another: node mock/a11y.mjs
+# axe-core scan of every screen against the mock engine. One-time setup (installs into the gitignored mock/.cache/;
+# the script launches your installed Chrome headless):
+cd apps/web
+npm i --prefix mock/.cache/pw playwright-core
+npm i --prefix mock/.cache/axe axe-core
+npm run dev:mock                 # in one terminal, then in another: node mock/a11y.mjs [http://localhost:3000]
 ```
 
 Tests that call Bedrock or Ring are skipped unless credentials are present. What the suites establish:
 
-- **The solver encoding is checked against an independent evaluator.** Over 6,000 randomized cases ran during development with 0 mismatches; the deep configuration in the repo (`SYNTH_PROP_SCALE=10`, command above) reproduces 3,850 of them in about 7 minutes: 2,000 randomly generated sketches compare the Z3 encoding with a NumPy evaluator and 1,850 more compare the solver with an exhaustive search, with no mismatches. 7 of 7 deliberately planted encoder bugs are caught by that comparison (`engine/tests/synth/test_synth_mutations.py`). A third, literal reference implementation of the semantics cross-checks the vectorised evaluator bit for bit (`engine/tests/dsl/`, `engine/tests/synth/`).
+- **The solver encoding is checked against an independent evaluator.** Over 6,000 randomized cases ran during development with 0 mismatches; the deep configuration in the repo (`SYNTH_PROP_SCALE=10`, command above) reproduces 3,850 of them in about 5 to 7 minutes: 2,000 randomly generated sketches compare the Z3 encoding with a NumPy evaluator and 1,850 more compare the solver with an exhaustive search, with no mismatches. 7 of 7 deliberately planted encoder bugs are caught by that comparison (`engine/tests/synth/test_synth_mutations.py`). A third, literal reference implementation of the semantics cross-checks the vectorised evaluator bit for bit (`engine/tests/dsl/`, `engine/tests/synth/`).
 - **The logic obeys its laws.** Property tests (Hypothesis) state that the sign of robustness agrees with the boolean result, that negation is an exact duality, and that widening `eventually` and `then` windows never decreases robustness ([`docs/DSL.md`](docs/DSL.md)).
 - **The false-alarm bound holds.** `engine/tests/calibrate/test_calibrate_validity.py` checks it exactly on a small discrete distribution and by a 100,000-draw simulation with heavy ties, and shows that a deliberately wrong quantile fails the same check. The conformal rank uses exact rational arithmetic because floating-point `ceil((n+1)(1-alpha))` is off by one for some alpha.
 - **Webhooks are verified like production.** Signed, tampered, re-serialised, unsigned and duplicate payloads are tested in both Python and Node against the same fixtures.

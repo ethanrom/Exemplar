@@ -1,3 +1,5 @@
+import type { EventSummary } from './types'
+
 export const fmtScore = (x: number | null | undefined, digits = 2) =>
   x == null ? '-' : `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(digits)}`
 
@@ -41,8 +43,35 @@ export function fmtRelative(ms: number, now = Date.now()): string {
   return `${Math.round(abs / 86_400_000)} d ${sign}`
 }
 
+/** Full local timestamp, for tooltips: "Oct 15, 2026, 2:25:08 AM". */
+export const fmtFull = (ms: number) => new Date(ms).toLocaleString([], { dateStyle: 'medium', timeStyle: 'medium' })
+
+const fmtTime = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+
+/** "Oct 13, 2:25 AM": the date with the time of day. */
+export const fmtDay = (ms: number) => new Date(ms).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+
+/**
+ * A moment as a person says it, so times on different days never look out of order:
+ * "just now", "2 min ago", "3 h ago" (today), "yesterday 2:25 AM", then "Oct 13, 2:25 AM". Pair it with `fmtFull` in a tooltip.
+ */
+export function fmtWhen(ms: number, now = Date.now()): string {
+  const diff = now - ms
+  if (diff < -60_000) return fmtDay(ms)
+  if (diff < 45_000) return 'just now'
+  if (diff < 3_600_000) return `${Math.max(1, Math.round(diff / 60_000))} min ago`
+  const midnight = (t: number) => { const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() }
+  const days = Math.round((midnight(now) - midnight(ms)) / 86_400_000)
+  if (days <= 0) return `${Math.round(diff / 3_600_000)} h ago`
+  if (days === 1) return `yesterday ${fmtTime(ms)}`
+  return fmtDay(ms)
+}
+
 export const fmtUsd = (x: number | null | undefined) =>
   x == null ? '-' : x === 0 ? '$0' : x < 0.01 ? `$${x.toFixed(4)}` : `$${x.toFixed(3)}`
+
+/** Ring device ids (ava1.ring.device.…) are never shown: any message that mentions one reads "the camera" instead. */
+export const hideDeviceIds = (s: string) => s.replace(/\bava1\.ring\.device\.[A-Za-z0-9_-]+/g, 'the camera')
 
 export const fmtInt = (x: number | null | undefined) => (x == null ? '-' : Math.round(x).toLocaleString())
 
@@ -70,6 +99,17 @@ export const SUBTYPE_LABEL: Record<string, string> = {
   motion: 'Motion',
   ding: 'Ring',
   on_demand: 'On demand',
+}
+
+/**
+ * A clip's name for people: its one-sentence summary, else what it is and when ("Person · Oct 15, 12:38 PM").
+ * Never the raw clip or event id, which means nothing to the reader.
+ */
+export function clipName(ev: Pick<EventSummary, 'summary' | 'kind' | 'sub_type' | 'source' | 'start_ms' | 'trace_status'> | null | undefined): string {
+  if (!ev) return 'A labelled clip'
+  if (ev.summary && ev.trace_status !== 'perception_failed') return ev.summary
+  const what = (ev.sub_type && SUBTYPE_LABEL[ev.sub_type]) || (ev.kind && KIND_LABEL[ev.kind]) || SOURCE_LABEL[ev.source] || 'Clip'
+  return `${what} · ${fmtDay(ev.start_ms)}`
 }
 
 /** Minimum number of random negatives for a conformal guarantee at level alpha: ceil(1/alpha) - 1. */

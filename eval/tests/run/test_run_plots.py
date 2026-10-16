@@ -105,3 +105,32 @@ def test_cli_writes_all_files(tmp_path):
     assert plots_main(["--results", str(p), "--out", str(out)]) == 0
     assert sorted(f.name for f in out.iterdir()) == ["cost_latency.svg", "f1_by_concept.svg", "results_table.md", "validity.svg"]
     assert plots_main(["--results", str(tmp_path / "none.json"), "--out", str(out)]) == 2
+
+
+# ------------------------------------------------------------------------------------------ cost_vs_rules
+def test_cost_vs_rules_output_does_not_depend_on_where_the_figures_came_from(tmp_path, capsys):
+    """Regenerating the tracked docs/eval page must not change it: same text from the ledgers and from the recorded figures."""
+    import json
+
+    from eval.plots import cost_vs_rules as cvr
+    f = cvr.FALLBACK
+    ledgers = tmp_path / "data" / "eval"
+    ledgers.mkdir(parents=True)
+    pre = [{"status": "ok", "cached": False, "usd": f["exemplar_usd"], "perception_latency_ms": f["exemplar_p50_latency_s"] * 1000}
+           for _ in range(f["exemplar_n"])]
+    n, half = f["zero_shot_n"], f["zero_shot_n"] // 2 + 1          # half + 1 calls at the median, the rest higher: the mean is above it
+    high = (f["zero_shot_mean_usd"] * n - half * f["zero_shot_median_usd"]) / (n - half)
+    zs = [{"phase": "zero_shot", "usd": f["zero_shot_median_usd"] if i < half else high} for i in range(n)]
+    (ledgers / "precompute.jsonl").write_text("\n".join(json.dumps(r) for r in pre), encoding="utf-8")
+    (ledgers / "costs.jsonl").write_text("\n".join(json.dumps(r) for r in zs), encoding="utf-8")
+
+    def run(data_dir, tag):
+        svg, md = tmp_path / f"{tag}.svg", tmp_path / f"{tag}.md"
+        assert cvr.main(["--data-dir", str(data_dir), "--svg", str(svg), "--md", str(md)]) == 0
+        return svg.read_bytes(), md.read_bytes()
+
+    from_ledgers = run(tmp_path / "data", "a")
+    from_fallback = run(tmp_path / "missing", "b")
+    capsys.readouterr()
+    assert from_ledgers[1] == from_fallback[1] and from_ledgers[0] == from_fallback[0]
+    assert b"recorded figures" not in from_fallback[1]          # the old wording that made the Source line flip

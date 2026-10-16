@@ -10,6 +10,8 @@
 * `--fixtures`          `engine/tests/fixtures/traces/*.json` as `fixture` events without media (no perception).
 
 Each imported clip gets a fast trace (the perception cache makes repeats free; the cost ledger skips cached results).
+This calls Bedrock; `--no-perceive` imports the media and skips it. A missing input (the frollard clip, the recording)
+stops the run before anything is imported: one line on stderr, exit status 2.
 The target database is `settings.db_path` (`EXEMPLAR_DATA_DIR` / `EXEMPLAR_DB`); the server need not be running.
 """
 from __future__ import annotations
@@ -33,6 +35,10 @@ from .config import configure_logging
 from .state import AppState
 
 log = logging.getLogger("exemplar.api.seed")
+
+
+class SeedInputError(Exception):
+    """A seed input is missing; `main` prints the message on one line and exits 2 (no traceback)."""
 
 FROLLARD_ATTRIBUTION = ('"Thief stealing our package" by frollard, CC BY 4.0, '
                         'https://www.youtube.com/watch?v=TfTFu8lGrwk')
@@ -120,15 +126,18 @@ def run_seed(state: AppState, *, media_dir: Path, playground: bool, frollard: bo
              perceive: bool = True, workers: int = 2, spike_dir: Path | None = None,
              video: Path | None = None) -> dict[str, Any]:
     out: dict[str, Any] = {}
+    sd = spike_dir or media_dir / "spike" / "ring"
+    vp = video or media_dir / "external" / "frollard_thief.mp4"
+    if playground and not sd.is_dir():                      # check every input before importing or perceiving anything
+        raise SeedInputError(f"Playground recording not found: {sd} (pass --spike-dir PATH or --media-dir PATH)")
+    if frollard and not vp.is_file():
+        raise SeedInputError(f"frollard clip not found: put frollard_thief.mp4 at {vp} (or pass --video PATH); "
+                             "--no-perceive skips Bedrock but the clip is still needed")
     if playground:
-        sd = spike_dir or media_dir / "spike" / "ring"
         ids = import_playground(state, sd)
         out["playground_events"] = len(ids)
         out["playground_traced"] = perceive_clips(state, ids, workers) if perceive else 0
     if frollard:
-        vp = video or media_dir / "external" / "frollard_thief.mp4"
-        if not vp.is_file():
-            raise FileNotFoundError(f"frollard clip not found: {vp}")
         specs = import_frollard(state, vp)
         out["frollard_windows"] = len(specs)
         if perceive:
@@ -148,7 +157,7 @@ def run_seed(state: AppState, *, media_dir: Path, playground: bool, frollard: bo
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m exemplar.api.seed", description=__doc__.split("\n\n")[0])
     ap.add_argument("--playground-spike", action="store_true", help="import the recorded Playground events")
-    ap.add_argument("--frollard", action="store_true", help="import the frollard clip as 20 s / 5 s upload windows")
+    ap.add_argument("--frollard", action="store_true", help="import data/external/frollard_thief.mp4 as 20 s / 5 s upload windows (needs the clip; calls Bedrock unless --no-perceive)")
     ap.add_argument("--fixtures", action="store_true", help="load engine/tests/fixtures/traces/*.json as fixture events")
     ap.add_argument("--media-dir", type=Path, help="dir holding spike/ring/ and external/ (default: <data_dir>)")
     ap.add_argument("--spike-dir", type=Path, help="override <media-dir>/spike/ring")
@@ -162,11 +171,16 @@ def main(argv: list[str] | None = None) -> int:
     settings = get_settings()
     state = AppState(settings=settings)
     print(f"database: {settings.db_path}")
-    res = run_seed(state, media_dir=args.media_dir or settings.data_dir, playground=args.playground_spike,
-                   frollard=args.frollard, fixtures=args.fixtures, perceive=not args.no_perceive,
-                   workers=args.workers, spike_dir=args.spike_dir, video=args.video)
+    try:
+        res = run_seed(state, media_dir=args.media_dir or settings.data_dir, playground=args.playground_spike,
+                       frollard=args.frollard, fixtures=args.fixtures, perceive=not args.no_perceive,
+                       workers=args.workers, spike_dir=args.spike_dir, video=args.video)
+    except SeedInputError as e:
+        print(f"seed: {e}", file=sys.stderr)
+        return 2
+    finally:
+        state.shutdown()
     print(json.dumps(res, indent=2))
-    state.shutdown()
     return 0
 
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { fmtDateTime, fmtDuration } from '../_lib/format'
+import { clipName, fmtDateTime, fmtDuration } from '../_lib/format'
 import { useApi } from '../_lib/hooks'
 import type { EventDetail } from '../_lib/types'
 import { Icon } from './Icon'
@@ -23,6 +23,8 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
   }, [eventId])
 
   const ev = detail.data
+  // When the clip could not be read, the summary slot carries the reason: show it in the facts panel, not as the clip's name.
+  const name = ev && ev.trace_status !== 'perception_failed' ? ev.summary : null
   return (
     <dialog
       ref={ref}
@@ -37,7 +39,7 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
             <div className="min-w-0">
               <p className="text-xs font-medium text-ex-ink3">Clip details</p>
               <h2 id="event-dialog-title" className="mt-0.5 line-clamp-2 text-md font-semibold leading-6 tracking-tight">
-                {ev?.summary || 'Event details'}
+                {name || 'Event details'}
               </h2>
             </div>
             <IconButton icon="cross" label="Close" onClick={() => ref.current?.close()} />
@@ -60,7 +62,7 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
                       preload="metadata"
                       poster={ev.has_snapshot ? snapshotUrl(ev.id) : undefined}
                       onError={() => setClipError(true)}
-                      aria-label={`Clip: ${ev.summary ?? ev.id}`}
+                      aria-label={`Clip: ${name ?? clipName(ev)}`}
                       className="aspect-video w-full rounded-lg bg-black"
                     >
                       <source src={clipUrl(ev.id)} type="video/mp4" />
@@ -68,7 +70,7 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
                   ) : ev.has_snapshot ? (
                     <div>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={snapshotUrl(ev.id)} alt={ev.summary ?? 'Event snapshot'} className="aspect-video w-full rounded-lg bg-black object-cover" />
+                      <img src={snapshotUrl(ev.id)} alt={name ?? 'Event snapshot'} className="aspect-video w-full rounded-lg bg-black object-cover" />
                       <p className="mt-1.5 text-xs text-ex-ink3">The clip is not available{ev.clip_status !== 'ready' ? ` yet (${ev.clip_status})` : ''}; showing the snapshot.</p>
                     </div>
                   ) : ev.trace?.status === 'ok' ? (
@@ -128,7 +130,7 @@ export function EventDialog({ eventId, onClose }: { eventId: string | null; onCl
                     </>
                   ) : (
                     <p className="mt-1.5 text-sm text-ex-ink2">
-                      {ev.trace_status === 'perception_failed' ? ev.trace?.error || 'Perception failed for this clip, so it is excluded from learning and backtests.' : 'No trace yet.'}
+                      {ev.trace_status === 'perception_failed' ? ev.trace?.error || ev.summary || 'Perception failed for this clip, so it is excluded from learning and backtests.' : ev.clip_status === 'ready' ? 'Reading this clip…' : 'No trace yet.'}
                     </p>
                   )}
                 </div>

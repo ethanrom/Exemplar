@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../_lib/app'
 import { ApiError, errorMessage, get, post, put } from '../_lib/api'
+import { clipName } from '../_lib/format'
 import { useApi, useEventStream } from '../_lib/hooks'
 import type { Concept, EventSummary, LabelSummary, Question, RuleSummary, Run, RunEvent, RunEventType } from '../_lib/types'
 import { AgentTimeline } from '../_components/AgentTimeline'
@@ -73,7 +74,7 @@ function NewConcept({ onCreated }: { onCreated: (c: Concept) => void }) {
 function ExampleRow({
   ev, concept, onOpen, onLabel,
 }: { ev: EventSummary; concept: Concept | null; onOpen: () => void; onLabel: (v: 'pos' | 'neg' | null) => void }) {
-  const title = ev.summary ?? ev.clip_id
+  const title = clipName(ev)
   const label = ev.label?.value ?? null
   return (
     <li className="flex items-center gap-3 py-2.5">
