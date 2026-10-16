@@ -8,7 +8,7 @@ import '@/lib/video-processors' // registers the built-in processors (and the Ex
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
 import { useApp } from '../_lib/app'
 import { errorMessage, get, post } from '../_lib/api'
-import { fmtClock, fmtInt, fmtNum, fmtUsd, keepUnits } from '../_lib/format'
+import { fmtClock, fmtInt, fmtNum, fmtUsd, hideDeviceIds, keepUnits } from '../_lib/format'
 import { useApi, useEventStream, useNow } from '../_lib/hooks'
 import type { CostSummary, Device, EventDetail, Firing, LiveFact, MonitorEvent, MonitorEventType, RuleSummary } from '../_lib/types'
 import { Dsl, DslBlock } from '../_components/Dsl'
@@ -253,8 +253,9 @@ export default function LiveScreen() {
     })
   }, [])
 
-  const streamStatus = useEventStream<MonitorEvent>('/monitor/stream', MONITOR_TYPES, (type, ev) => {
-    const at = ev.at_ms || Date.now()
+  const streamStatus = useEventStream<MonitorEvent>('/monitor/stream', MONITOR_TYPES, (type, raw) => {
+    const at = raw.at_ms || Date.now()
+    const ev = raw.message ? { ...raw, message: hideDeviceIds(raw.message) } : raw
     switch (type) {
       case 'live_facts': {
         if (pausedRef.current) break

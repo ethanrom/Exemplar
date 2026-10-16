@@ -44,6 +44,9 @@ export function fmtRelative(ms: number, now = Date.now()): string {
 export const fmtUsd = (x: number | null | undefined) =>
   x == null ? '-' : x === 0 ? '$0' : x < 0.01 ? `$${x.toFixed(4)}` : `$${x.toFixed(3)}`
 
+/** Ring device ids (ava1.ring.device.…) are never shown: any message that mentions one reads "the camera" instead. */
+export const hideDeviceIds = (s: string) => s.replace(/\bava1\.ring\.device\.[A-Za-z0-9_-]+/g, 'the camera')
+
 export const fmtInt = (x: number | null | undefined) => (x == null ? '-' : Math.round(x).toLocaleString())
 
 export const SOURCE_LABEL: Record<string, string> = {

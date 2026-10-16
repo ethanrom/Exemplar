@@ -35,6 +35,20 @@ def test_sync_ingests_playground_events_end_to_end(env):
     assert len(env.perceive.calls) == 2
 
 
+def test_live_feed_message_names_the_camera_not_its_id(env):
+    """The Live feed shows `event_ingested.message` verbatim: the device name, never (a tail of) the Ring device id."""
+    env.connect()
+    env.ring.add_event(EV1, H.T0, 6_000)
+    env.sync()
+    env.wait_trace(EV1)
+    msgs = [e["message"] for e in env.state.bus.recent() if e["type"] == "event_ingested" and e["event_id"] == EV1]
+    assert msgs == ["On-demand clip on Playground Device"]
+    assert H.DEVICE_ID[-8:] not in msgs[0]
+    H.post_webhook(env, "wh1", sub="human")                     # a webhook before any device listing was cached: no name, no id
+    unnamed = [e["message"] for e in env.state.bus.recent() if e["type"] == "event_ingested" and e["event_id"] == "evt-wh1"]
+    assert unnamed and all(H.DEVICE_ID[-8:] not in m for m in unnamed)
+
+
 def test_media_files_are_stored_under_the_data_dir(env):
     env.connect()
     env.ring.add_event(EV1, H.T0, 6_000)

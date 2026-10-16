@@ -28,6 +28,7 @@ if TYPE_CHECKING:  # pragma: no cover
 log = logging.getLogger("exemplar.api.ingest")
 
 _HISTORY_KINDS = ("motion", "on_demand", "ding")
+_KIND_LABEL = {"motion": "Motion", "ding": "Doorbell press", "on_demand": "On-demand clip"}
 
 
 class IngestPipeline:
@@ -113,9 +114,17 @@ class IngestPipeline:
         if not st.store.events.insert(row):
             return None
         st.store.clips.insert(ClipRow(id=row.id, event_id=row.id, created_at_ms=now_ms(), status="pending"))
-        st.bus.emit("event_ingested", event_id=row.id,
-                    message=f"{row.kind or 'event'} on {(row.device_id or 'device')[-8:]}")
+        what = _KIND_LABEL.get(row.kind or "", "Event")
+        name = self.device_name(row.device_id)                      # shown in the Live feed: the camera's name, never its id
+        st.bus.emit("event_ingested", event_id=row.id, message=f"{what} on {name}" if name else what)
         return row
+
+    def device_name(self, device_id: str | None) -> str | None:
+        """The name of a device from the last device listing (None until one has been fetched)."""
+        for d in (self._devices[1] if self._devices else []):
+            if d.id == device_id and getattr(d, "name", None):
+                return d.name
+        return None
 
     def kick_sync(self) -> None:
         """Poll right now in the background (after a fresh token was pasted)."""

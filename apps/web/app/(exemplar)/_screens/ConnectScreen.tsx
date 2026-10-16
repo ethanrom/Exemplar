@@ -276,7 +276,6 @@ function DevicesSection() {
                   <p className="text-md font-semibold tracking-tight text-ex-ink">{d.name}</p>
                   {d.online != null && <span className="text-xs text-ex-ink2"><StatusDot tone={d.online ? 'pos' : 'neg'}>{d.online ? 'Online' : 'Offline'}</StatusDot></span>}
                 </div>
-                <p className="mt-0.5 font-mono text-xs text-ex-ink3">Device ID ····{d.id.slice(-6)}</p>
                 <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5" aria-label="Capabilities">
                   <Capability on={!!d.snapshot}>Snapshots</Capability>
                   <Capability on={!!d.chime}>{d.chime ? 'Chime playback' : 'No chime'}</Capability>
