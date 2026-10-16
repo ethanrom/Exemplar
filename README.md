@@ -2,7 +2,7 @@
 
 > Show a Ring camera one or two clips of what you care about, and it learns a readable rule, proves it on your history with a statistical false-alarm guarantee, and watches for it live, explaining every alert.
 
-Ring understands four things: person, vehicle, package, other motion. People's real questions are more specific: "a package was taken by someone who didn't deliver it", "a car has been idling at my loading dock for two minutes". **Exemplar lets you teach those by example.** An LLM reads each clip once and turns it into symbolic facts; a Strands agent proposes rule sketches in a small temporal-logic language; the Z3 solver fills in the exact numbers; and a conformal calibration step puts a guarantee on how often the rule may cry wolf. Then the rule runs on live Ring events, and each alert shows the timeline of facts that triggered it.
+Every household cares about something different. People's real questions are specific: "a package was taken by someone who didn't deliver it", "a car has been idling at my loading dock for two minutes". **Exemplar lets you teach those by example.** An LLM reads each clip once and turns it into symbolic facts; a Strands agent proposes rule sketches in a small temporal-logic language; the Z3 solver fills in the exact numbers; and a conformal calibration step puts a guarantee on how often the rule may cry wolf. Then the rule runs on live Ring events, and each alert shows the timeline of facts that triggered it.
 
 Entry for the Amazon Developer Hackathon 2026: **Ring** track, **AWS Builder** mini challenge.
 

@@ -140,10 +140,10 @@ export default function HomeScreen() {
           </p>
           <h1 className="mt-6 text-balance text-3xl font-semibold tracking-tight text-ex-ink sm:text-4xl">
             Teach your Ring camera
-            <span className="block text-ex-ink3">new detectors by example.</span>
+            <span className="block text-ex-ink3">what matters to you.</span>
           </h1>
           <p className="mt-6 max-w-xl text-md text-ex-ink2 sm:text-lg">
-            Ring knows four things: person, vehicle, package, other motion. Show Exemplar a clip or two of what you actually care about. It learns a readable rule, tests its false-alarm rate on your own history, and watches live with an explanation for every alert.
+            Teach detectors by example: show Exemplar a clip or two of what you care about. It learns a readable rule, tests its false-alarm rate on your own history, and watches live with an explanation for every alert.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link href={started ? '/library' : '/connect'} className="btn btn-primary btn-lg">

@@ -27,13 +27,13 @@ Teach your Ring camera new detectors by example: readable rules, a proven false-
 
 ### Inspiration: the problem
 
-A Ring camera understands four things: person, vehicle, package, other motion. People's real questions are more specific:
+Every household cares about something different. People's real questions are specific:
 
 - "A package was taken by someone who isn't the one who delivered it."
 - "A car is idling at my loading dock for more than two minutes."
 - "Someone came to the door but didn't ring the bell."
 
-Motion zones are too blunt to express any of these. Prompting a vision model with a sentence can sometimes work, but it gives no idea how often it will be wrong until it has already spammed you, it cannot explain why it fired, and it costs a model call for every rule on every event.
+These are questions about what happens over time, not just what appears in a frame. Prompting a vision model with a sentence can sometimes work, but it gives no idea how often it will be wrong until it has already spammed you, it cannot explain why it fired, and it costs a model call for every rule on every event.
 
 ### What it does
 
