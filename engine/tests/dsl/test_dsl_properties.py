@@ -206,12 +206,21 @@ def test_witness_is_consistent_with_score(rt):
     assert set(w["bindings"]) == {v.name for v in rule.vars}
     assert tuple(w["bindings"].values()) in tr.bindings(tuple(v.type for v in rule.vars))
     body = rho(rule.body, tr, w["bindings"])
-    for sp in w["spans"]:
+    spans = w["spans"]
+    for k, sp in enumerate(spans):
         assert sp["t_start_ms"] <= sp["t_end_ms"]
         if sp["op"] in ("eventually", "always", "holds_for") and sp["t_start_ms"] != sp["t_end_ms"]:
             # a window span: starts at/after the first frame, is clipped at the last frame, and holds a frame
             assert times[0] <= sp["t_start_ms"] <= sp["t_end_ms"] <= times[-1]
             assert any(sp["t_start_ms"] <= x <= sp["t_end_ms"] for x in times)
+        elif sp["op"] in ("and", "or"):
+            # the composite root covers its evidence: the hull of every span beneath it, so its ends are
+            # frame times only when the spans that set them are (a window span can end between frames)
+            assert sp["path"] == "body" and k == 0 and len(spans) > 1
+            rest = spans[1:]
+            assert sp["t_start_ms"] == min(s["t_start_ms"] for s in rest)
+            assert sp["t_end_ms"] == max(s["t_end_ms"] for s in rest)
+            assert times[0] <= sp["t_start_ms"] <= sp["t_end_ms"] <= times[-1]
         else:
             assert sp["t_start_ms"] in times and sp["t_end_ms"] in times
         node = node_at(rule, sp["path"])
