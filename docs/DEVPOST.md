@@ -4,11 +4,11 @@ Copy-ready text for the Devpost form. Fields that depend on the final upload are
 
 ## Project name
 
-**Exemplar**
+**Exemplar: Teach Your Ring Camera by Example**
 
 ## Tagline (one line)
 
-Teach your Ring camera new detectors by example: readable rules, a bounded false-alarm rate, and an explanation for every alert.
+Teach your Ring camera the alerts that matter to you: show a few clips, get a readable rule with a bounded false-alarm rate, and see exactly why every alert fired.
 
 ## Track and mini challenge
 
