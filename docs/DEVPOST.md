@@ -32,7 +32,11 @@ Teach your Ring camera the alerts that matter to you: show a few clips, get a re
 
 ### Inspiration
 
-A Ring camera already tells you when it sees a person, a vehicle or motion. But the moments people actually care about are specific to their home or business, and they unfold over time:
+It's 2 p.m. and you're at work. A box is on your porch, and your Ring camera has already sent you a motion alert for the courier, another for a neighbour walking a dog, and another for a car going by. What you actually want to know is simpler: *is that package still sitting there an hour later?*
+
+That gap matters at scale. About 63 million parcels are shipped in the US every day ([Pitney Bowes Parcel Shipping Index 2026](https://www.pitneybowes.com/content/dam/pitneybowes/us/en/shipping-index/dmr-5127-parcel-shipping-index-report-2026-ebook.pdf)), and one in four Americans has had a package stolen ([Security.org, 2025](https://www.security.org/package-theft/annual-report/)).
+
+A Ring camera already tells you when it sees a person, a vehicle or motion. But the moments people care about are specific to their home or business, and they unfold over time:
 
 - a delivery that has been sitting on the steps for a while;
 - someone picking a package up off the porch;
