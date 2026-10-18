@@ -1,0 +1,252 @@
+{
+ "events": [
+  {
+   "alias": "pg-bird-07",
+   "order": 1,
+   "class": "pg_bird",
+   "decisions": [
+    {
+     "rule": "package-deployed",
+     "stage": 1,
+     "score": -0.5,
+     "tau": 0.0,
+     "fired": false,
+     "witness": null
+    },
+    {
+     "rule": "vehicle-deployed",
+     "stage": 1,
+     "score": -0.5,
+     "tau": 0.0,
+     "fired": false,
+     "witness": null
+    }
+   ]
+  },
+  {
+   "alias": "pg-veh-05",
+   "order": 2,
+   "class": "pg_vehicle",
+   "decisions": [
+    {
+     "rule": "package-deployed",
+     "stage": 1,
+     "score": -0.5,
+     "tau": 0.0,
+     "fired": false,
+     "witness": null
+    },
+    {
+     "rule": "vehicle-deployed",
+     "stage": 1,
+     "score": 0.44999999999999996,
+     "tau": 0.0,
+     "fired": true,
+     "witness": {
+      "clip_id": "pg-veh-05",
+      "score": 0.44999999999999996,
+      "bindings": {
+       "v": "v2"
+      },
+      "entities": [
+       {
+        "id": "v2",
+        "type": "vehicle",
+        "attrs": [
+         "suv",
+         "dark"
+        ]
+       }
+      ],
+      "spans": [
+       {
+        "path": "body",
+        "op": "atom",
+        "text": "in_zone(v, driveway)",
+        "t_start_ms": 671,
+        "t_end_ms": 671,
+        "rho": 0.44999999999999996
+       }
+      ],
+      "english": "There is a vehicle v such that v is in the driveway.",
+      "rule_id": "vehicle-deployed",
+      "tau": 0.0,
+      "margin": 0.44999999999999996
+     }
+    }
+   ]
+  },
+  {
+   "alias": "pg-pkg-19",
+   "order": 3,
+   "class": "pg_package",
+   "decisions": [
+    {
+     "rule": "package-deployed",
+     "stage": 1,
+     "score": 0.44999999999999996,
+     "tau": 0.0,
+     "fired": true,
+     "witness": {
+      "clip_id": "pg-pkg-19",
+      "score": 0.44999999999999996,
+      "bindings": {
+       "k": "k1"
+      },
+      "entities": [
+       {
+        "id": "k1",
+        "type": "package",
+        "attrs": [
+         "cardboard_box"
+        ]
+       }
+      ],
+      "spans": [
+       {
+        "path": "body",
+        "op": "holds_for",
+        "text": "holds_for >= 15 (in_zone(k, steps) or in_zone(k, porch))",
+        "t_start_ms": 991,
+        "t_end_ms": 15991,
+        "rho": 0.44999999999999996
+       },
+       {
+        "path": "body.arg.args[0]",
+        "op": "atom",
+        "text": "in_zone(k, steps)",
+        "t_start_ms": 991,
+        "t_end_ms": 991,
+        "rho": 0.44999999999999996
+       }
+      ],
+      "english": "There is a package k such that (k is on the steps or k is on the porch) continuously for at least 15 s.",
+      "rule_id": "package-deployed",
+      "tau": 0.0,
+      "margin": 0.44999999999999996
+     }
+    },
+    {
+     "rule": "vehicle-deployed",
+     "stage": 1,
+     "score": -0.5,
+     "tau": 0.0,
+     "fired": false,
+     "witness": null
+    }
+   ]
+  },
+  {
+   "alias": "pg-veh-06",
+   "order": 4,
+   "class": "pg_vehicle",
+   "decisions": [
+    {
+     "rule": "package-deployed",
+     "stage": 1,
+     "score": -0.5,
+     "tau": 0.0,
+     "fired": false,
+     "witness": null
+    },
+    {
+     "rule": "vehicle-deployed",
+     "stage": 1,
+     "score": 0.44999999999999996,
+     "tau": 0.0,
+     "fired": true,
+     "witness": {
+      "clip_id": "pg-veh-06",
+      "score": 0.44999999999999996,
+      "bindings": {
+       "v": "v1"
+      },
+      "entities": [
+       {
+        "id": "v1",
+        "type": "vehicle",
+        "attrs": [
+         "silver_suv"
+        ]
+       }
+      ],
+      "spans": [
+       {
+        "path": "body",
+        "op": "atom",
+        "text": "in_zone(v, driveway)",
+        "t_start_ms": 671,
+        "t_end_ms": 671,
+        "rho": 0.44999999999999996
+       }
+      ],
+      "english": "There is a vehicle v such that v is in the driveway.",
+      "rule_id": "vehicle-deployed",
+      "tau": 0.0,
+      "margin": 0.44999999999999996
+     }
+    }
+   ]
+  },
+  {
+   "alias": "pg-pkg-20",
+   "order": 5,
+   "class": "pg_package",
+   "decisions": [
+    {
+     "rule": "package-deployed",
+     "stage": 1,
+     "score": 0.44999999999999996,
+     "tau": 0.0,
+     "fired": true,
+     "witness": {
+      "clip_id": "pg-pkg-20",
+      "score": 0.44999999999999996,
+      "bindings": {
+       "k": "k1"
+      },
+      "entities": [
+       {
+        "id": "k1",
+        "type": "package",
+        "attrs": [
+         "cardboard_box"
+        ]
+       }
+      ],
+      "spans": [
+       {
+        "path": "body",
+        "op": "holds_for",
+        "text": "holds_for >= 15 (in_zone(k, steps) or in_zone(k, porch))",
+        "t_start_ms": 991,
+        "t_end_ms": 15991,
+        "rho": 0.44999999999999996
+       },
+       {
+        "path": "body.arg.args[1]",
+        "op": "atom",
+        "text": "in_zone(k, porch)",
+        "t_start_ms": 991,
+        "t_end_ms": 991,
+        "rho": 0.44999999999999996
+       }
+      ],
+      "english": "There is a package k such that (k is on the steps or k is on the porch) continuously for at least 15 s.",
+      "rule_id": "package-deployed",
+      "tau": 0.0,
+      "margin": 0.44999999999999996
+     }
+    },
+    {
+     "rule": "vehicle-deployed",
+     "stage": 1,
+     "score": -0.5,
+     "tau": 0.0,
+     "fired": false,
+     "witness": null
+    }
+   ]
+  }
+ ]
+}

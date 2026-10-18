@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-padding-top: 5rem;
+  background: var(--ex-bg);
+}
+
+body {
+  color: var(--ex-ink);
+  background: var(--ex-bg);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(88, 142, 255, 0.35);
+}
+
+/* Quiet scrollbars that still show where the scrollable regions are. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); background-clip: content-box; }
+
+/* WCAG 2.4.7 / 2.4.11: one focus indicator, visible on every surface we use (>= 3:1 and 2 px). */
+:focus-visible {
+  outline: 2px solid var(--ex-accent-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* WCAG 2.3.3 / user preference: no motion when the user asks for none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  /* A bare `grid` gets one shrinkable column, so wide children (tables, charts) scroll inside their own
+     box instead of stretching the page on phones. grid-cols-* utilities (any breakpoint) still win. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Native selects: same chrome as text fields, with our own chevron. */
+  select.field {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%238A8F98' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem 1rem;
+  }
+  select.field option {
+    background: var(--ex-raised);
+    color: var(--ex-ink);
+  }
+
+  dialog::backdrop {
+    background: rgba(4, 5, 6, 0.72);
+    backdrop-filter: blur(2px);
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------------ surfaces */
+  .card {
+    @apply rounded-xl border border-ex-line bg-ex-panel p-5;
+  }
+
+  /* ------------------------------------------------------------------ type helpers */
+  .label {
+    @apply text-xs font-medium text-ex-ink3;
+  }
+  .card-title {
+    @apply text-md font-semibold tracking-tight text-ex-ink;
+  }
+  .num {
+    @apply font-mono tabular-nums;
+  }
+
+  /* ------------------------------------------------------------------ forms */
+  .field-label {
+    @apply mb-1 block text-xs font-medium text-ex-ink2;
+  }
+  .field {
+    @apply h-8 w-full min-w-0 rounded-md border border-ex-edge bg-ex-bg px-2.5 text-sm text-ex-ink transition-colors placeholder:text-ex-ink3 hover:border-ex-ink3 focus-visible:border-ex-accent-ink disabled:cursor-not-allowed disabled:opacity-55;
+  }
+  textarea.field {
+    @apply h-auto py-1.5;
+  }
+
+  /* ------------------------------------------------------------------ buttons */
+  .btn,
+  .btn-primary,
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex h-8 min-w-[32px] shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn {
+    @apply border border-ex-line2 bg-ex-raised text-ex-ink hover:bg-ex-hover;
+  }
+  .btn-primary {
+    @apply border border-transparent bg-ex-accent text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] hover:bg-ex-accent-hover disabled:bg-ex-raised disabled:text-ex-ink3 disabled:opacity-100 disabled:shadow-none;
+  }
+  .btn-ghost {
+    @apply border border-transparent bg-transparent text-ex-ink2 hover:bg-ex-hover hover:text-ex-ink;
+  }
+  .btn-danger {
+    @apply border border-ex-neg-line bg-transparent text-ex-neg hover:bg-ex-neg-soft;
+  }
+  .btn-sm {
+    @apply h-7 px-2.5 text-xs;
+  }
+  .btn-lg {
+    @apply h-10 px-5 text-base;
+  }
+  .btn-icon {
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-transparent text-ex-ink2 transition-colors hover:bg-ex-hover hover:text-ex-ink disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Links inside prose */
+  .link {
+    @apply rounded-sm text-ex-accent-ink underline decoration-ex-accent-line underline-offset-2 transition-colors hover:decoration-ex-accent-ink;
+  }
+
+  /* ------------------------------------------------------------------ code */
+  .kbd {
+    @apply rounded border border-ex-line2 bg-ex-bg px-1.5 py-0.5 font-mono text-xs text-ex-ink2;
+  }
+  .code {
+    @apply whitespace-pre-wrap break-words rounded-lg border border-ex-line bg-ex-bg px-3.5 py-2.5 font-mono text-[13px] leading-6 text-ex-ink;
+  }
+
+  /* ------------------------------------------------------------------ loading */
+  .skeleton {
+    @apply rounded-md bg-ex-raised;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      background-image: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+      background-size: 200% 100%;
+      animation: ex-shimmer 1.8s linear infinite;
+    }
+  }
+}

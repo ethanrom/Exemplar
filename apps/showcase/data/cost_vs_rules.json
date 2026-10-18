@@ -1,0 +1,66 @@
+{
+ "source": "docs/eval/cost_vs_rules.md",
+ "note": "Copied from the table in the source file, strings unchanged, so the site builds without the rest of the repository.",
+ "rows": [
+  {
+   "rules": 1,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.0133",
+   "ratio": "7x"
+  },
+  {
+   "rules": 2,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.0266",
+   "ratio": "15x"
+  },
+  {
+   "rules": 3,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.0399",
+   "ratio": "22x"
+  },
+  {
+   "rules": 4,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.0532",
+   "ratio": "30x"
+  },
+  {
+   "rules": 5,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.0665",
+   "ratio": "37x"
+  },
+  {
+   "rules": 6,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.0798",
+   "ratio": "45x"
+  },
+  {
+   "rules": 7,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.0931",
+   "ratio": "52x"
+  },
+  {
+   "rules": 8,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.1064",
+   "ratio": "59x"
+  },
+  {
+   "rules": 9,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.1197",
+   "ratio": "67x"
+  },
+  {
+   "rules": 10,
+   "exemplar": "$0.00179",
+   "zeroShot": "$0.1330",
+   "ratio": "74x"
+  }
+ ]
+}

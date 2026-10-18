@@ -1,0 +1,129 @@
+{
+ "concept": "package",
+ "alpha": 0.1,
+ "rule": "package-deployed",
+ "scope": "stage1_fast_perception",
+ "provenance": {
+  "random_labels": 20,
+  "drawn_via": "random-sample endpoint",
+  "disjoint_from_examples": true,
+  "disjoint_from_curated": true
+ },
+ "random": [
+  {
+   "alias": "pg-pkg-10",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "pg-bird-03",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "pg-bird-04",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "pg-pkg-16",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "pg-pkg-12",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "pg-veh-03",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "cc-frollard-10s",
+   "label": "neg",
+   "score": -0.45
+  },
+  {
+   "alias": "cc-frollard-25s",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "cc-frollard-50s",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "cc-frollard-65s",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "pg-pkg-11",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "pg-pkg-13",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "pg-pkg-15",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "cc-frollard-20s",
+   "label": "neg",
+   "score": -0.45
+  },
+  {
+   "alias": "cc-frollard-75s",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "pg-pkg-04",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "cc-frollard-05s",
+   "label": "pos",
+   "score": 0.44999999999999996
+  },
+  {
+   "alias": "cc-frollard-55s",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "cc-frollard-70s",
+   "label": "neg",
+   "score": -0.5
+  },
+  {
+   "alias": "cc-frollard-80s",
+   "label": "neg",
+   "score": -0.5
+  }
+ ],
+ "calibration": {
+  "alpha": 0.1,
+  "n_random_neg": 12,
+  "n_random_pos": 8,
+  "k": 12,
+  "tau": 0.0,
+  "guarantee": true,
+  "message": null,
+  "delta": 0.05,
+  "recall": 1.0,
+  "recall_ci95": [
+   0.6305833524471808,
+   1.0
+  ]
+ }
+}

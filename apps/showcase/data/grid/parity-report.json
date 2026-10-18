@@ -1,0 +1,38 @@
+{
+ "slots": 6050,
+ "entries": 223850,
+ "identical": 202270,
+ "tie_verified": 6120,
+ "engine_supplied": 15460,
+ "mismatch": 0,
+ "missing": 0,
+ "top6_same": 5612,
+ "top6_explained": 438,
+ "top6_mismatch": 0,
+ "top6_missing": 0,
+ "mdl_checked": 80252,
+ "mdl_mismatch": 0,
+ "alt_checked": 211774,
+ "alt_mismatch": 0,
+ "ms": 1279159,
+ "max_slot_ms": 895.9102999999996,
+ "max_classes": 39601,
+ "engine_supplied_by_sketch": {
+  "22": 972,
+  "34": 6038,
+  "35": 6038,
+  "36": 2412
+ },
+ "tie_verified_by_sketch": {
+  "18": 864,
+  "22": 243,
+  "23": 864,
+  "27": 1242,
+  "30": 864,
+  "32": 864,
+  "36": 450,
+  "20": 729
+ },
+ "problems": [],
+ "avg_slot_ms": 211.4
+}

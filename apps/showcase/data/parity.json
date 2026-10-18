@@ -1,0 +1,117 @@
+{
+ "generated_on": "2026-10-18",
+ "engine_commit": "dc911769adc7ec9c8bd79beb797f452673166c54",
+ "families": {
+  "dsl.random": {
+   "cases": 7886,
+   "identical": 7886,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "dsl.real": {
+   "cases": 30806,
+   "identical": 30806,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "dsl.sweep": {
+   "cases": 5351,
+   "identical": 5351,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "dsl.edge": {
+   "cases": 72,
+   "identical": 72,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "dsl.text": {
+   "cases": 2110,
+   "identical": 2110,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "synth.recorded": {
+   "cases": 49,
+   "identical": 49,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "synth.random": {
+   "cases": 1298,
+   "identical": 1260,
+   "tie_verified": 0,
+   "engine_supplied": 38,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "synth.random.sat": {
+   "cases": 576,
+   "identical": 459,
+   "tie_verified": 0,
+   "engine_supplied": 117,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "lab.grid": {
+   "cases": 223850,
+   "identical": 202270,
+   "tie_verified": 6120,
+   "engine_supplied": 15460,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "cegis.presets": {
+   "cases": 133,
+   "identical": 133,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "cal": {
+   "cases": 20571,
+   "identical": 20571,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "cal.real": {
+   "cases": 467,
+   "identical": 467,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  },
+  "mdl": {
+   "cases": 3510,
+   "identical": 3510,
+   "tie_verified": 0,
+   "engine_supplied": 0,
+   "excluded_operational": 0,
+   "mismatches": 0
+  }
+ },
+ "presets": {
+  "p1-playground": {
+   "solves": 12,
+   "identical": 12,
+   "engine_supplied": 0
+  }
+ }
+}

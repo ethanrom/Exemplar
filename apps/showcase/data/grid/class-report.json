@@ -1,0 +1,420 @@
+{
+ "budget": 50000,
+ "grid": [
+  {
+   "id": 0,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 1,
+   "holes": 0,
+   "classes_all_8_clips": 1,
+   "max_over_subsets": 1,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 2,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 3,
+   "holes": 0,
+   "classes_all_8_clips": 1,
+   "max_over_subsets": 1,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 4,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 5,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 6,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 7,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 8,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 9,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 10,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 11,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 12,
+   "holes": 0,
+   "classes_all_8_clips": 1,
+   "max_over_subsets": 1,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 13,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 14,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 15,
+   "holes": 2,
+   "classes_all_8_clips": 39601,
+   "max_over_subsets": 39601,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 16,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 17,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 18,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 19,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 20,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 21,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 22,
+   "holes": 2,
+   "classes_all_8_clips": 39601,
+   "max_over_subsets": 39601,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 23,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 24,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 25,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 26,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 27,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 28,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 29,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 30,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 31,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 32,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 33,
+   "holes": 1,
+   "classes_all_8_clips": 199,
+   "max_over_subsets": 199,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  },
+  {
+   "id": 34,
+   "holes": 3,
+   "classes_all_8_clips": 7880599,
+   "max_over_subsets": 7880599,
+   "subsets_over_budget": 243,
+   "of_subsets": 247
+  },
+  {
+   "id": 35,
+   "holes": 3,
+   "classes_all_8_clips": 7880599,
+   "max_over_subsets": 7880599,
+   "subsets_over_budget": 243,
+   "of_subsets": 247
+  },
+  {
+   "id": 36,
+   "holes": 2,
+   "classes_all_8_clips": 39601,
+   "max_over_subsets": 39601,
+   "subsets_over_budget": 0,
+   "of_subsets": 247
+  }
+ ],
+ "presets_class_product_per_sketch": {
+  "p1-playground": [
+   171,
+   1,
+   171,
+   1,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   1,
+   171,
+   171,
+   29241,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   29241,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   171,
+   5000211,
+   5000211,
+   29241
+  ],
+  "p2-generated": [
+   163,
+   1,
+   163,
+   1,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   1,
+   163,
+   163,
+   26569,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   26569,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   163,
+   4330747,
+   4330747,
+   26569
+  ],
+  "run2-identical": [
+   33,
+   1,
+   33,
+   1,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   1,
+   33,
+   33,
+   1089,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   1089,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   33,
+   35937,
+   35937,
+   1089
+  ]
+ }
+}

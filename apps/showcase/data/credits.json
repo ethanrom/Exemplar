@@ -1,0 +1,196 @@
+[
+ {
+  "id": "frollard",
+  "group": "cc_by",
+  "title": "Thief stealing our package",
+  "author": "frollard",
+  "url": "https://www.youtube.com/watch?v=TfTFu8lGrwk",
+  "licence": "CC BY 4.0",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "permission": {
+   "basis": "cc_by",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "YouTube metadata of https://www.youtube.com/watch?v=TfTFu8lGrwk: license \"Creative Commons Attribution license (reuse allowed)\"; uploader \"frollard\"; uploaded 2018-12-06. The metadata does not state a licence version; the project's materials cite CC BY 4.0, the deed YouTube links."
+  },
+  "modification": "Cut into 20 s windows at a 5 s stride (17 windows); 16 frames per window extracted and scaled for display. The video itself is not hosted.",
+  "note": "Attribution recorded with each window: \"Thief stealing our package\" by frollard, CC BY 4.0, https://www.youtube.com/watch?v=TfTFu8lGrwk",
+  "aliases": [
+   "cc-frollard-00s",
+   "cc-frollard-05s",
+   "cc-frollard-10s",
+   "cc-frollard-15s",
+   "cc-frollard-20s",
+   "cc-frollard-25s",
+   "cc-frollard-30s",
+   "cc-frollard-35s",
+   "cc-frollard-40s",
+   "cc-frollard-45s",
+   "cc-frollard-50s",
+   "cc-frollard-55s",
+   "cc-frollard-60s",
+   "cc-frollard-65s",
+   "cc-frollard-70s",
+   "cc-frollard-75s",
+   "cc-frollard-80s"
+  ]
+ },
+ {
+  "id": "playground-frollard",
+  "group": "playground_frollard_derived",
+  "title": "Ring Developer Playground simulated-event recordings, package scene",
+  "author": "Ring Developer Playground (sandbox output); underlying footage by frollard",
+  "url": "https://www.youtube.com/watch?v=TfTFu8lGrwk",
+  "licence": "CC BY 4.0 (underlying footage)",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "permission": {
+   "basis": "cc_by",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "The Playground's package clip is derived from the CC BY video \"Thief stealing our package\" by frollard (https://www.youtube.com/watch?v=TfTFu8lGrwk); YouTube metadata: license \"Creative Commons Attribution license (reuse allowed)\", uploader \"frollard\". The recording is Ring sandbox output and carries Ring's watermark."
+  },
+  "modification": "Frames extracted and scaled for display. Ring's burned-in watermark is left unaltered.",
+  "note": "Twenty recordings of the Playground's package scene, made by simulating events in the Ring Developer Playground.",
+  "aliases": [
+   "pg-pkg-01",
+   "pg-pkg-02",
+   "pg-pkg-03",
+   "pg-pkg-04",
+   "pg-pkg-05",
+   "pg-pkg-06",
+   "pg-pkg-07",
+   "pg-pkg-08",
+   "pg-pkg-09",
+   "pg-pkg-10",
+   "pg-pkg-11",
+   "pg-pkg-12",
+   "pg-pkg-13",
+   "pg-pkg-14",
+   "pg-pkg-15",
+   "pg-pkg-16",
+   "pg-pkg-17",
+   "pg-pkg-18",
+   "pg-pkg-19",
+   "pg-pkg-20"
+  ]
+ },
+ {
+  "id": "playground-sandbox",
+  "group": "playground_other",
+  "title": "Ring Developer Playground simulated-event recordings, vehicle and bird scenes",
+  "author": "Ring Developer Playground (sandbox output)",
+  "licence": "Ring Developer Playground sandbox output; no separate licence",
+  "permission": {
+   "basis": "ring_sandbox",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "Ring Developer Playground simulated-event recording, made by the project author with their own Playground access. No licence beyond Playground access applies. The project author has decided that these frames are shown, as in the public demo video."
+  },
+  "modification": "Frames extracted and scaled for display. Ring's burned-in watermark is left unaltered.",
+  "note": "Six vehicle recordings and seven bird recordings.",
+  "aliases": [
+   "pg-bird-01",
+   "pg-bird-02",
+   "pg-bird-03",
+   "pg-bird-04",
+   "pg-bird-05",
+   "pg-bird-06",
+   "pg-bird-07",
+   "pg-veh-01",
+   "pg-veh-02",
+   "pg-veh-03",
+   "pg-veh-04",
+   "pg-veh-05",
+   "pg-veh-06"
+  ]
+ },
+ {
+  "id": "ringtv-fox",
+  "group": "cc_by",
+  "title": "Ring Video Doorbell Pro Finds Out Who's Been Taking The Morning Paper | RingTV",
+  "author": "Ring",
+  "url": "https://www.youtube.com/watch?v=MJP2iL7xLro",
+  "licence": "CC BY (YouTube Creative Commons Attribution license)",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "permission": {
+   "basis": "cc_by",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "YouTube metadata of https://www.youtube.com/watch?v=MJP2iL7xLro: license \"Creative Commons Attribution license (reuse allowed)\"; channel \"Ring\" (verified); uploaded 2020-11-25. Published by Ring's own channel."
+  },
+  "modification": "Cut into three 20 s windows; 16 frames per window extracted and scaled for display.",
+  "note": "Attribution recorded with each window: 'Ring Video Doorbell Pro Finds Out Who's Been Taking The Morning Paper' by RingTV, YouTube CC BY",
+  "aliases": [
+   "cc-ringtv-fox-00s",
+   "cc-ringtv-fox-20s",
+   "cc-ringtv-fox-40s"
+  ]
+ },
+ {
+  "id": "meva",
+  "group": "meva",
+  "title": "MEVA: Multiview Extended Video with Activities",
+  "author": "Kitware, Inc. and IARPA",
+  "url": "https://registry.opendata.aws/mevadata",
+  "licence": "CC BY 4.0",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "permission": {
+   "basis": "cc_by",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "AWS Open Data registry entry https://registry.opendata.aws/mevadata; its licence file (http://mevadata.org/resources/MEVA-data-license.txt) reads \"Creative Commons Attribution 4.0 International License\"."
+  },
+  "modification": "Cut to 20 s windows, cropped to a fixed 16:9 region of interest and scaled to 1280 px wide when the clips were prepared; 16 frames per window extracted and scaled for display.",
+  "note": "Accessed 2026-10-15 from https://registry.opendata.aws/mevadata. Corona et al., \"MEVA: A Large-Scale Multiview, Multimodal Video Dataset for Activity Detection\", WACV 2021. Attribution recorded with each window: MEVA parking lot G336 (20 s), CC BY 4.0 | MEVA lot G336 quiet (20 s), CC BY 4.0 | MEVA parking lot G339 (20 s), CC BY 4.0 | MEVA (Multiview Extended Video with Activities) surveillance clip, public data",
+  "aliases": [
+   "meva-g336-a",
+   "meva-g336-c",
+   "meva-g339-a",
+   "meva-g424",
+   "meva-g436"
+  ]
+ },
+ {
+  "id": "exemplar-repo",
+  "group": "software",
+  "title": "Exemplar (this project)",
+  "author": "Exemplar contributors",
+  "url": "https://github.com/ethanrom/Exemplar",
+  "licence": "MIT",
+  "permission": {
+   "basis": "own_work",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "LICENSE at the repository root: \"MIT License\", \"Copyright (c) 2026 Exemplar contributors\"."
+  },
+  "aliases": []
+ },
+ {
+  "id": "geist",
+  "group": "software",
+  "title": "Geist font (npm package geist 1.7.2)",
+  "author": "Vercel",
+  "licence": "SIL Open Font License 1.1",
+  "permission": {
+   "basis": "open_source",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "package.json of geist 1.7.2, field license: \"SIL OPEN FONT LICENSE\"."
+  },
+  "aliases": []
+ },
+ {
+  "id": "z3",
+  "group": "software",
+  "title": "Z3 theorem prover (z3-solver 5.3.0.0)",
+  "author": "Microsoft Research",
+  "licence": "MIT",
+  "permission": {
+   "basis": "open_source",
+   "status": "cleared",
+   "checked_on": "2026-10-18",
+   "evidence": "z3-solver package metadata, field License: \"MIT License\". Used by the Python engine."
+  },
+  "aliases": []
+ }
+]

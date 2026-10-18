@@ -1,0 +1,114 @@
+{
+ "source": "docs/DEVPOST.md",
+ "note": "Copied as published; the numbers ledger of the submission stream, when it lands, supersedes these.",
+ "claims": [
+  {
+   "id": "teach.duration_published",
+   "display": "under 30 seconds",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 54,
+    "quote": "2. **Exemplar learns a readable rule.** A Strands agent on Amazon Bedrock drafts the shape of the rule and leaves the numbers blank. The Z3 solver fills them in exactly. In our demo the agent's first draft only looked at the steps, so it missed a clip where the box sat on the porch. That clip came back as a counterexample and the agent revised the rule. Z3 then chose the duration, giving *\"There is a package k such that (k is on the steps or k is on the porch) continuously for at least 15 s.\"* This took under 30 seconds. The English is printed from the rule by code, never paraphrased by a model."
+   }
+  },
+  {
+   "id": "cost.per_event_live",
+   "display": "$0.0014–$0.0015 per watched event in our live runs",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 68,
+    "quote": "**Why it scales:** Claude on Amazon Bedrock reads each event once, for under two-tenths of a cent: $0.0014–$0.0015 per watched event in our live runs, and $0.0018 on average over 1,005 clips. Every rule after that runs on the cached facts in about a tenth of a millisecond, with no model call. Adding a rule therefore adds almost no cost ([chart](eval/cost_vs_rules.md)), and backtesting a new rule against your whole history is free."
+   }
+  },
+  {
+   "id": "cost.per_event_mean",
+   "display": "$0.0018 on average over 1,005 clips",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 68,
+    "quote": "**Why it scales:** Claude on Amazon Bedrock reads each event once, for under two-tenths of a cent: $0.0014–$0.0015 per watched event in our live runs, and $0.0018 on average over 1,005 clips. Every rule after that runs on the cached facts in about a tenth of a millisecond, with no model call. Adding a rule therefore adds almost no cost ([chart](eval/cost_vs_rules.md)), and backtesting a new rule against your whole history is free."
+   }
+  },
+  {
+   "id": "cost.rule_eval",
+   "display": "about a tenth of a millisecond",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 68,
+    "quote": "**Why it scales:** Claude on Amazon Bedrock reads each event once, for under two-tenths of a cent: $0.0014–$0.0015 per watched event in our live runs, and $0.0018 on average over 1,005 clips. Every rule after that runs on the cached facts in about a tenth of a millisecond, with no model call. Adding a rule therefore adds almost no cost ([chart](eval/cost_vs_rules.md)), and backtesting a new rule against your whole history is free."
+   }
+  },
+  {
+   "id": "perception.frames",
+   "display": "16 frames per clip",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 82,
+    "quote": "- **Perception on Amazon Bedrock.** The fast Claude model reads 16 frames per clip through the Converse API with forced tool use. It returns typed entities and per-frame facts with a confidence level. These are validated against an ontology and cached as a symbolic trace."
+   }
+  },
+  {
+   "id": "calibration.alpha_default",
+   "display": "10% by default",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 56,
+    "quote": "4. **It tests the rule before it goes live.** It backtests the rule on your history and sets the firing threshold from randomly sampled clips the rule never trained on. For events like these, the chance of a false alarm is then at most the level you choose (10% by default)."
+   }
+  },
+  {
+   "id": "verify.encoding_cases",
+   "display": "3,850 randomized cases",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 93,
+    "quote": "- 3,850 randomized cases in which the Z3 encoding must agree with a separate evaluator and a brute-force search, with zero mismatches (over 6,000 ran during development)."
+   }
+  },
+  {
+   "id": "verify.planted_bugs",
+   "display": "7 of 7 deliberately planted solver bugs caught",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 94,
+    "quote": "- 7 of 7 deliberately planted solver bugs caught."
+   }
+  },
+  {
+   "id": "verify.conformal_draws",
+   "display": "A 100,000-draw simulation of the false-alarm bound",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 95,
+    "quote": "- A 100,000-draw simulation of the false-alarm bound."
+   }
+  },
+  {
+   "id": "tests.counts",
+   "display": "860+ engine tests, 205 evaluation tests and 22 webhook tests",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 96,
+    "quote": "- 860+ engine tests, 205 evaluation tests and 22 webhook tests."
+   }
+  },
+  {
+   "id": "contract.api_ops",
+   "display": "33 of 33 operations",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 97,
+    "quote": "- An API contract enforced against a mock (33 of 33 operations)."
+   }
+  },
+  {
+   "id": "friction.entries",
+   "display": "51 friction-log entries",
+   "source": {
+    "path": "docs/DEVPOST.md",
+    "line": 113,
+    "quote": "- 51 friction-log entries and detailed product feedback on every Ring and AWS tool we used."
+   }
+  }
+ ]
+}

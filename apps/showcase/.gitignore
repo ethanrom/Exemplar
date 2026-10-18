@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# QA tooling cache (browsers, reports)
+qa/.cache/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs and build info
+npm-debug.log*
+*.log
+*.tsbuildinfo
+
+# Copied at build time, never committed (SPEC section 2)
+public/z3/

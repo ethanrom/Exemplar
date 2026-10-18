@@ -1,0 +1,87 @@
+{
+ "generated_on": "2026-10-18",
+ "what": "Z3 5.3.1 (WebAssembly build, solved in Node here, in a Web Worker in the browser) against the Python engine (Z3 5.3.0). Verdicts: agree = identical status, holes, margin, violated set; agree_outcome = same outcome, hole values differ because the placement stepped back from the slack centre (it depends on the solver model point) or a hole-box query hit its time limit; equal_optimum = another optimal violated set (same violated weight and margin).",
+ "families": [
+  {
+   "family": "F6 synth.recorded",
+   "cases": 49,
+   "agree": 49,
+   "agree_outcome": 0,
+   "equal_optimum": 0,
+   "differs": 0,
+   "not_comparable": 0,
+   "unsupported": 0,
+   "timeouts": 0,
+   "errors": 0,
+   "ms": 5136
+  },
+  {
+   "family": "F7 synth.random",
+   "cases": 1298,
+   "agree": 1279,
+   "agree_outcome": 19,
+   "equal_optimum": 0,
+   "differs": 0,
+   "not_comparable": 0,
+   "unsupported": 0,
+   "timeouts": 0,
+   "errors": 0,
+   "ms": 44325,
+   "boxes": 163,
+   "boxes_identical": 163
+  },
+  {
+   "family": "F7 synth.random.sat",
+   "cases": 576,
+   "agree": 535,
+   "agree_outcome": 40,
+   "equal_optimum": 1,
+   "differs": 0,
+   "not_comparable": 0,
+   "unsupported": 0,
+   "timeouts": 0,
+   "errors": 0,
+   "ms": 53737,
+   "boxes": 576,
+   "boxes_identical": 576
+  }
+ ],
+ "grid": {
+  "family": "F8 lab.grid",
+  "cases": 223850,
+  "agree": 212501,
+  "agree_outcome": 4595,
+  "equal_optimum": 6754,
+  "differs": 0,
+  "not_comparable": 0,
+  "unsupported": 0,
+  "timeouts": 0,
+  "errors": 0,
+  "ms": 15539933,
+  "valid_slots": 6050,
+  "slots_attempted": 6050,
+  "slots_attempted_reachable_in_the_lab_ui": 1932,
+  "sketches_per_slot": 37,
+  "sampling": "every valid slot, run in short Node processes (the slots are the label combinations of the 8 curated clips; slots_attempted_reachable_in_the_lab_ui is the subset the Lab page can still reach)",
+  "agree_outcome_by_sketch": {
+   "22": 629,
+   "34": 1297,
+   "35": 1308,
+   "36": 1361
+  },
+  "equal_optimum_by_sketch": {
+   "18": 711,
+   "19": 512,
+   "20": 247,
+   "22": 271,
+   "23": 638,
+   "27": 793,
+   "30": 719,
+   "32": 609,
+   "34": 785,
+   "35": 677,
+   "36": 792
+  },
+  "unexplained": []
+ }
+}
