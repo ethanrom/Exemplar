@@ -35,7 +35,8 @@ export function useWebRTCStream({ videoRef, deviceId }: UseWebRTCStreamOptions):
       })
       pcRef.current = pc
 
-      pc.addTransceiver('audio', { direction: 'sendrecv' })
+      // Ring's WHEP contract: every m-line of the offer must be recvonly.
+      pc.addTransceiver('audio', { direction: 'recvonly' })
       pc.addTransceiver('video', { direction: 'recvonly' })
 
       pc.ontrack = (e) => {
