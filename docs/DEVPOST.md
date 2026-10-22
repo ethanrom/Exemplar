@@ -26,7 +26,7 @@ Teach your Ring camera the alerts that matter to you: show a few clips, get a re
 - Code: https://github.com/ethanrom/Exemplar (MIT license; setup and run instructions in the README)
 - Demo video (under 3 minutes): `<YouTube or Vimeo URL>`
 - Product feedback: [`docs/FEEDBACK.md`](FEEDBACK.md)
-- Friction log (51 entries): [`docs/FRICTION_LOG.md`](FRICTION_LOG.md)
+- Friction log (52 entries): [`docs/FRICTION_LOG.md`](FRICTION_LOG.md)
 
 ## Description
 
@@ -110,7 +110,7 @@ Exemplar is a web app for Ring customers, designed for the Ring Appstore. It nee
 - Readable rules learned from a handful of clips in under 30 seconds, with one well-chosen question.
 - A statistically sound false-alarm bound, and a cost per event that stays flat as rules are added.
 - Engineering rigor beyond a demo: cross-checked synthesis, property-tested logic, a simulated guarantee, signed-webhook fixtures and an accessible interface.
-- 51 friction-log entries and detailed product feedback on every Ring and AWS tool we used.
+- 52 friction-log entries and detailed product feedback on every Ring and AWS tool we used.
 
 ### What we learned
 

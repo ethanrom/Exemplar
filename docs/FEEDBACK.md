@@ -77,6 +77,7 @@ Contents: [Ring API](#1-ring-api-apiamazonvisioncom) · [Ring Developer Playgrou
 **What needs work.**
 - The webhook route does not verify the documented HMAC and accepts every POST when its secret is unset (APP-1), and `DELETE /api/ring/stream` forwards the bearer token to any URL the client names (APP-2). Partners will copy this code, so it matters.
 - The Stop button covers the mandatory watermark (APP-3), the palette is not WCAG 2.2 AA (APP-4), and there are small build-hygiene issues (APP-5, APP-6).
+- The WHEP hook offers audio as `sendrecv`, although the docs require `recvonly` on every m-line; the Playground accepts it anyway, so it fails silently (APP-7).
 
 **Onboarding.** The README's three steps (token, scripts, web app) are accurate and quick.
 

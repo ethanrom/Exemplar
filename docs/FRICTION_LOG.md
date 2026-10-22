@@ -1,6 +1,6 @@
 # Friction log
 
-Problems we hit while building Exemplar on the Ring API, the Ring Developer Playground, Amazon Bedrock, the Strands Agents SDK and AWS Open Data, written down as they happened. Each entry gives the task, the steps, expected versus actual behaviour, a severity, the workaround we used and an actionable suggestion. Entries marked **(live)** were reproduced against the Developer Playground on 2026-10-15; the others come from building against the documentation and the SDKs.
+Problems we hit while building Exemplar on the Ring API, the Ring Developer Playground, Amazon Bedrock, the Strands Agents SDK and AWS Open Data, written down as they happened. Each entry gives the task, the steps, expected versus actual behaviour, a severity, the workaround we used and an actionable suggestion. Entries marked **(live)** were reproduced against the Developer Playground on 2026-10-15 (APP-7: 2026-10-22); the others come from building against the documentation and the SDKs.
 
 **Severity:** *high* = invalidates a design or a demo; *medium* = cost real time or forced a workaround in the product; *low* = confusing, cosmetic or informational.
 
@@ -35,6 +35,7 @@ Entries are grouped by tool. Our own feedback on each tool (what worked, onboard
 | APP-4 | Sample app | medium | Not WCAG 2.2 AA out of the box |
 | APP-5 | Sample app | low | README badge says Next.js 14, `package.json` pins 15.5; `tsconfig` targets `es5` |
 | APP-6 | Sample app | low | Lockfile out of sync; `next-env.d.ts` tracked and rewritten |
+| APP-7 | Sample app | low | The WHEP hook offers audio as `sendrecv`, but the docs require `recvonly` on every m-line (live) |
 | BR-1 | Bedrock | medium | New Claude models: `temperature` rejected, per-model `toolChoice` and `thinking` rules |
 | BR-2 | Bedrock | medium | `ConnectionClosedError` after botocore exhausted its retries (live) |
 | BR-3 | Bedrock | medium | Same request takes 10 s to 64 s; concurrency makes it worse (live) |
@@ -282,6 +283,15 @@ Entries are grouped by tool. Our own feedback on each tool (what worked, onboard
 - **Severity:** low.
 - **Workaround:** resolve the lockfile once; `git checkout apps/web/next-env.d.ts` before committing.
 - **Suggestion:** regenerate the lockfile, untrack `next-env.d.ts` and add it to `.gitignore`.
+
+### APP-7 The WHEP hook offers audio as `sendrecv`, but the docs require `recvonly` on every m-line (live)
+- **Task:** live view via WHEP.
+- **Steps:** the sample's `useWebRTCStream` hook calls `addTransceiver('audio', { direction: 'sendrecv' })`; the live-streaming page says every m-line of the offer must be `a=recvonly` (video required, audio optional) and that `sendrecv` and `sendonly` are not supported.
+- **Expected:** the offer follows the docs (all `recvonly`).
+- **Actual:** the Playground still accepted it, so nothing failed visibly: replaying both offers directly against the WHEP endpoint gave 201 each time, and for the `sendrecv` offer the answer carried `a=sendrecv` on the audio m-line (the server agreed to bidirectional audio the docs say is unsupported). It violates the documented contract and could break on real devices or stricter servers (the docs' "Incompatible send direction" error is the failure they describe for this).
+- **Severity:** low.
+- **Workaround:** we set audio to `recvonly`. Checked live on 2026-10-22: the offer has `a=recvonly` on both m-lines, the Playground answers 201 with `a=sendonly` on both, and 1280x720 video decodes (`framesDecoded` 1 to 140 over 5 s).
+- **Suggestion:** fix the one line in the sample.
 
 ---
 
