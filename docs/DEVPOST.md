@@ -125,6 +125,12 @@ Exemplar is a web app for Ring customers, designed for the Ring Appstore. It nee
 - More rule actions: Chime playback (already built, behind a flag), outbound webhooks into business systems, and Slack.
 - Host the synthesis agent on Amazon Bedrock AgentCore Runtime, and evaluate Amazon Nova's native video input for perception.
 
+### Try it (for judges)
+
+- **No setup, no credentials:** the hosted showcase at `<showcase URL>` is an interactive replay of a real session. Browse the clips, replay the teach run, and open "Why it fired" and the false-alarm guarantee. There's nothing to install or paste.
+- **Run it locally, still with no credentials:** follow the README's Quick start, then run `uv run --project engine python -m exemplar.api.seed --fixtures`. Every screen works, including Teach through the offline rule proposer, and all test suites run.
+- **Live on the Ring Developer Playground (optional):** with your own Playground token and Amazon Bedrock access, paste the token on the Connect screen, teach and deploy a rule, then click Simulate in the Playground and watch the Live screen. The demo video shows this loop end to end.
+
 ## Built with
 
 Ring API · Ring Developer Playground · Amazon Bedrock · Claude (Anthropic) · Strands Agents SDK · AWS Open Data (S3) · Z3 (`z3-solver`) · Python · FastAPI · NumPy · SciPy · Pydantic · Lark · SQLite · boto3 · httpx · ffmpeg · Hypothesis · Next.js · React · TypeScript · Tailwind CSS · WebRTC (WHEP) · Server-Sent Events · Node.js · uv · axe-core
@@ -145,14 +151,7 @@ Suggested uploads: the video thumbnail, then `docs/img/home.png`, `docs/img/teac
 
 ## Testing instructions for judges
 
-The README has the full steps. The live loop needs a Ring Developer Playground token and Amazon Bedrock access to two Claude models:
-
-1. Run the engine and the web app.
-2. Paste the Playground token on the Connect screen.
-3. Teach and deploy a rule.
-4. Click Simulate in the Playground and watch the Live screen.
-
-Without any credentials, `uv run --project engine python -m exemplar.api.seed --fixtures` loads twelve example traces. Every screen then works, including Teach through an offline rule proposer, Rule and Evidence, and all test suites run. The demo video shows the complete live loop.
+Use the "Try it (for judges)" section at the end of the description. If the form has a separate testing field, paste that section there too.
 
 ## Attributions
 
